@@ -32,5 +32,5 @@ Aprobación:
 | Req  | Detalles |
 | ------------- |:-------------:|
 | CRUD | 1. CRUD Administrador <br> 2. CRUD Cliente <br> 3. CRUD Ejercicio <br> 4. CRUD Rutina <br> 5. CRUD Cuota <br> 6. CRUD Día |
-| CUU | 1. Abonar mensualidad <br> 2. CRUD Gestiona rutina clientes|
+| CUU | 1. Abonar mensualidad <br> 2. CRUD Gestiona rutina clientes <br>3. Registrar Cliente|
 
