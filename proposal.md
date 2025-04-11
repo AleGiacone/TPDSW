@@ -23,7 +23,7 @@ Una aplicación web orientada a la administración de rutinas de entrenamiento p
 Regularidad:
 | Req  | Detalles |
 |:-|:-|
-| CRUD simple   | 1. CRUD Ejercicio <br> 2. CRUD Rutina|
+| CRUD simple   | 1. CRUD Ejercicio <br> 2. CRUD Cliente|
 | CRUD dependiente      | 1. CRUD Rutina {depende de} CRUD Ejercicio   |
 | Listado + detalles  | 1. Listado de rutina filtrado por día muestra series, repeticiones y nombre de ejercicio => detalle CRUD Ejercicio   |
 | CUU | 1. Abonar mensualidad|
