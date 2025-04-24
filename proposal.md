@@ -30,7 +30,7 @@ Regularidad:
 Aprobación:
 | Req  | Detalles |
 |:-|:-|
-| CRUD | 1. CRUD Administrador <br> 2. CRUD Cuidador <br> 3. CRUD Dueño <br> 4. CRUD Mascota <br> 5. CRUD Tratatamiento <br> 6. CRUD Reserva <br> 7. CRUD Publicación <br> 8. CRUD Disponibilidad <br> 9. CRUD Ciudad <br> 10. CRUD Provincia |
+| CRUD | 1. CRUD Reserva  <br> 2. CRUD Disponibilidad <br> 3.CRUD Ciudad  <br> 4. CRUD Provincia   |
 | CUU | 1. Realizar reserva <br> 2. Crear publicación  |
 
 ### Alcance Adicional Voluntario
