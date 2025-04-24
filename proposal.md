@@ -11,11 +11,10 @@
 
 ## Tema
 ### Descripción
-
-Una aplicación web orientada a la administración de rutinas de entrenamiento personalizadas. La plataforma estará dirigida a un administrador, encargado de la gestión de rutinas y clientes, y a los clientes, quienes podrán acceder a sus programas de entrenamiento mediante una suscripción mensual. Como usuario administrador, dentro de sus funcionalidades podrá realizar la administración de rutinas para poder visualizar la lista de clientes con sus pagos al día, seleccionar clientes para modificar y actualizar sus rutinas de entrenamiento y asignar ejercicios específicos a cada cliente, detallando repeticiones, series y videos instructivos. Además, dentro de la administración de clientes, se podrá consultar el estado de pago de cada cliente, modificar información personal y estado de suscripción y dar de baja a clientes con pagos vencidos. Como usuario cliente, dentro de sus funcionalidades podrá visualizar su rutina para acceder a los ejercicios asignados por el administrador, junto a videos tutoriales de cada ejercicio. Además, como gestor de suscripción, podrá realizar el pago mensual para el acceso a la rutina y solicitar la baja al servicio en cualquier momento.
+Una aplicación web de "PATAS" (Plataforma de Alojamiento Temporal y Atención de SeresPeludos) la cual permite conectar cuidadores de mascotas con personas que necesitan dejar sus animales al cuidado de otros por un periodo determinado. Dentro de su funcionamiento se contemplan tres tipos de usuarios principales. El usuario "Administrador" se encarga de supervisar el sistema en general, moderar aplicaciones y reportes con acceso a todos los datos. El tipo de usuario "Cuidador" puede registrar una o varias publicaciones donde ofrece su hogar y servicio de cuidado, definiendo qué tipo de animales acepta, por cuánto tiempo, si puede cuidar animales exóticos, condiciones especiales, tarifas y disponibilidad. Este recibe reservas por parte de los dueños y decide si las acepta o las rechaza. El "Dueño de mascota", registra a sus mascotas en el sistema con detalles relevantes (edad, especie, necesidades específicas, etc) y busca cuidadores según filtros personalizados (ubicaciones, tipo de mascota, fechas, servicios especiales). Así, puede solicitar una reserva para una publicación específica y dejar una reseña al finalizar.
 
 ### Modelo
-![PrimeroModelo](ModeloDeDominio.png)
+![PrimeroModelo](Petsbnb.png)
 
 
 ## Alcance Funcional
@@ -23,14 +22,17 @@ Una aplicación web orientada a la administración de rutinas de entrenamiento p
 Regularidad:
 | Req  | Detalles |
 |:-|:-|
-| CRUD simple   | 1. CRUD Ejercicio <br> 2. CRUD Cliente|
-| CRUD dependiente      | 1. CRUD Rutina {depende de} CRUD Ejercicio   |
-| Listado + detalles  | 1. Listado de rutina filtrado por día muestra series, repeticiones y nombre de ejercicio => detalle CRUD Ejercicio   |
-| CUU | 1. Abonar mensualidad|
+| CRUD simple   | 1. CRUD Dueño <br> 2. CRUD Cuidador <br> 3. CRUD Administador|
+| CRUD dependiente      | 1. CRUD Publicación {depende de} CRUD Cuidador |
+| Listado + detalles  | 1. Listado de publicaciones filtrado por atributo exótico => detalle muestra publicaciones de cuidadores |
+| CUU | 1. Registro de dueño <br> 2. Registro de cuidador |
 
 Aprobación:
 | Req  | Detalles |
 |:-|:-|
-| CRUD | 1. CRUD Administrador <br> 2. CRUD Cliente <br> 3. CRUD Ejercicio <br> 4. CRUD Rutina <br> 5. CRUD Cuota <br> 6. CRUD Día <br> 7. CRUD Comentario |
-| CUU | 1. CRUD Gestionar rutina clientes <br> 2. CRUD Comentar ejercicio |
+| CRUD | 1. CRUD Administrador <br> 2. CRUD Cuidador <br> 3. CRUD Dueño <br> 4. CRUD Mascota <br> 5. CRUD Tratatamiento <br> 6. Reserva <br> 7. CRUD Publicación <br> 8. CRUD Disponibilidad <br> 9. CRUD Ciudad <br> 10. CRUD Provincia |
+| CUU | 1. Realizar reserva <br> 2. Crear publicación  |
 
+### Alcance Adicional Voluntario
+|:-|:-|
+| CUU/Epic| 1. Realizar reseña de reserva|
