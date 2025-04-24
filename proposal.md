@@ -30,7 +30,7 @@ Regularidad:
 Aprobación:
 | Req  | Detalles |
 |:-|:-|
-| CRUD | 1. CRUD Reserva  <br> 2. CRUD Disponibilidad <br> 3.CRUD Ciudad  <br> 4. CRUD Provincia   |
+| CRUD | 1. CRUD Reserva  <br> 2. CRUD Disponibilidad <br> 3. CRUD Ciudad  <br> 4. CRUD Provincia   |
 | CUU | 1. Realizar reserva <br> 2. Crear publicación  |
 
 ### Alcance Adicional Voluntario
