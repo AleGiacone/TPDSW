@@ -25,13 +25,13 @@ Regularidad:
 | CRUD simple   | 1. CRUD Dueño <br> 2. CRUD Cuidador <br> 3. CRUD Administador|
 | CRUD dependiente      | 1. CRUD Publicación {depende de} CRUD Cuidador <br> 2. CRUD Mascota {depende de} CRUD Dueño <br> 3. CRUD Tratamiento {depende de} CRUD Mascota  |
 | Listado + detalles  | 1. Listado de publicaciones filtrado por atributo exótico => detalle muestra publicaciones de cuidadores |
-| CUU | 1. Crear publicación <br> 2. Registro de cuidador |
+| CUU | 1. Crear publicación |
 
 Aprobación:
 | Req  | Detalles |
 |:-|:-|
 | CRUD | 1. CRUD Reserva  <br> 2. CRUD Disponibilidad <br> 3. CRUD Ciudad  <br> 4. CRUD Provincia   |
-| CUU | 1. Realizar reserva  |
+| CUU | 1.Crear publicación  <br> 2. Realizar reserva|
 
 ### Alcance Adicional Voluntario
 | Req  | Detalles |
