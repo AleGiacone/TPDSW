@@ -30,10 +30,5 @@ Regularidad:
 Aprobación:
 | Req  | Detalles |
 |:-|:-|
-| CRUD | 1. CRUD Reserva  <br> 2. CRUD Disponibilidad <br> 3. CRUD Tipo |
+| CRUD | 1. CRUD Reserva  <br> 2. CRUD Disponibilidad <br> 3. CRUD Tipo  <br> 3. CRUD Pago|
 | CUU | 1. Crear publicación  <br> 2. Realizar reserva|
-
-### Alcance Adicional Voluntario
-| Req  | Detalles |
-|:-|:-|
-| CUU/Epic| 1. Realizar reseña de reserva|
