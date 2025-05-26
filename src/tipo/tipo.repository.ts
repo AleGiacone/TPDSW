@@ -1,8 +1,6 @@
 import {Repository} from "../shared/repository.js"
 import {Tipo} from "./tipo.entity.js"
 
-console.log('Pilar trola');
-
 const tipos = [
   new Tipo('Perro', 'Dogo Argentino'),
   new Tipo('Gato', 'El gordo'),

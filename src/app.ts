@@ -6,8 +6,6 @@ const app = express();
 
 app.use(express.json());
 
-console.log("Ale puto")
-
 app.use("/api/tipos", tipoRouter);
 
 app.use((_, res) => {
