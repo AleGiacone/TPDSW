@@ -5,7 +5,7 @@ import { razaRouter } from './especie/raza.routes.js';
 // Instala los Especies con: pnpm add -D @types/express
 
 import { orm, syncSchema } from "./shared/db/orm.js";
-import { RequestContext } from '@mikro-orm/mysql';
+import { RequestContext } from '@mikro-orm/core';
 
 const app = express();
 app.use(express.json());
