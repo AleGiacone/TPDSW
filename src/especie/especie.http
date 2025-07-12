@@ -9,7 +9,7 @@ Content-Type: application/json
 
 {
   "nomEspecie": "Perro",
-  "razas": [1]
+  "razas": []
 }
 
 
