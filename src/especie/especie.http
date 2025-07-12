@@ -1,0 +1,36 @@
+### Obtener todos los especies
+
+GET http://localhost:3000/api/especies/
+
+### Crear un especie 
+# @name createEspecie
+POST http://localhost:3000/api/especies/
+Content-Type: application/json
+
+{
+  "nomEspecie": "Perro",
+  "razas": [1]
+}
+
+
+
+### ID
+@idEspecie =  {{ createEspecie.response.body.data.idEspecie }}
+
+### Devolver una especie
+GET http://localhost:3000/api/especies/{{idEspecie}}
+
+
+### Actualizar un especie
+PUT http://localhost:3000/api/especies/{{idEspecie}}   
+Content-Type: application/json
+
+{
+  "nomEspecie": "Nutria",
+  "razas": []
+
+}
+
+### Eliminar un especie
+DELETE http://localhost:3000/api/especies/{{idEspecie}}
+
