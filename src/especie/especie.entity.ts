@@ -1,5 +1,5 @@
 import { Cascade, Collection, Entity, ManyToMany, PrimaryKey, Property } from "@mikro-orm/core";
-import { Raza } from "./raza.entity.js";
+import { Raza } from "../raza/raza.entity.js";
 
 @Entity()
 export class Especie {
