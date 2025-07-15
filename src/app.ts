@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import express from "express";
 import {especieRouter} from "./especie/especie.routes.js";
-import { razaRouter } from './especie/raza.routes.js';
+import { razaRouter } from './raza/raza.routes.js';
 // Instala los Especies con: pnpm add -D @types/express
 
 import { orm, syncSchema } from "./shared/db/orm.js";
