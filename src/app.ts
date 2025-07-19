@@ -21,6 +21,11 @@ app.use((req,res,next) => {
 app.use("/api/especies", especieRouter);
 app.use("/api/razas", razaRouter);
 
+app.get("/", (req, res) => {
+  res.send("Welcome to the Pet API!");
+});
+
+
 app.use((_, res) => {
   res.status(404).send({ message: "Not Found" });
   return;  
@@ -30,9 +35,12 @@ app.use((_, res) => {
   res.status(404).send({ message: "Not Found" });
   return;  
 })
+
+const PORT = process.env.PORT || 3000;
 
 await syncSchema(); //Never in production
 
-app.listen(3000, () => {
+
+app.listen(PORT, () => {
   console.log("Server is running on port 3000");
 });

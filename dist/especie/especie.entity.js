@@ -7,11 +7,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Cascade, Collection, Entity, ManyToMany, PrimaryKey, Property } from "@mikro-orm/core";
-import { Raza } from "./raza.entity.js";
+import { Cascade, Collection, Entity, ManyToMany, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
+import { Raza } from "../raza/raza.entity.js";
+import { Mascota } from "../mascota/mascota.entity.js";
 export let Especie = class Especie {
     constructor() {
         this.razas = new Collection(this);
+        this.mascotas = new Collection(this);
     }
 };
 __decorate([
@@ -26,6 +28,10 @@ __decorate([
     ManyToMany(() => Raza, raza => raza.especies, { cascade: [Cascade.ALL] }),
     __metadata("design:type", Object)
 ], Especie.prototype, "razas", void 0);
+__decorate([
+    OneToMany(() => Mascota, mascota => mascota.especie, { cascade: [Cascade.ALL] }),
+    __metadata("design:type", Object)
+], Especie.prototype, "mascotas", void 0);
 Especie = __decorate([
     Entity()
 ], Especie);

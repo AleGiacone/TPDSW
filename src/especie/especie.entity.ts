@@ -1,5 +1,6 @@
-import { Cascade, Collection, Entity, ManyToMany, PrimaryKey, Property } from "@mikro-orm/core";
+import { Cascade, Collection, Entity, ManyToMany, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
 import { Raza } from "../raza/raza.entity.js";
+import { Mascota } from "../mascota/mascota.entity.js";
 
 @Entity()
 export class Especie {
@@ -11,5 +12,8 @@ export class Especie {
   
   @ManyToMany(() => Raza, raza => raza.especies, {cascade:[Cascade.ALL]})
   razas = new Collection<Raza>(this); 
+
+  @OneToMany(() => Mascota, mascota => mascota.especie, { cascade: [Cascade.ALL] })
+  mascotas = new Collection<Mascota>(this);
 
 }
