@@ -3,22 +3,21 @@ import { Usuario } from "../usuario/usuario.entity.js";
 import { Mascota } from "../mascota/mascota.entity.js";
 import { Reserva } from "../reserva/reserva.entity.js";
 
-@Entity()
+@Entity({
+  discriminatorValue: 'dueno' 
+})
 export  class Dueno extends Usuario { 
 
-  @Property({ nullable: false, unique: false })
-  nombre!: string;
-
-  @Property({ nullable: false, unique: false })
+  @Property({ nullable: true, unique: true })
   nroDocumento!: string; 
 
-  @Property({ nullable: false, unique: false })
+  @Property({ nullable: true, unique: false })
   tipoDocumento!: string;
 
-  @Property({ nullable: false, unique: false })
+  @Property({ nullable: true, unique: false })
   telefono!: string;
 
-  @Property({ nullable: false, unique: false }) 
+  @Property({ nullable: true, unique: false }) 
   telefonoEmergencia?: string;
   
   @OneToMany(() => Mascota, mascota => mascota.dueno, { cascade: [Cascade.ALL] })

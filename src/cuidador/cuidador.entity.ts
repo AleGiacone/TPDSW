@@ -2,21 +2,21 @@ import { Cascade, Collection, Entity, OneToMany, PrimaryKey, Property } from "@m
 import { Usuario } from "../usuario/usuario.entity.js";
 import { Reserva } from "../reserva/reserva.entity.js";
 
-@Entity()
+@Entity({
+  discriminatorValue: 'cuidador'
+})
 export class Cuidador extends Usuario {
-  @Property({ nullable: false, unique: false })
-  nombreCuidador!: string;
 
-  @Property({ nullable: false, unique: false })
+  @Property({ nullable: true, unique: true })
   nroDocumento!: string;
 
-  @Property({ nullable: false, unique: false })
+  @Property({ nullable: true, unique: false })
   tipoDocumento!: string;
 
-  @Property({ nullable: false, unique: false })
+  @Property({ nullable: true, unique: false })
   telefono!: string;
 
-  @Property({ nullable: false, unique: false })
+  @Property({ nullable: true, unique: false })
   sexoCuidador!: string;
 
   @OneToMany(() => Reserva, reserva => reserva.cuidador, { cascade: [Cascade.ALL] })

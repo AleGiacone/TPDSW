@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+</head>
+<body>
+  <h1>Welcome to the Index Page</h1>
+  <p>Email: <%= usuario.email %></p>
+  <% if (usuario.email != undefined) { %>
+    <button onclick="" id="Logout-button">Logouta</button>
+    <h1><%= usuario.id %></h1>
+  <% } %>
+
+  <script>
+    // Un console.log me tiraba error y me dejaba de funcionar el logout
+    const logoutButton = document.querySelector('#Logout-button');
+    logoutButton?.addEventListener('click', e => {
+      console.log('Logout button clicked');
+      fetch('/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        console.log('Response:', response);
+        if (response.ok) {
+          window.location.href = '/login';
+        } else {
+          alert('Logout failed. Please try again.');
+        }
+      })
+    });
+    // Example of a simple script
+  </script>
+</body>
+</html>

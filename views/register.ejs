@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+</head>
+  <body style="margin: auto; padding-top: 20px;">
+    <h1>Register Page</h1>
+    <form action="/register" method="POST" id="register-form">
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+      <br>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+      <h3>¿Qué eres?</h3>
+      <div >
+        <ul>
+          <li><input type="radio" id="tipoDueno" name="tipo" value="dueno" required> Dueño</li>
+          <li><input type="radio" id="tipoCuidador" name="tipo" value="cuidador" required> Cuidador</li>
+        </ul>
+      </div>
+      <br>
+      <button type="submit">Register</button>
+    </form>
+  </div>  
+  <script>
+    const registerForm = document.querySelector('#register-form');
+    registerForm?.addEventListener('submit', e => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const tipo = document.querySelector('input[name="tipo"]:checked').value;
+      console.log(`Email: ${email}, Password: ${password}, Tipo: ${tipo}`);
+      if (tipo == 'dueno') {
+        console.log('Registering as Dueno');
+        fetch('/api/duenos', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+          })
+            .then(response => {
+              console.log('Response:', response);
+              if (response.ok) {
+                registerForm.innerHTML = 'Registration successful! Redirecting to login...';
+                setTimeout(() => {
+                  window.location.href = '/login';
+                }, 2000);
+              } else if (response.status === 400) {
+                // Poner una alerta linda
+                alert('Email already exists. Please try another email.');
+              }
+            })
+      } else {
+        console.log('Registering as Cuidador');
+        fetch('/api/cuidadores', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password, tipo })
+        })
+          .then(response => {
+            console.log('Response:', response);
+            if (response.ok) {
+              registerForm.innerHTML = 'Registration successful! Redirecting to login...';
+              setTimeout(() => {
+                window.location.href = '/login';
+              }, 2000);
+            } else if (response.status === 400) {
+              // Poner una alerta linda
+              alert('Email already exists. Please try another email.');
+            }
+          })
+      }
+    })
+      
+      
+  </script>
+</body>
+</html>
