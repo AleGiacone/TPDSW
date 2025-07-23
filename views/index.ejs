@@ -13,11 +13,26 @@
     <h1><%= usuario.id %></h1>
   <% } %>
 
+
+
+
+    <form action='/upload-image' enctype='multipart/form-data' method='POST' id="upload-image">
+      <input type='file' name='imageFile' id= 'image'  />
+      <button type='submit'>Upload</button>
+    </form>
+
+    <h2>Tu bella imágen</h2>
+    <% if (usuario.perfilImage) {  %>
+
+        <img src="<%= usuario.perfilImage %>" alt="User profile photo showing the account holder in a neutral setting, with a calm expression, displayed on the main page. No visible text in the image." style="width: 200px; height: 200px;">
+    <% } %>
+
+
   <script>
     // Un console.log me tiraba error y me dejaba de funcionar el logout
+    const uploadImage = document.querySelector('#upload-image');
     const logoutButton = document.querySelector('#Logout-button');
     logoutButton?.addEventListener('click', e => {
-      console.log('Logout button clicked');
       fetch('/logout', {
         method: 'POST',
         headers: {
@@ -33,7 +48,34 @@
         }
       })
     });
-    // Example of a simple script
+ 
+    uploadImage?.addEventListener('submit', e => {
+      e.preventDefault();
+      
+      const files = document.querySelector('#image');
+      const formData = new FormData();
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ':', pair[1]);
+      }
+      formData.append('imageFile', files.files[0]);
+      console.log('FormData:', formData);
+      fetch(`/api/usuarios/upload-image`, {
+        method: 'POST',
+        
+        body: formData
+      }).then (response => {
+        console.log('formData:', formData);
+        if (response.ok) {
+          console.log('Files uploaded successfully');
+        } else {
+          console.error('File upload failed');
+        }
+        window.location.href = '/';
+      }).catch(error => {
+        console.error('Error uploading files:', error);
+      });
+    })
+
   </script>
 </body>
 </html>

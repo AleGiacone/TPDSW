@@ -1,3 +1,4 @@
+import type { Request, Response } from "express";
 import 'reflect-metadata'
 import express from "express";
 import {especieRouter} from "./especie/especie.routes.js";
@@ -11,6 +12,12 @@ import cookieParser from 'cookie-parser';
 import { SECRET_JWT_KEY } from './config.js';
 import { cuidadorRouter } from './cuidador/cuidador.routes.js';
 import { duenoRouter } from './dueno/dueno.routes.js';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 // Extend Express Request interface to include 'session'
 declare global {
@@ -20,14 +27,23 @@ declare global {
     }
   }
 }
-
 const app = express();
 app.use(cookieParser());
 app.set('view engine', 'ejs');
 app.use(express.json());
-
+app.use('/img', express.static(path.join(__dirname, '../public/img')));
 //Luego de los middlewares base
 
+app.use((req, res, next) => {
+  const token = req.cookies.access_token;
+  req.session = { usuario: null }
+  try {
+    const data = jwt.verify(token, SECRET_JWT_KEY!);
+    req.session.usuario = data;
+  } catch {}
+  next();
+
+})
 app.use((req,res,next) => {
   RequestContext.create(orm.em, next)
 });
@@ -40,21 +56,12 @@ app.use("/api/usuarios", usuarioRouter);
 app.use("/api/login", usuarioRouter);
 app.use("/api/duenos", duenoRouter);
 app.use("/api/cuidadores", cuidadorRouter);
+app.use("/api/usuario/upload-image", usuarioRouter);
 
 app.get("/login", (req, res) => {
   res.render("login");
 });
 // Middleware funciones donde modificamos peticion o respuesta
-app.use((req, res, next) => {
-  const token = req.cookies.access_token;
-  req.session = { usuario: null }
-  try {
-    const data = jwt.verify(token, SECRET_JWT_KEY!);
-    req.session.usuario = data;
-  } catch {}
-  next();
-
-})
 
 app.get('/', (req, res) => {
   const { usuario } = req.session ?? { usuario: null };
@@ -62,11 +69,14 @@ app.get('/', (req, res) => {
     res.status(401).send('Acceso no autorizado')
     return 
   }
-  console.log(usuario)
-  console.log("Email del usuario:", usuario.email);
-  console.log("ID del usuario:", usuario.idUsuario);
+  console.log('estoy aca',usuario);
   res.render('index', { usuario });
 });
+
+
+
+
+
 
 app.get('/register', (req, res) => {
   res.render("register");
@@ -82,6 +92,8 @@ app.post('/login', (req, res) => {
 app.post('/register', (req, res) => {
   
 });
+
+
 
 app.post('/logout', (req, res) => {
   res.clearCookie('access_token');

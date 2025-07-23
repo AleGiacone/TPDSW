@@ -23,6 +23,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.4",
+    "multer": "^2.0.2",
     "reflect-metadata": "0.2.2"
   },
   "devDependencies": {
@@ -30,6 +31,7 @@
     "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
     "@types/node": "22.16.5",
     "tsc-watch": "6.0.4",
     "typescript": "5.1.3"

@@ -4,6 +4,11 @@ import { Usuario } from './usuario.entity.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { SECRET_JWT_KEY } from '../config.js';
+import multer from 'multer';
+import path from 'path';
+
+
+
 
 const em = orm.em
 
@@ -73,11 +78,18 @@ async function add(req: Request, res: Response) {
 } 
 
 async function update(req: Request, res: Response) {
+  
+  console.log("Updating usuario with body:", req.body);
+
   try {
-    const idUsuario = Number.parseInt(req.params.idUsuario);
-    const usuario = await orm.em.findOneOrFail(Usuario, { idUsuario: idUsuario });
-    orm.em.assign(usuario, req.body.sanitizeInput);
-    await orm.em.flush();
+    console.log("Updating usuario with body:", req.body);
+    const usuario = await em.findOneOrFail(Usuario, { email: req.body.email });
+    if (usuario.password !== req.body.sanitizeInput.password) { 
+      // El 10 representa el número de rondas de sal o hashing
+      req.body.sanitizeInput.password = await bcrypt.hash(req.body.sanitizeInput.password, 10);
+    }
+    em.assign(usuario, req.body.sanitizeInput);
+    await em.flush();
     res.status(200).json({ message: 'Usuario updated', data: usuario });
   } catch (error: any) {
     res.status(500).json({ message: "Error updating usuario", error: error.message });
@@ -96,6 +108,7 @@ async function remove(req: Request, res: Response) {
 }   
 
 async function loginCtrl(req: Request, res: Response) {
+  // Resolver problema de que no encuentra el mail y tira otro error
   try {
     const { email, password } = req.body.sanitizeInput;
     if (!email || !password) {
@@ -105,20 +118,24 @@ async function loginCtrl(req: Request, res: Response) {
     await authenticate(req.body.sanitizeInput, res);
     console.log("Login controller called with body:", email, password);
     const usuario = await em.findOne(Usuario, { email });
+    console.log("Found usuario:", usuario);
     if (!usuario) {
+      console.log("Email not found:", email);
       res.status(404).json({ message: 'Email not found' });
       return;
     }
     const isValid = await bcrypt.compare(password, usuario.password);
     console.log(isValid)
     if (!isValid) {
+      console.log("Invalid password for email:", email);
       res.status(401).json({ message: 'Invalid password' });
       return;
     }
     if (usuario && isValid) {
+      console.log("Valid usuario found:", usuario);
       const { password, idUsuario, ...publicUser } = usuario;
       const token = jwt.sign(
-        { idUsuario: idUsuario, email: email }, 
+        { idUsuario: idUsuario, email: email, perfilImage: usuario.perfilImage }, 
         SECRET_JWT_KEY, 
         { expiresIn: '1h' });
       res.cookie('access_token', token, {
@@ -128,7 +145,7 @@ async function loginCtrl(req: Request, res: Response) {
         maxAge: 1000 * 60 * 60 // 1 hour
       });
       console.log("Generated JWT:", token);
-      res.status(200).json({ message: 'Login successful', data: { idUsuario: usuario.idUsuario, email: usuario.email }, 
+      res.status(200).json({ message: 'Login successful', data: { idUsuario: usuario.idUsuario, email: usuario.email, perfilImage: usuario.perfilImage }, token:
         token });
       return;
       
@@ -164,4 +181,52 @@ async function authenticate(usuario: Usuario, res: Response) {
   }
 }
 
-export { sanitizeUsuario, findAll, findOne, add, update, remove, loginCtrl, authenticate };
+async function uploadFiles(req: Request, res: Response) {
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, './public/img/perfilImages');
+    },
+    filename: (req, file, cb) => {
+      const uniqueName = Date.now().toString(16) + path.extname(file.originalname);
+      cb(null, uniqueName);
+    }
+  });
+  console.log("Files uploaded:", req);
+  console.log("Uploading files with body:", req.body);
+
+  if(!req.file) {
+    console.log("No file uploaded");
+    return;
+  }
+  console.log("Files uploaded:", req.file.path);
+  if (!req.session) {
+    console.log("Session not found");
+    return;
+  } else {
+    console.log("Session found:", req.session.usuario);
+    const email = req.session.usuario.email;
+    const emFork = em.fork();
+      try {
+        console.log("EL FUCKING MAIL", email);
+        if (!req.file) {
+          res.status(400).json({ message: 'No file uploaded' });
+          return;
+        }
+        const usuario = await emFork.findOneOrFail(Usuario, { email: req.session.usuario.email})
+        console.log("Found usuario for upload:", usuario);
+        usuario.perfilImage = '/img/perfilImages/' + req.file.filename;
+        await emFork.flush();
+
+      } catch (error) {
+        console.log("Error during file upload:", error);
+        return;
+      }
+    }
+}
+
+
+
+
+
+
+export { sanitizeUsuario, findAll, findOne, add, update, remove, loginCtrl, authenticate, uploadFiles };

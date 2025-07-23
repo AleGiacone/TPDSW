@@ -21,4 +21,7 @@ export class Usuario {
   @Property({ nullable: false, unique: false })
   tipoUsuario!: string;  
 
+  @Property({ nullable: false, unique: false })
+  perfilImage?: string;
+
 }
