@@ -21,13 +21,10 @@ export class Reserva {
   @Property({ nullable: false, unique: false })
   descripcion!: string;
 
-  @ManyToOne(() => Publicacion)
+  @ManyToOne(() => Publicacion, { nullable: false, cascade: [Cascade.ALL] })
   public publicacion!: Rel<Publicacion>;
 
-  @ManyToOne(() => Cuidador)
-  public cuidador!: Rel<Cuidador>;
-
-  @ManyToOne(() => Dueno)
+  @ManyToOne(() => Dueno, { nullable: false, cascade: [Cascade.ALL] })
   public dueno!: Rel<Dueno>;
 
   @ManyToMany({entity: () => Mascota, cascade: [Cascade.ALL]})

@@ -4,22 +4,23 @@ import { Cuidador } from "../cuidador/cuidador.entity.js";
 
 @Entity() 
 export class Publicacion {
+
   @PrimaryKey()
   idPublicacion!: number;
-
-
-  @OneToOne(() => Cuidador, { nullable: false, cascade: [Cascade.ALL] })
-  idCuidador!: number;
+  
   @Property({ nullable: false, unique: false })
   titulo!: string;
-
+  
   @Property({ nullable: false, unique: false })
   descripcion!: string;
-
-  @Property({ nullable: false, unique: false })
+  
+  @Property({ nullable: true, unique: false })
   fechaPublicacion!: Date;
 
-  @OneToMany(() => Reserva, reserva => reserva.publicacion, { cascade: [Cascade.ALL] })
+  @OneToOne(() => Cuidador, cuidador => cuidador.publicacion, { nullable: true, cascade: [Cascade.ALL] })
+  idCuidador!: number;
+
+  @OneToMany(() => Reserva, reserva => reserva.publicacion, { nullable: true, cascade: [Cascade.ALL] })
   reservas = new Collection<Reserva>(this);
 
   @Property({ nullable: false, unique: false })

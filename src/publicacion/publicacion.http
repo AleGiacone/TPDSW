@@ -1,0 +1,10 @@
+### Crear publicacion
+POST http://localhost:3000/api/publicacion
+Content-Type: application/json
+
+{
+  "titulo": "Un hogar para tu cachorrito",
+  "descripcion": "Gran persona amantes de los animales",
+  "idCuidador": 3,
+  "precio": 3000
+}

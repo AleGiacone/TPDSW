@@ -8,7 +8,7 @@ import { Cascade, Collection, Entity, ManyToMany, PrimaryKey, Property } from "@
 export class Usuario {
   @PrimaryKey()
   idUsuario!: number;
-  // Darle la razon a pilar de que hay que poner un nombre
+  
   @Property({ nullable: false, unique: false })
   nombre!: string;
 
@@ -21,7 +21,7 @@ export class Usuario {
   @Property({ nullable: false, unique: false })
   tipoUsuario!: string;  
 
-  @Property({ nullable: false, unique: false })
+  @Property({ nullable: true, unique: false })
   perfilImage?: string;
 
 }

@@ -14,7 +14,7 @@ import { cuidadorRouter } from './cuidador/cuidador.routes.js';
 import { duenoRouter } from './dueno/dueno.routes.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
-
+import { publicacionRouter } from './publicacion/publicacion.routes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -44,11 +44,10 @@ app.use((req, res, next) => {
   next();
 
 })
+
 app.use((req,res,next) => {
   RequestContext.create(orm.em, next)
 });
-//Antes de las rutas y middlewares de negocio
-
 
 app.use("/api/especies", especieRouter);
 app.use("/api/razas", razaRouter);
@@ -57,6 +56,7 @@ app.use("/api/login", usuarioRouter);
 app.use("/api/duenos", duenoRouter);
 app.use("/api/cuidadores", cuidadorRouter);
 app.use("/api/usuario/upload-image", usuarioRouter);
+app.use("/api/publicacion", publicacionRouter);
 
 app.get("/login", (req, res) => {
   res.render("login");

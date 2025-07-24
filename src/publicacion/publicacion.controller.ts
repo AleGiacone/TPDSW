@@ -4,12 +4,17 @@ import { Publicacion } from './publicacion.entity.js';
 
 function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizeInput = {
-    idPublicacion: req.body.idPublicacion,
     idCuidador: req.body.idCuidador,
     titulo: req.body.titulo,
     descripcion: req.body.descripcion,
-    fechaPublicacion: req.body.fechaPublicacion
+    precio: req.body.precio,
+    fechaPublicacion: new Date(),
   };
+  Object.keys(req.body.sanitizeInput).forEach((key) => { 
+    if (req.body.sanitizeInput[key] === undefined) {
+      delete req.body.sanitizeInput[key];
+    }
+  });
   next();
 }
 
@@ -25,6 +30,7 @@ async function findAll(req: Request, res: Response) {
 }
 
 async function findOne(req: Request, res: Response) {
+  console.log("Adding publicacion with body:", req.body);
   try {
     const idPublicacion = Number(req.params.idPublicacion);
     const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas'] });
@@ -35,7 +41,13 @@ async function findOne(req: Request, res: Response) {
 }
 
 async function add(req: Request, res: Response) {
+
+  console.log("Adding publicacion with body:", req.body);
   try {
+    if(req.session) {
+      req.body.sanitizeInput.idCuidador = req.session.usuario.idUsuario
+    }
+    req.body.sanitizeInput.precio = Number(req.body.sanitizeInput.precio);
     const publicacion = em.create(Publicacion, req.body.sanitizeInput);
     await em.flush();
     res.status(200).json({ message: 'Publicacion created', data: publicacion });
@@ -45,6 +57,7 @@ async function add(req: Request, res: Response) {
 }
 
 async function update(req: Request, res: Response) {
+  
   try {
     const idPublicacion = Number.parseInt(req.params.idPublicacion);
     const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion });
