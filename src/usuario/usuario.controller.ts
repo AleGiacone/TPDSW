@@ -84,6 +84,7 @@ async function update(req: Request, res: Response) {
   try {
     console.log("Updating usuario with body:", req.body);
     const usuario = await em.findOneOrFail(Usuario, { email: req.body.email });
+      // Poner un input adicional para que el usuario pueda cambiar su contraseña
     if (usuario.password !== req.body.sanitizeInput.password) { 
       // El 10 representa el número de rondas de sal o hashing
       req.body.sanitizeInput.password = await bcrypt.hash(req.body.sanitizeInput.password, 10);

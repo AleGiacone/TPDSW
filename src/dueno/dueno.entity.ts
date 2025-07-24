@@ -25,5 +25,6 @@ export  class Dueno extends Usuario {
   
   @OneToMany(() => Reserva, reserva => reserva.dueno, { cascade: [Cascade.ALL] })
   reservas = new Collection<Reserva>(this);
+  
 
  }

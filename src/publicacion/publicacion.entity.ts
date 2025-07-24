@@ -1,14 +1,15 @@
-import { Cascade, Collection, Entity, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
+import { Cascade, Collection, Entity, OneToMany, OneToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { Reserva } from "../reserva/reserva.entity.js";
+import { Cuidador } from "../cuidador/cuidador.entity.js";
 
 @Entity() 
 export class Publicacion {
   @PrimaryKey()
   idPublicacion!: number;
 
-  @Property({ nullable: false, unique: false })
-  idCuidador!: number;
 
+  @OneToOne(() => Cuidador, { nullable: false, cascade: [Cascade.ALL] })
+  idCuidador!: number;
   @Property({ nullable: false, unique: false })
   titulo!: string;
 
@@ -20,4 +21,10 @@ export class Publicacion {
 
   @OneToMany(() => Reserva, reserva => reserva.publicacion, { cascade: [Cascade.ALL] })
   reservas = new Collection<Reserva>(this);
+
+  @Property({ nullable: false, unique: false })
+  precio!: number;
+  
+  @Property({ nullable: true, unique: false })
+  imagenes?: string[];
 }
