@@ -18,6 +18,7 @@ import { publicacionRouter } from './publicacion/publicacion.routes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import cors from 'cors'; // 
+import { authMiddleware } from "./usuario/usuario.controller.js";
 
 
 // Extend Express Request interface to include 'session'
@@ -31,7 +32,7 @@ declare global {
 }
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:3308', credentials: true }));
+app.use(cors({ origin: 'http://localhost:3307', credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use('/img', express.static(path.join(__dirname, '../public/img')));
@@ -74,9 +75,7 @@ app.use("/api/cuidadores", cuidadorRouter);
 app.use("/api/usuario/upload-image", usuarioRouter);
 app.use("/api/publicacion", publicacionRouter);
 
-app.get("/login", (req, res) => {
-  
-});
+
 // Middleware funciones donde modificamos peticion o respuesta
 
 app.get('/', (req, res) => {
@@ -90,7 +89,9 @@ app.get('/', (req, res) => {
 });
 
 
-
+app.get('/api/usuario/me', (req, res) => {
+  res.json({ usuario: req.session?.usuario || null });
+})
 
 
 

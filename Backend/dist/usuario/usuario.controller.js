@@ -30,16 +30,6 @@ async function findAll(req, res) {
         res.status(500).json({ message: "Error retrieving usuarios", error: error.message });
     }
 }
-async function findOne(req, res) {
-    try {
-        const idUsuario = Number(req.params.idUsuario);
-        const usuario = await em.findOneOrFail(Usuario, { idUsuario: idUsuario });
-        res.status(200).json({ message: 'Usuario found', data: usuario });
-    }
-    catch (error) {
-        res.status(500).json({ message: "Error retrieving usuario", error: error.message });
-    }
-}
 async function add(req, res) {
     console.log("Adding usuario with body:", req.body);
     const email = await em.findOne(Usuario, { email: req.body.email });
@@ -121,7 +111,7 @@ async function loginCtrl(req, res) {
         if (usuario && isValid) {
             console.log("Valid usuario found:", usuario);
             const { password, idUsuario, ...publicUser } = usuario;
-            const token = jwt.sign({ idUsuario: idUsuario, email: email, perfilImage: usuario.perfilImage }, SECRET_JWT_KEY, { expiresIn: '1h' });
+            const token = jwt.sign({ idUsuario: idUsuario, email: email, perfilImage: usuario.perfilImage, nombre: usuario.nombre, tipoUsuario: usuario.tipoUsuario }, SECRET_JWT_KEY, { expiresIn: '1h' });
             res.cookie('access_token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -205,20 +195,34 @@ async function uploadFiles(req, res) {
         }
     }
 }
-function authMiddleware(req, res, next) {
+async function findOne(req, res) {
+    try {
+        const idUsuario = Number(req.params.idUsuario);
+        const usuario = await em.findOneOrFail(Usuario, { idUsuario: idUsuario });
+        res.status(200).json({ message: 'Usuario found', data: usuario });
+    }
+    catch (error) {
+        res.status(500).json({ message: "Error retrieving usuario", error: error.message });
+    }
+}
+async function authMiddleware(req, res, next) {
+    console.log("Auth middleware called", req.cookies);
     const token = req.cookies.token;
+    req.usuario; // Inicializa el usuario como null
     if (!token) {
-        return res.status(401).json({ error: 'Token no enviado' });
+        console.log("No token found in cookies");
     }
     try {
         const decoded = jwt.verify(token, SECRET_JWT_KEY);
         req.usuario = decoded; // Guarda los datos del usuario en el request
+        res.status(200).json({ message: 'Token válido', usuario: req.session?.usuario || null });
         next();
+        return;
     }
     catch (err) {
-        return res.status(403).json({ error: 'Token inválido' });
+        res.status(403).json({ error: 'Token inválido' });
+        return;
     }
 }
-export default authMiddleware;
-export { sanitizeUsuario, findAll, findOne, add, update, remove, loginCtrl, authenticate, uploadFiles };
+export { sanitizeUsuario, authMiddleware, findAll, findOne, add, update, remove, loginCtrl, authenticate, uploadFiles };
 //# sourceMappingURL=usuario.controller.js.map

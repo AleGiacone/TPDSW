@@ -18,7 +18,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import cors from 'cors'; // 
 const app = express();
-app.use(cors({ origin: 'http://localhost:3308', credentials: true }));
+app.use(cors({ origin: 'http://localhost:3307', credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use('/img', express.static(path.join(__dirname, '../public/img')));
@@ -49,8 +49,6 @@ app.use("/api/duenos", duenoRouter);
 app.use("/api/cuidadores", cuidadorRouter);
 app.use("/api/usuario/upload-image", usuarioRouter);
 app.use("/api/publicacion", publicacionRouter);
-app.get("/login", (req, res) => {
-});
 // Middleware funciones donde modificamos peticion o respuesta
 app.get('/', (req, res) => {
     const { usuario } = req.session ?? { usuario: null };
@@ -60,6 +58,9 @@ app.get('/', (req, res) => {
     }
     console.log('estoy aca', usuario);
     res.render('index', { usuario });
+});
+app.get('/api/usuario/me', (req, res) => {
+    res.json({ usuario: req.session?.usuario || null });
 });
 app.get('/register', (req, res) => {
     res.render("register");

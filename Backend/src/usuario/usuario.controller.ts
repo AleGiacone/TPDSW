@@ -7,6 +7,15 @@ import { SECRET_JWT_KEY } from '../config.js';
 import multer from 'multer';
 import path from 'path';
 
+// Extiende la interfaz Request para incluir 'usuario'
+declare global {
+  namespace Express {
+    interface Request {
+      usuario?: any;
+    }
+  }
+}
+
 
 
 
@@ -42,15 +51,6 @@ async function findAll(req: Request, res: Response) {
   }
 }
 
-async function findOne(req: Request, res: Response) {
-  try {
-    const idUsuario = Number(req.params.idUsuario);
-    const usuario = await em.findOneOrFail(Usuario, { idUsuario: idUsuario });
-    res.status(200).json({ message: 'Usuario found', data: usuario });
-  } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving usuario", error: error.message });
-  }
-}
 
 async function add(req: Request, res: Response) {
 
@@ -63,6 +63,7 @@ async function add(req: Request, res: Response) {
       const usuario = em.create(Usuario, req.body.sanitizeInput);
       await em.flush();
       res.status(200).json({ message: 'Usuario created', data: usuario });
+    
       return ;
 
   } catch (error: any) {
@@ -139,7 +140,7 @@ async function loginCtrl(req: Request, res: Response) {
       console.log("Valid usuario found:", usuario);
       const { password, idUsuario, ...publicUser } = usuario;
       const token = jwt.sign(
-        { idUsuario: idUsuario, email: email, perfilImage: usuario.perfilImage }, 
+        { idUsuario: idUsuario, email: email, perfilImage: usuario.perfilImage, nombre: usuario.nombre, tipoUsuario: usuario.tipoUsuario }, 
         SECRET_JWT_KEY, 
         { expiresIn: '1h' });
       res.cookie('access_token', token, {
@@ -230,23 +231,37 @@ async function uploadFiles(req: Request, res: Response) {
 }
 
 
-function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  const token = req.cookies.token;
+async function findOne(req: Request, res: Response) {
+  try {
+    const idUsuario = Number(req.params.idUsuario);
+    const usuario = await em.findOneOrFail(Usuario, { idUsuario: idUsuario });
+    res.status(200).json({ message: 'Usuario found', data: usuario });
+  } catch (error: any) {
+    res.status(500).json({ message: "Error retrieving usuario", error: error.message });
+  }
+}
 
+
+async function authMiddleware(req: Request, res: Response, next: NextFunction) {
+  console.log("Auth middleware called", req.cookies);
+  const token = req.cookies.token;
+  req.usuario as any; // Inicializa el usuario como null
   if (!token) {
-    return res.status(401).json({ error: 'Token no enviado' });
+    console.log("No token found in cookies");
   }
 
   try {
     const decoded = jwt.verify(token, SECRET_JWT_KEY!);
     req.usuario = decoded; // Guarda los datos del usuario en el request
+    res.status(200).json({ message: 'Token válido', usuario: req.session?.usuario || null });
     next();
+    return;
   } catch (err) {
-    return res.status(403).json({ error: 'Token inválido' });
+    res.status(403).json({ error: 'Token inválido' });
+    return;
   }
 }
-export default authMiddleware;
 
 
 
-export { sanitizeUsuario, findAll, findOne, add, update, remove, loginCtrl, authenticate, uploadFiles };
+export { sanitizeUsuario, authMiddleware, findAll, findOne, add, update, remove, loginCtrl, authenticate, uploadFiles };

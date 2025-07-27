@@ -4,7 +4,7 @@ import { MySqlDriver } from "@mikro-orm/mysql";
 export const orm = await MikroORM.init({
     entities: ['dist/**/*.entity.js'],
     entitiesTs: ['src/**/*.entity.ts'],
-    clientUrl: 'mysql://admin:admin@localhost:3307/Petsbnb',
+    clientUrl: 'mysql://admin:admin@127.0.0.1:3307/Petsbnb',
     highlighter: new SqlHighlighter(),
     driver: MySqlDriver,
     debug: true,

@@ -50,6 +50,8 @@ const RegisterPage = () => {
           nombre: formData.nombre,
           email: formData.email,
           password: formData.password
+          // Agregar tipoUsuario si es duenio o cuidador los demas campos no son obligatorios
+          
         })
       });
 
@@ -72,6 +74,9 @@ const RegisterPage = () => {
       setError('Error de conexión con el servidor');
     }
   };
+
+
+
 
   return (
     <div className="auth-container">

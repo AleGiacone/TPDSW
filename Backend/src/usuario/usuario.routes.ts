@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { sanitizeUsuario, findAll, findOne, add, update, remove, loginCtrl, uploadFiles } from './usuario.controller.js';
+import { authMiddleware, sanitizeUsuario, findAll, findOne, add, update, remove, loginCtrl, uploadFiles } from './usuario.controller.js';
 import { appendFile } from 'fs';
 
 export const usuarioRouter = Router();
@@ -11,6 +11,7 @@ const upload = multer({ dest: './public/img/perfilImages' });
 usuarioRouter.post('/', sanitizeUsuario, loginCtrl);
 usuarioRouter.get('/usuarios', findAll);
 usuarioRouter.get('/usuario', findOne);
+usuarioRouter.get('/usuario/me', authMiddleware);
 usuarioRouter.post('/register', sanitizeUsuario, add);
 usuarioRouter.put('/:email', sanitizeUsuario, update);
 usuarioRouter.patch('/:email', sanitizeUsuario, update);
