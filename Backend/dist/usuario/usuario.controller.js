@@ -93,6 +93,8 @@ async function remove(req, res) {
     }
 }
 async function loginCtrl(req, res) {
+    console.log('Body completo:', req.body);
+    console.log("Login controller called with body:", req.body.sanitizeInput);
     // Resolver problema de que no encuentra el mail y tira otro error
     try {
         const { email, password } = req.body.sanitizeInput;
@@ -123,7 +125,7 @@ async function loginCtrl(req, res) {
             res.cookie('access_token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
+                sameSite: 'lax',
                 maxAge: 1000 * 60 * 60 // 1 hour
             });
             console.log("Generated JWT:", token);
@@ -203,5 +205,20 @@ async function uploadFiles(req, res) {
         }
     }
 }
+function authMiddleware(req, res, next) {
+    const token = req.cookies.token;
+    if (!token) {
+        return res.status(401).json({ error: 'Token no enviado' });
+    }
+    try {
+        const decoded = jwt.verify(token, SECRET_JWT_KEY);
+        req.usuario = decoded; // Guarda los datos del usuario en el request
+        next();
+    }
+    catch (err) {
+        return res.status(403).json({ error: 'Token inválido' });
+    }
+}
+export default authMiddleware;
 export { sanitizeUsuario, findAll, findOne, add, update, remove, loginCtrl, authenticate, uploadFiles };
 //# sourceMappingURL=usuario.controller.js.map

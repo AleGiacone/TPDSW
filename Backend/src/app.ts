@@ -17,9 +17,11 @@ import path from 'path';
 import { publicacionRouter } from './publicacion/publicacion.routes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+import cors from 'cors'; // 
 
 
 // Extend Express Request interface to include 'session'
+
 declare global {
   namespace Express {
     interface Request {
@@ -27,11 +29,16 @@ declare global {
     }
   }
 }
+
 const app = express();
+app.use(cors({ origin: 'http://localhost:3308', credentials: true }));
 app.use(cookieParser());
-app.set('view engine', 'ejs');
 app.use(express.json());
 app.use('/img', express.static(path.join(__dirname, '../public/img')));
+
+
+
+
 //Luego de los middlewares base
 
 app.use((req, res, next) => {
@@ -49,17 +56,26 @@ app.use((req,res,next) => {
   RequestContext.create(orm.em, next)
 });
 
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  console.log('Body recibido:', req.body);
+  next();
+});
+
+
+
+
+app.use("/api/login", usuarioRouter);
+app.use("/api/usuarios", usuarioRouter);
 app.use("/api/especies", especieRouter);
 app.use("/api/razas", razaRouter);
-app.use("/api/usuarios", usuarioRouter);
-app.use("/api/login", usuarioRouter);
 app.use("/api/duenos", duenoRouter);
 app.use("/api/cuidadores", cuidadorRouter);
 app.use("/api/usuario/upload-image", usuarioRouter);
 app.use("/api/publicacion", publicacionRouter);
 
 app.get("/login", (req, res) => {
-  res.render("login");
+  
 });
 // Middleware funciones donde modificamos peticion o respuesta
 
@@ -82,12 +98,7 @@ app.get('/register', (req, res) => {
   res.render("register");
 });
 
-app.post('/login', (req, res) => {
-  const { email, password } = req.body;
-  console.log("Login attempt with email:");
-  // const token = jwt.sign({ idUsuario: idUsuario._idUsuario, email: email}, SECRET_KEY)
-  // Implement login logic here
-});
+
 
 app.post('/register', (req, res) => {
   

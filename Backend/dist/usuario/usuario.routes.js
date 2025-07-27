@@ -3,10 +3,10 @@ import { sanitizeUsuario, findAll, findOne, add, update, remove, loginCtrl, uplo
 export const usuarioRouter = Router();
 import multer from 'multer';
 const upload = multer({ dest: './public/img/perfilImages' });
-usuarioRouter.post('/login', sanitizeUsuario, loginCtrl);
-usuarioRouter.get('/', findAll);
-usuarioRouter.get('/:email', findOne);
-usuarioRouter.post('/', sanitizeUsuario, add);
+usuarioRouter.post('/', sanitizeUsuario, loginCtrl);
+usuarioRouter.get('/usuarios', findAll);
+usuarioRouter.get('/usuario', findOne);
+usuarioRouter.post('/register', sanitizeUsuario, add);
 usuarioRouter.put('/:email', sanitizeUsuario, update);
 usuarioRouter.patch('/:email', sanitizeUsuario, update);
 usuarioRouter.delete('/:email', remove);
