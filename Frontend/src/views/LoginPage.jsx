@@ -1,8 +1,8 @@
 import React, { useState } from'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../api/auth';
 import { Link } from 'react-router-dom';
 import '../styles/Auth.css';
+import { loginCtrl } from '../api/auth';
 
 
 function LoginPage() {
@@ -22,7 +22,7 @@ function LoginPage() {
 
     
     try {
-      const response = await login (email, password);
+      const response = await loginCtrl(email, password);
       if(response.ok) {
         const data = await response.json();
         localStorage.setItem ('token' , data.token ) //guarda el token
@@ -69,5 +69,7 @@ return (
     </div>
   );
 }
+
+
 export default LoginPage;
 

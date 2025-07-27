@@ -4,6 +4,8 @@ import LoginPage from './views/LoginPage';
 import Navbar from './components/Navbar';
 import RegisterPage from './views/RegisterPage';
 
+
+
 function App() {
   return (
       <BrowserRouter>
@@ -16,5 +18,7 @@ function App() {
       </BrowserRouter>
   );
 }
+
+
 
 export default App;
