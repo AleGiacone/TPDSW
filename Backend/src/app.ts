@@ -32,9 +32,19 @@ declare global {
 }
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:3307', credentials: true }));
+
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  console.log('Body recibido:', req.body);
+  next();
+});
+
+
 app.use(cookieParser());
+app.use(cors({ origin: 'http://localhost:3307', credentials: true }));
 app.use(express.json());
+
+// 
 app.use('/img', express.static(path.join(__dirname, '../public/img')));
 
 
@@ -43,6 +53,8 @@ app.use('/img', express.static(path.join(__dirname, '../public/img')));
 //Luego de los middlewares base
 
 app.use((req, res, next) => {
+  console.log('Token recibido:', req.cookies.access_token);
+
   const token = req.cookies.access_token;
   req.session = { usuario: null }
   try {
@@ -57,11 +69,6 @@ app.use((req,res,next) => {
   RequestContext.create(orm.em, next)
 });
 
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  console.log('Body recibido:', req.body);
-  next();
-});
 
 
 
@@ -79,6 +86,9 @@ app.use("/api/publicacion", publicacionRouter);
 // Middleware funciones donde modificamos peticion o respuesta
 
 app.get('/', (req, res) => {
+  console.log('Session:', req.session);
+  console.log('Cookies:', req.cookies);
+  console.log('Headers:', req.headers);
   const { usuario } = req.session ?? { usuario: null };
   if (!usuario) {
     res.status(401).send('Acceso no autorizado')
@@ -86,6 +96,11 @@ app.get('/', (req, res) => {
   }
   console.log('estoy aca',usuario);
   res.render('index', { usuario });
+});
+
+app.use((req, res, next) => {
+  console.log(`[REQ] ${req.method} ${req.url}`);
+  next();
 });
 
 

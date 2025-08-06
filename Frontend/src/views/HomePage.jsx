@@ -10,7 +10,6 @@ import { useEffect, useState } from 'react';
 
 function HomePage() {
   const [usuario, setUsuario] = useState(null);
-
   useEffect(() => {
     const fetchUsuario = async () => {
       try {
@@ -21,6 +20,7 @@ function HomePage() {
             'Content-Type': 'application/json',
           },
         });
+        console.log("Response status:", response.status);
         if (response.ok) {
           const data = await response.json();
           console.log("Data obtenida:", data);
@@ -35,21 +35,26 @@ function HomePage() {
 
     fetchUsuario();
   }, []); // ✅ se ejecuta una sola vez
+  console.log("Render usuario:", usuario);
 
   return (
     <div className="page-wrapper">
       <main>
-        <h1>Bienvenido {usuario.nombre}! <br/>sonsa la que lea</h1>
-        <h2>Cuidamos lo que más querés :)</h2>
+        {usuario ? (
+          <h1>Bienvenido {usuario.nombre}!</h1>
+        ) : (
+          <h1>Bienvenido a Petsbnb!</h1>
+        )}
         <p>
-          {/* Este speech va para cuando no esta logueado en mi opinion 
-            en /us sea donde ponga el speech de nosotros
+              {/* Este speech va para cuando no esta logueado en mi opinion
+                en /us sea donde ponga el speech de nosotros
           */}
-          
+        
           En Petsbnb, encontrá el cuidador ideal para tu mascota o compartí tu hogar cuidando animales.
           Conectamos dueños y cuidadores con confianza, amor y facilidad.
         </p>
         {usuario && <p>¡Hola, {usuario.email}!</p>}
+
       </main>
     </div>
   );
