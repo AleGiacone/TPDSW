@@ -9,8 +9,8 @@ const upload = multer({ dest: './public/img/perfilImages' });
 
 
 usuarioRouter.post('/', sanitizeUsuario, loginCtrl);
-usuarioRouter.get('/usuarios', findAll);
-usuarioRouter.get('/usuario', findOne);
+usuarioRouter.get('/', findAll);
+usuarioRouter.get('/:id', findOne);
 usuarioRouter.get('/usuario/me', authMiddleware);
 usuarioRouter.post('/register', sanitizeUsuario, add);
 usuarioRouter.put('/:email', sanitizeUsuario, update);

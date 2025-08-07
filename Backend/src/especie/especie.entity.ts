@@ -5,7 +5,7 @@ import { Mascota } from "../mascota/mascota.entity.js";
 @Entity()
 export class Especie {
   @PrimaryKey()
-  idEspecie!: number
+  idEspecie?: number
 
   @Property({nullable:false, unique:true})
   nomEspecie!: string

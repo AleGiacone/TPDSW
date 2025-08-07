@@ -43,6 +43,7 @@ async function sanitizeUsuario(req: Request, res: Response, next: NextFunction) 
 // Probar usar zod en vez de sanitizeInput
 
 async function findAll(req: Request, res: Response) {
+  console.log("Finding all usuarios");
   try {
     const usuarios = await orm.em.find(Usuario, {});
     res.status(200).json({ message: 'Found all usuarios', data: usuarios });

@@ -5,17 +5,18 @@ import { orm } from '../shared/db/orm.js';
 
 
 function sanitizeEspecie(req: Request, res: Response, next: NextFunction) {
+  console.log("Sanitizing especie with body:", req.body);
+  console.log("Nombre especie:", req.body.nomEspecie);
   req.body.sanitizeInput = {
-    idEspecie: req.body.idEspecie,
     nomEspecie: req.body.nomEspecie,
-    razas: req.body.razas    
   };
-  Object.keys(req.body.sanitizeInput).forEach((key) => { 
-    if (req.body.sanitizeInput[key] === undefined) {
-      delete req.body.sanitizeInput[key];
-    }
+// cambiar el object keys
+  // Object.keys(req.body.sanitizeInput).forEach((key) => { 
+  //   if (req.body.sanitizeInput[key] === undefined) {
+  //     delete req.body.sanitizeInput[key];
+  //   }
     
-  });
+  // });
   next()
 }
 
@@ -42,6 +43,7 @@ async function findOne(req: Request, res: Response) {
 }
 
 async function add(req: Request, res: Response) {
+  console.log("Adding especie with data:", req.body.sanitizeInput);
   try {
     const especie = em.create(Especie, req.body.sanitizeInput);
     await em.flush()

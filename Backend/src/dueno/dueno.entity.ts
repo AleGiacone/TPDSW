@@ -21,10 +21,10 @@ export  class Dueno extends Usuario {
   telefonoEmergencia?: string;
   
   @OneToMany(() => Mascota, mascota => mascota.dueno, { cascade: [Cascade.ALL] })
-  mascotas = new Collection<Mascota>(this);
+  mascotas? = new Collection<Mascota>(this);
   
   @OneToMany(() => Reserva, reserva => reserva.dueno, { cascade: [Cascade.ALL] })
-  reservas = new Collection<Reserva>(this);
-  
+  reservas? = new Collection<Reserva>(this);
+
 
  }

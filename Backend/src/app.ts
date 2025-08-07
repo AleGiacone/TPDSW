@@ -19,7 +19,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import cors from 'cors'; // 
 import { authMiddleware } from "./usuario/usuario.controller.js";
-
+import { mascotaRouter } from './mascota/mascota.routes.js';
 
 // Extend Express Request interface to include 'session'
 
@@ -33,11 +33,6 @@ declare global {
 
 const app = express();
 
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  console.log('Body recibido:', req.body);
-  next();
-});
 
 
 app.use(cookieParser());
@@ -75,6 +70,7 @@ app.use((req,res,next) => {
 
 app.use("/api/login", usuarioRouter);
 app.use("/api/usuarios", usuarioRouter);
+app.use("/api/mascotas", mascotaRouter);
 app.use("/api/especies", especieRouter);
 app.use("/api/razas", razaRouter);
 app.use("/api/duenos", duenoRouter);

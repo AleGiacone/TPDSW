@@ -6,6 +6,8 @@ const mascotaRouter = Router();
 mascotaRouter.get('/', findAll);
 mascotaRouter.get('/:idMascota', findOne);
 mascotaRouter.post('/', sanitizeMascota, add);
+mascotaRouter.patch('/:idMascota', update);
 mascotaRouter.put('/:idMascota', sanitizeMascota, update);
 mascotaRouter.delete('/:idMascota', remove);
-mascotaRouter.patch('/:idMascota', sanitizeMascota, update);
+
+export { mascotaRouter };
