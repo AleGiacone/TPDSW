@@ -79,26 +79,46 @@ const RegisterPage = () => {
 
 
   return (
-    <div className="auth-container">
-      <h2>Registrarse</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="auth-container-register">
+      <h4>Registrarse</h4>
 
-        <input
+      {/* Selector de tipoUusuario */}
+      <div className= "selector-tipo">
+        <label1 htmlFor="selector">Seleccioná tu rol:</label1>
+        <div className= "opciones-tipo">
+        <button
+        type= "button"
+        className= {formData.tipoUsuario === "dueño" ? "selected" : ""}
+         onClick={() => setFormData({ ...formData, tipoUsuario: "dueño" })}
+        >
+         Dueño
+        </button>
+        
+        <button
+         type="button"
+         className={formData.tipoUsuario === "cuidador" ? "selected" : ""}
+        onClick={() => setFormData({ ...formData, tipoUsuario: "cuidador" })}
+        >
+        Cuidador
+        </button>
+        <form onSubmit={handleSubmit}>
+        <labell htmlFor="nombre">Nombre completo:</labell>
+        < input
           type="text"
           name="nombre"
           placeholder="Nombre completo"
           value={formData.nombre}
           onChange={handleChange}
         />
-
+        <labell htmlFor="email">Correo electrónico:</labell>
         <input
           type="email"
           name="email"
-          placeholder="Correo electrónico"
+          placeholder="tuemail@ejemplo.com"
           value={formData.email}
           onChange={handleChange}
         />
-
+        <labell htmlFor="password">Contraseña:</labell>
         <input
           type="password"
           name="password"
@@ -120,6 +140,8 @@ const RegisterPage = () => {
         {error && <p className="error">{error}</p>}
         {success && <p className="success">{success}</p>}
       </form>
+      </div>
+      </div>
     </div>
   );
 };

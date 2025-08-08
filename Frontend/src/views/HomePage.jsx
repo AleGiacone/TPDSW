@@ -38,6 +38,7 @@ function HomePage() {
   console.log("Render usuario:", usuario);
 
   return (
+   
     <div className="page-wrapper">
       <main>
         {usuario ? (
@@ -56,7 +57,8 @@ function HomePage() {
         {usuario && <p>¡Hola, {usuario.email}!</p>}
 
       </main>
-    </div>
+     </div>
+    
   );
 }
 

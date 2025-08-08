@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import '../styles/Auth.css';
 import { loginCtrl } from '../api/auth';
+import Navbar from '../components/Navbar';
+
 
 
 function LoginPage() {
@@ -40,8 +42,9 @@ function LoginPage() {
 
 return (
     <div className="auth-container">
-      <h1>Iniciar Sesión</h1>
-      <form className="auth-form" onSubmit={handleSubmit}>
+      <h3>Iniciar Sesión</h3>
+      <form className="auth-form input" onSubmit={handleSubmit}>
+        <div className= "form-group">
         <label htmlFor="email">Correo electrónico:</label>
         <input
           type="email"
@@ -57,13 +60,12 @@ return (
           type="password"
           id="password"
           value={password}
-          placeholder="Tu contraseña"
+          placeholder="Tu contraseña" 
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-
         {errorMsg && <p className="error-message">{errorMsg}</p>}
-
+        </div>
         <button type="submit">Ingresar</button>
       </form>
     </div>
