@@ -1,249 +1,250 @@
 /*LOGIN*/
 
-.auth-container {
-  max-width: 100%;
-  margin:50px;
-  padding: 30px;
-  border-radius: 20px;
-  justify-content: center;
-  font-family: "Nunito", "Sans-serif";
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+     .auth-container {
+     max-width: 100%;
+     margin:50px;
+     padding: 30px;
+     border-radius: 20px;
+     justify-content: center;
+     font-family: "Nunito", "Sans-serif";
+     display: flex;
+     flex-direction: column;
+     align-items: center;
 }
 
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: "Nunito", "Sans-serif";
+     .auth-form {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     font-family: "Nunito", "Sans-serif";
 }
 
-.auth-form input {
-  width: 700px;
-  padding: 20px;
-  margin-bottom: 30px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background-color: #ffff;
-  color: #222222;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-  outline: none;
+     .auth-form input {
+     width: 700px;
+     padding: 20px;
+     margin-bottom: 30px;
+     font-size: 1rem;
+     border: 1px solid #ccc;
+     border-radius: 10px;
+     background-color: #ffff;
+     color: #222222;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+     outline: none;
 }
 
-.auth-form button {
-  width: 700px;
-  padding: 20px;
-  margin: 0 auto;
-  font-family: "Nunito";
-  text-align: center;
-  background-color: #f97136;
-  color: #ffff;
-  border: none;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: 0.3s ease;
-  border-radius:20px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+     .auth-form button {
+     padding: 20px;
+     width: 700px;
+     margin: 0 auto;
+     font-family: "Nunito";
+     text-align: center;
+     background-color: #f97136;
+     color: #ffff;
+     border: none;
+     border-radius: 6px;
+     font-weight: bold;
+     font-size: 1.2rem;
+     cursor: pointer;
+     transition: 0.3s ease;
+     border-radius:20px;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
-.auth-form button:hover {
-  background-color: #f97136;
+     .auth-form button:hover {
+     background-color: #f976;
 }
 
-h3{
-  width: 700px;
-  background-color: #fff;
-  color: #f97316;
-  text-align: center;
-  font-weight: bold;
-  font-size: 4rem;
-  line-height: 1.1;
-  padding: 30px;
-  margin: 30px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  border-radius: 30px;
+/*INGRESAR*/
+
+     h3{
+     width: 700px;
+     background-color: #fff;
+     color: #f97316;
+     text-align: center;
+     font-weight: bold;
+     font-size: 4rem;
+     line-height: 1.1;
+     padding: 30px;
+     margin: 30px;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+     border-radius: 30px;
+}
+ /*MISMO PARA AMBOS*/
+
+     label{
+     font-weight: bold;
+     margin-bottom: 10px;  
+     text-align: center;
+     padding: 10px;
+     width: 150px;
+     display: block;
+     background-color: #ffff;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+     border-radius:20px;
+     color: #222222;
 }
 
-label{
-  font-weight: bold;
-  margin-bottom: 10px;  
-  text-align: center;
-  padding: 10px;
-  width: 150px;
-  display: block;
-  background-color: #ffff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  border-radius:20px;
-  color: #222222;
-}
-.error-message {
-  
-  color:#f97136;
-  text-align: center;
-  font-family: 'Nunito', 'Sans-serif';
-  font-size: 1.2rem;
-  margin-bottom: 20px;
-  background-color: #fff;
-  padding: 10px;
-  border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+     .error-message {
+     color:#f97136;
+     text-align: center;
+     font-family: 'Nunito', 'Sans-serif';
+     font-size: 1.2rem;
+     margin-bottom: 20px;
+     background-color: #fff;
+     padding: 10px;
+     border-radius: 20px;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
 }
 
-.auth-form input:focus{
-  outline: none;
+     .auth-form input:focus{
+     outline: none;
 }
-.auth-form input:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px white inset !important;
-  -webkit-text-fill-color: black !important;
+     .auth-form input:-webkit-autofill {
+     -webkit-box-shadow: 0 0 0 1000px white inset !important;
+     -webkit-text-fill-color: black !important;
 }
 
 /*REGISTER*/
 
-.auth-container-register{
-  max-width: 900px;
-  width: 100%;
-  margin: 0 auto;
-  border-radius: 20px;
-  justify-content: center;
-  font-family: "Nunito", "Sans-serif";
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-sizing: border-box;
+     .auth-container-register{
+     max-width: 900px;
+     width: 100%;
+     margin: 0 auto;
+     border-radius: 20px;
+     justify-content: center;
+     font-family: "Nunito", "Sans-serif";
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     box-sizing: border-box;
 }
 
-.form {
-  max-width: 900px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: "Nunito", "Sans-serif";
+     .form {
+     max-width: 900px;
+     width: 100%;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     font-family: "Nunito", "Sans-serif";
 }
 
-h4 {
-  width: 700px;
-  background-color: #fff;
-  color: #f97316;
-  text-align: center;
-  font-weight: bold;
-  font-size: 4rem;
-  line-height: 1.1;
-  padding: 30px;
-  margin: 20px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  border-radius: 30px;
+/*REGISTRAR*/
+
+     h4 {
+     width: 700px;
+     background-color: #fff;
+     color: #f97316;
+     text-align: center;
+     font-weight: bold;
+     font-size: 4rem;
+     line-height: 1.1;
+     padding: 30px;
+     margin: 20px;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+     border-radius: 30px;
 }
-input{
-   width: 100%;
-   padding: 20px;
-   margin-bottom: 20px;
-   font-size: 1rem;
-   border: 1px solid #ccc;
-   border-radius: 10px;
-   background-color: #ffff;
-   color: #222222;
-   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-   outline: none;
-  box-sizing: border-box;
+
+     input{
+     width: 100%;
+     padding: 20px;
+     margin-bottom: 20px;
+     font-size: 1rem;
+     border: 1px solid #ccc;
+     border-radius: 10px;
+     background-color: #ffff;
+     color: #222222;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+     outline: none;
+     box-sizing: border-box;
    
 }
- button {
-    width: 700px;
-    padding: 20px;
-    margin: 10px;
-    font-family: "Nunito";
-    background-color: #f97136;
-    color: #ffff;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: 0.3s ease;
-    border-radius: 20px;
-    box-sizing: border-box;
-    text-align: center;
-    flex-direction: column;
-    display: flex;
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    transform: translateY(0);
+ 
+     button {
+     width: 700px;
+     padding: 20px;
+     margin: 20px;
+     font-family: "Nunito";
+     background-color: #f97136;
+     color: #ffff;
+     border: none;
+     border-radius: 6px;
+     font-weight: bold;
+     font-size: 1.2rem;
+     cursor: pointer;
+     transition: 0.3s ease;
+     border-radius: 20px;
+     box-sizing: border-box;
+     text-align: center;
+     flex-direction: column;
+     display: flex;
+     transition: transform 0.1s ease, box-shadow 0.1s ease;
+     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+     transform: translateY(0);
 }
 
-button:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+     button:active {
+     transform: translateY(2px);
+     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
 }
 
-labell {
-  font-weight: bold;
-  margin-bottom: 10px;
-  text-align: center;
-  padding: 10px;
-  width: 150px;
-  display: block;
-  background-color: #ffff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  border-radius: 20px;
-  color: #222222;
+     button:hover{
+     background-color: #f976;
 }
 
-.auth-container-register .error {
-  background-color: #fff;
-  color: #f97136;
-  font-family: 'Nunito';
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+     .auth-container-register .error {
+     background-color: #fff;
+     color: #f97136;
+     font-family: 'Nunito';
+     display: flex;
+     flex-direction: column;
+     align-items: center;
 }
 
-.auth-container-register .success {
-  background-color: #fff;
-  color: #f97136;
-  font-family: 'Nunito';
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+     .auth-container-register .success {
+     background-color: #fff;
+     color: #f97136;
+     font-family: 'Nunito';
+     display: flex;
+     flex-direction: column;
+     align-items: center;
 }
 
-input:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px white inset !important;
-  -webkit-text-fill-color: black !important;
+     input:-webkit-autofill {
+     -webkit-box-shadow: 0 0 0 1000px white inset !important;
+     -webkit-text-fill-color: black !important;
 }
 
 
 /*BOTONES*/
-.opciones-tipo {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+
+     .opciones-tipo {
+     display: flex;
+     gap: 10px;
+     margin-bottom: 10px;
 }
 
-.opciones-tipo button {
-  padding: 10px 20px;
-  border: 2px solid #f97136;
-  background-color: white;
-  color: #f97136;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: bold;
+     .opciones-tipo button {
+     width:100%;
+     padding: 10px;
+     border: 2px solid #f97136;
+     background-color: white;
+     color: #f97136;
+     border-radius: 10px;
+     cursor: pointer;
+     transition: all 0.3s ease;
+     font-weight: bold;
 }
 
-.opciones-tipo button.selected {
-  background-color: #f97136;
-  color: white;
+     .opciones-tipo button.selected {
+     background-color: #f97136;
+     color: white;
 }
+
 @media ( max-width: 768px ) {
 
-   .auth-container {
+     .auth-container {
      width: 100%;
      max-width: 300px;
      margin: 0 auto;
@@ -254,19 +255,20 @@ input:-webkit-autofill {
      flex-direction: column;
      align-items: center;
      box-sizing: border-box;
-  }
+}
   
-    .auth-form {
+      .auth-form {
       width: 100%;
       max-width: 90%;
       display: flex-start;
       flex-direction: column;
       align-items: center;
-    }
+}
   
-    .auth-form input {
+      .auth-form input {
       width: 100%;
       max-width: 90%;
+      margin: 0 auto 10px;
       padding: 15px;
       font-size: 1rem;
       border: 1px solid #ccc;
@@ -275,11 +277,12 @@ input:-webkit-autofill {
       color: #222222;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
       outline: none;
-    }
+}
   
-    .auth-form button {
+      .auth-form button {
       width: 100%;
       max-width: 90%;
+      margin: 0  auto;
       padding: 15px;
       font-family: "Nunito";
       text-align: center;
@@ -292,13 +295,13 @@ input:-webkit-autofill {
       transition: 0.3s ease;
       border-radius: 20px;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-    }
+}
   
     .auth-form button:hover {
-      background-color: #f97136;
-    }
+      background-color: #f976;
+}
   
-    h3 {
+      h3 {
       width:100%;
       max-width: 90%;
       background-color: #fff;
@@ -308,40 +311,177 @@ input:-webkit-autofill {
       font-size: 2rem;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
       border-radius: 30px;
-    }
+}
   
-    label {
-      font-weight: bold;
-      margin-bottom: 5px;
-      text-align: center;
-      display: block;
-      background-color: #ffff;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-      border-radius: 20px;
-      color: #222222;
+     label {
+     font-weight: bold;
+     margin-bottom: 5px;
+     text-align: center;
+     display: block;
+     background-color: #ffff;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+     border-radius: 20px;
+     color: #222222;
     }
   
     .error-message {
-  
-      color: #f97136;
-      text-align: center;
-      font-family: 'Nunito', 'Sans-serif';
-      font-size: 1rem;
-      margin-bottom: 20px;
-      background-color: #fff;
-      padding: 10px;
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+     color: #f97136;
+     text-align: center;
+     font-family: 'Nunito', 'Sans-serif';
+     font-size: 1rem;
+     margin-bottom: 20px;
+     background-color: #fff;
+     padding: 10px;
+     border-radius: 20px;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+}
   
     .auth-form input:focus {
       outline: none;
-    }
+}
   
-    .auth-form input:-webkit-autofill {
-      -webkit-box-shadow: 0 0 0 1000px white inset !important;
-      -webkit-text-fill-color: black !important;
+     .auth-form input:-webkit-autofill {
+     -webkit-box-shadow: 0 0 0 1000px white inset !important;
+     -webkit-text-fill-color: black !important;
+ }
+
+
+/*REGISTER*/
+
+    .auth-container-register {
+     max-width: 300px;
+     width: 100%;
+     margin: 0 auto;
+     border-radius: 20px;
+     justify-content: center;
+     font-family: "Nunito", "Sans-serif";
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     box-sizing: border-box;
+}
+
+     .form {
+     max-width: 300px;
+     width: 100%;
+     display: flex;
+     align-items: center;
+     font-family: "Nunito", "Sans-serif";
+}
+
+     h4 {
+     max-width: 200px;
+     width: 100%;
+     background-color: #fff;
+     color: #f97316;
+     text-align: center;
+     font-weight: bold;
+     font-size: 2rem;
+     line-height: 1.1;
+     padding: 30px;
+     margin: 20px;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+     border-radius: 30px;
+}
+
+     input {
+     width: 100%;
+     padding: 20px;
+     margin-bottom: 20px;
+     font-size: 1rem;
+     border: 1px solid #ccc;
+     border-radius: 10px;
+     background-color: #ffff;
+     color: #222222;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+     outline: none;
+     box-sizing: border-box;
+
+}
+
+     button {
+     max-width: 200px;
+     width: 100%;
+     margin: 0 auto;
+     padding: 20px;
+     font-family: "Nunito";
+     background-color: #f97136;
+     color: #ffff;
+     border: none;
+     border-radius: 6px;
+     font-weight: bold;
+     font-size: 1rem;
+     cursor: pointer;
+     transition: 0.3s ease;
+     border-radius: 20px;
+     text-align: center;
+     flex-direction: column;
+     display: flex;
+     transition: transform 0.1s ease, box-shadow 0.1s ease;
+     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+     transform: translateY(0);
+}
+
+     button:active {
+     transform: translateY(2px);
+     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+     button:hover{
+     background-color: #f976;
+}
+
+     .auth-container-register .error {
+     background-color: #fff;
+     color: #f97136;
+     font-family: 'Nunito';
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+}
+
+     .auth-container-register .success {
+     background-color: #fff;
+     color: #f97136;
+     font-family: 'Nunito';
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+}
+
+     input:-webkit-autofill {
+     -webkit-box-shadow: 0 0 0 1000px white inset !important;
+     -webkit-text-fill-color: black !important;
+}
+
+
+/*BOTONES TIPO*/
+
+     .opciones-tipo {
+     display: flex;
+     gap: 10px;
+     margin-bottom: 10px;
+}
+
+     .opciones-tipo button {
+     width: 100%;
+     padding: 10px;
+     border: 2px solid #f97136;
+     background-color: white;
+     color: #f97136;
+     border-radius: 10px;
+     cursor: pointer;
+     transition: all 0.3s ease;
+     font-weight: bold;
+}
+
+     .opcines-tipo button:hover {
+     background-color: #f976;
+     }
+     .opciones-tipo button.selected {
+     background-color: #f97136;
+     color: white;
 }
 }

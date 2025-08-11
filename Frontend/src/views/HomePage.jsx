@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import '../styles/Navbar.css';
-const API_URL = 'http://localhost:3000/api'; // Reemplazá 
+const API_URL = 'http://localhost:3307/api'; // Reemplazá 
 
 
 

@@ -11,7 +11,15 @@ const RegisterPage = () => {
     nombre: '',
     email: '',
     password: '',
-    confirmarPassword: ''
+    confirmarPassword: '',
+    tipoUsuario: '',
+    tipoDocumento: '',
+    nroDocumento: '',
+    telefono: '',
+    telefonoEmergencia: '',
+    sexo:'',
+    edad: ''
+
   });
 
   const [error, setError] = useState('');
@@ -41,18 +49,12 @@ const RegisterPage = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5173/api/register', {
+      const response = await fetch('http://localhost:3307/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          nombre: formData.nombre,
-          email: formData.email,
-          password: formData.password
-          // Agregar tipoUsuario si es duenio o cuidador los demas campos no son obligatorios
-          
-        })
+        body: JSON.stringify(formData)
       });
 
       if (!response.ok) {
@@ -66,7 +68,14 @@ const RegisterPage = () => {
           nombre: '',
           email: '',
           password: '',
-          confirmarPassword: ''
+          confirmarPassword: '',
+          tipoUsuario: '',
+          tipoDocumento: '',
+          nroDocumento: '',
+          telefono: '',
+          telefonoEmergencia: '',
+          sexo: '',
+          edad: ''
         });
       }
 
@@ -84,33 +93,37 @@ const RegisterPage = () => {
 
       {/* Selector de tipoUusuario */}
       <div className= "selector-tipo">
-        <label1 htmlFor="selector">Seleccioná tu rol:</label1>
         <div className= "opciones-tipo">
         <button
-        type= "button"
-        className= {formData.tipoUsuario === "dueño" ? "selected" : ""}
-         onClick={() => setFormData({ ...formData, tipoUsuario: "dueño" })}
+          type= "button"
+          className= {formData.tipoUsuario === "dueño" ? "selected" : ""}
+          onClick={() => setFormData({ ...formData, tipoUsuario: "dueño" })}
         >
          Dueño
         </button>
         
         <button
-         type="button"
-         className={formData.tipoUsuario === "cuidador" ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, tipoUsuario: "cuidador" })}
+          type="button"
+          className={formData.tipoUsuario === "cuidador" ? "selected" : ""}
+          onClick={() => setFormData({ ...formData, tipoUsuario: "cuidador" })}
         >
         Cuidador
         </button>
-        <form onSubmit={handleSubmit}>
-        <labell htmlFor="nombre">Nombre completo:</labell>
-        < input
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        {/* Campos comunes */}
+        <label>Nombre completo:</label>
+        <input
           type="text"
           name="nombre"
           placeholder="Nombre completo"
           value={formData.nombre}
           onChange={handleChange}
         />
-        <labell htmlFor="email">Correo electrónico:</labell>
+
+        <label>Correo electrónico:</label>
         <input
           type="email"
           name="email"
@@ -118,7 +131,8 @@ const RegisterPage = () => {
           value={formData.email}
           onChange={handleChange}
         />
-        <labell htmlFor="password">Contraseña:</labell>
+
+        <label>Contraseña:</label>
         <input
           type="password"
           name="password"
@@ -135,13 +149,78 @@ const RegisterPage = () => {
           onChange={handleChange}
         />
 
+        {/* Campos específicos */}
+        {formData.tipoUsuario && (
+          <>
+            <label>Tipo de documento:</label>
+            <input
+              type="text"
+              name="tipoDocumento"
+              placeholder="DNI / Pasaporte / etc."
+              value={formData.tipoDocumento}
+              onChange={handleChange}
+            />
+
+            <label>Número de documento:</label>
+            <input
+              type="text"
+              name="nroDocumento"
+              placeholder="Número de documento"
+              value={formData.nroDocumento}
+              onChange={handleChange}
+            />
+
+            <label>Teléfono:</label>
+            <input
+              type="text"
+              name="telefono"
+              placeholder="Teléfono"
+              value={formData.telefono}
+              onChange={handleChange}
+            />
+
+            {formData.tipoUsuario === "dueño" && (
+              <>
+                <label>Teléfono de emergencia:</label>
+                <input
+                  type="text"
+                  name="telefonoEmergencia"
+                  placeholder="Teléfono de emergencia"
+                  value={formData.telefonoEmergencia}
+                  onChange={handleChange}
+                />
+              </>
+            )}
+
+            {formData.tipoUsuario === "cuidador" && (
+              <>
+                <label>Sexo:</label>
+                <input
+                  type="text"
+                  name="sexo"
+                  placeholder="Sexo"
+                  value={formData.sexo}
+                  onChange={handleChange}
+                />
+
+                <label>Edad:</label>
+                <input
+                  type="number"
+                  name="edad"
+                  placeholder="Edad"
+                  value={formData.edad}
+                  onChange={handleChange}
+                />
+              </>
+            )}
+          </>
+        )}
+
         <button type="submit">Registrarse</button>
 
         {error && <p className="error">{error}</p>}
         {success && <p className="success">{success}</p>}
       </form>
-      </div>
-      </div>
     </div>
   );
 };
