@@ -72,6 +72,17 @@ async function add(req: Request, res: Response) {
     }
 }
 
+async function findPets(req: Request, res: Response) {
+  console.log("Finding mascotas for dueno with id:", req.params.idUsuario);
+  try {
+    const idUsuario = Number(req.params.idUsuario);
+    const dueno = await em.findOneOrFail(Dueno, { idUsuario }, { populate: ['mascotas'] });
+    res.status(200).json({ message: 'Mascotas found', data: dueno.mascotas });
+  } catch (error: any) {
+    res.status(500).json({ message: "Error retrieving mascotas", error: error.message });
+  }
+}
+
 
 async function updateDueno(req: Request, res: Response) {
   try {
@@ -100,4 +111,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeDueno, findAll, findOne, add, updateDueno, remove };
+export { sanitizeDueno, findAll, findOne, add, updateDueno, remove, findPets };

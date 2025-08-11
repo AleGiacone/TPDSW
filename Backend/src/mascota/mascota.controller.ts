@@ -3,6 +3,8 @@ import { Mascota } from './mascota.entity.js';
 import { orm } from '../shared/db/orm.js';
 import { Dueno } from '../dueno/dueno.entity.js'; 
 import { Especie } from '../especie/especie.entity.js';
+import multer from 'multer';
+import path from 'path';
 
 function sanitizeMascota(req: Request, res: Response, next: NextFunction) {
 
@@ -42,6 +44,47 @@ async function findOne(req: Request, res: Response) {
   } catch (error: any) {
     res.status(500).json({ message: "Error retrieving mascota", error: error.message });
   }
+}
+
+async function uploadFiles(req: Request, res: Response) {
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, './public/img/perfilImages');
+    },
+    filename: (req, file, cb) => {
+      const uniqueName = Date.now().toString(16) + path.extname(file.originalname);
+      cb(null, uniqueName);
+    }
+  });
+  console.log("Files uploaded:", req);
+  console.log("Uploading files with body:", req.body);
+
+  if(!req.file) {
+    console.log("No file uploaded");
+    return;
+  }
+  console.log("Files uploaded:", req.file.path);
+  if (!req.session) {
+    console.log("Session not found");
+    return;
+  } else {
+    console.log("Session found:", req.session.usuario);
+    const emFork = em.fork();
+      try {
+        if (!req.file) {
+          res.status(400).json({ message: 'No file uploaded' });
+          return;
+        }
+        const mascota = await emFork.findOneOrFail(Mascota, { idMascota: req.session.usuario.idMascota })
+        console.log("Found mascota for upload:", mascota);
+        mascota.fotoPerfil = '/img/perfilImages/' + req.file.filename;
+        await emFork.flush();
+
+      } catch (error) {
+        console.log("Error during file upload:", error);
+        return;
+      }
+    }
 }
 
 async function add(req: Request, res: Response) {
@@ -97,5 +140,5 @@ async function authenticate(sanitizeInput: any, res: Response) {
 
 }
 
-export { sanitizeMascota, findAll, findOne, add, update, remove };
+export { sanitizeMascota, findAll, findOne, add, update, remove, uploadFiles};
 

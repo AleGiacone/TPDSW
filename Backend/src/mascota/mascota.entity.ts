@@ -36,5 +36,8 @@ export class Mascota {
   @ManyToMany(() => Reserva, reserva => reserva.mascotas, { cascade: [Cascade.ALL] })
   reservas = new Collection<Reserva>(this);
 
+  @Property({nullable: true, unique: false})
+  fotoPerfil?: string;
+
 
 }
