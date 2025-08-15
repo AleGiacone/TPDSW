@@ -24,3 +24,4 @@ export async function register(nombre, email, password) {
     body: JSON.stringify({ nombre, email, password })
   });
 }
+

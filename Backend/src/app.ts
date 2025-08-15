@@ -36,7 +36,7 @@ const app = express();
 
 
 app.use(cookieParser());
-app.use(cors({ origin: 'http://localhost:3307', credentials: true }));
+app.use(cors({ origin: 'http://localhost:3308', credentials: true }));
 app.use(express.json());
 
 // 
@@ -141,12 +141,12 @@ app.use((_, res) => {
   return;  
 })
 
-const PORT = process.env.PORT || 3307;
+const PORT = process.env.PORT || 3000;
 
 await syncSchema(); //Never in production
 
 
 app.listen(PORT, () => {
-  console.log("Server is running on port 3307");
+  console.log("Server is running on port 3000");
 });
 
