@@ -10,3 +10,4 @@ cuidadorRouter.post("/", sanitizeCuidador, add);
 cuidadorRouter.put("/:idUsuario", sanitizeCuidador, update);
 cuidadorRouter.patch("/:idUsuario", sanitizeCuidador, update);
 cuidadorRouter.delete("/:idUsuario", remove);
+

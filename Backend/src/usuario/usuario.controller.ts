@@ -242,7 +242,6 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
-
 async function authMiddleware(req: Request, res: Response, next: NextFunction) {
   console.log("Auth middleware called", req.cookies);
   const token = req.cookies.token;
@@ -262,7 +261,6 @@ async function authMiddleware(req: Request, res: Response, next: NextFunction) {
     return;
   }
 }
-
 
 
 export { sanitizeUsuario, authMiddleware, findAll, findOne, add, update, remove, loginCtrl, authenticate, uploadFiles };

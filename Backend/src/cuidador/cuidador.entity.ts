@@ -20,6 +20,9 @@ export class Cuidador extends Usuario {
   @Property({ nullable: true, unique: false })
   sexoCuidador!: string;
 
+  @Property({ nullable: true, unique: false })
+  descripcion!: string;
+
   @OneToOne(() => Publicacion, { nullable: true })
   publicacion?: Rel<Publicacion>;
 
