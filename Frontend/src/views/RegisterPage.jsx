@@ -49,7 +49,7 @@ const RegisterPage = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:3307/api/register', {
+      const response = await fetch('http://localhost:3000/api/cuidadores', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

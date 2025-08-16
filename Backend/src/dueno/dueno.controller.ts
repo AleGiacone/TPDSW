@@ -54,7 +54,7 @@ async function add(req: Request, res: Response) {
     const email = await em.findOne(Usuario, { email: req.body.email });
     if(!email){
       try {
-        await authenticate(req.body.sanitizeInput, res);
+        await authenticate(req.body.sanitizeInput);
         req.body.sanitizeInput.password = await bcrypt.hash(req.body.sanitizeInput.password, 10);
         const dueno = em.create(Dueno, req.body.sanitizeInput);
         await em.flush();
