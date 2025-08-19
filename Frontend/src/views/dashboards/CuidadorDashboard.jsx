@@ -1,0 +1,489 @@
+// CuidadorDashboard.jsx
+import React, { useState, useEffect } from 'react';
+import { publicacionService, reservaService, handleApiError } from './apiService';
+import './CuidadorDashboard.css';
+import useAuth from '../hooks/useAuth';
+
+const CuidadorDashboard = () => {
+  const { user, logout } = useAuth();
+  const [currentView, setCurrentView] = useState('publicaciones');
+  const [publicaciones, setPublicaciones] = useState([]);
+  const [reservas, setReservas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Estado para el formulario de nueva publicación
+  const [formData, setFormData] = useState({
+    titulo: '',
+    descripcion: '',
+    tarifaPorDia: '',
+    ubicacion: '',
+    tipoAlojamiento: '',
+    cantAnimales: '',
+    exotico: false
+  });
+
+  // Cargar publicaciones del cuidador
+  useEffect(() => {
+    if (user?.id) {
+      fetchPublicaciones();
+    }
+  }, [user?.id]);
+
+  // Cargar reservas del cuidador
+  useEffect(() => {
+    if (user?.id) {
+      fetchReservas();
+    }
+  }, [user?.id]);
+
+  const fetchPublicaciones = async () => {
+    if (!user?.id) return;
+    
+    setLoading(true);
+    setError('');
+    
+    try {
+      const data = await publicacionService.obtenerPorCuidador(user.id);
+      setPublicaciones(data.publicaciones || data || []);
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      console.error('Error al cargar publicaciones:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchReservas = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const data = await reservaService.obtenerPorCuidador(user.id);
+      setReservas(data.reservas || data || []);
+    } catch (err) {
+      console.error('Error al cargar reservas:', err);
+      // No mostrar error para reservas ya que no es crítico
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const nuevaPublicacion = await publicacionService.crear(formData);
+      
+      // Actualizar la lista de publicaciones
+      setPublicaciones(prev => [...prev, nuevaPublicacion]);
+      
+      // Limpiar formulario
+      setFormData({
+        titulo: '',
+        descripcion: '',
+        tarifaPorDia: '',
+        ubicacion: '',
+        tipoAlojamiento: '',
+        cantAnimales: '',
+        exotico: false
+      });
+      
+      // Cambiar vista a publicaciones
+      setCurrentView('publicaciones');
+      
+      alert('Publicación creada exitosamente!');
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      alert('Sesión cerrada');
+    } catch (err) {
+      console.error('Error al cerrar sesión:', err);
+    }
+  };
+
+  const deletePublicacion = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar esta publicación?')) {
+      return;
+    }
+
+    try {
+      await publicacionService.eliminar(id);
+      setPublicaciones(prev => prev.filter(pub => pub.id !== id));
+      alert('Publicación eliminada exitosamente');
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      alert(`Error al eliminar publicación: ${errorMessage}`);
+    }
+  };
+
+  const updateReservaEstado = async (reservaId, nuevoEstado) => {
+    try {
+      await reservaService.actualizarEstado(reservaId, nuevoEstado);
+      
+      // Actualizar el estado local
+      setReservas(prev => 
+        prev.map(reserva => 
+          reserva.id === reservaId 
+            ? { ...reserva, estado: nuevoEstado }
+            : reserva
+        )
+      );
+      
+      alert(`Reserva ${nuevoEstado === 'confirmada' ? 'aceptada' : 'rechazada'} exitosamente`);
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      alert(`Error al actualizar reserva: ${errorMessage}`);
+    }
+  };
+
+  const renderPublicaciones = () => (
+    <div className="dashboard-main">
+      <div className="publicaciones-header">
+        <h2 className="section-title">Mis Publicaciones</h2>
+        <button
+          onClick={() => setCurrentView('nueva-publicacion')}
+          className="btn-primary"
+        >
+          + Nueva Publicación
+        </button>
+      </div>
+
+      {loading && <div className="loading-message">Cargando publicaciones...</div>}
+      
+      {error && <div className="error-message">{error}</div>}
+
+      {publicaciones.length === 0 && !loading ? (
+        <div className="empty-state">
+          <p>Aún no tienes publicaciones</p>
+          <button
+            onClick={() => setCurrentView('nueva-publicacion')}
+            className="btn-primary"
+          >
+            Crear mi primera publicación
+          </button>
+        </div>
+      ) : (
+        <div className="publicaciones-grid">
+          {publicaciones.map((pub) => (
+            <div key={pub.id} className="publicacion-card">
+              <h3 className="card-title">{pub.titulo}</h3>
+              <p className="card-description">{pub.descripcion}</p>
+              <div className="card-info">
+                <div className="price-location">
+                  <span className="price">
+                    ${pub.tarifaPorDia}/día
+                  </span>
+                  <span className="location">📍 {pub.ubicacion}</span>
+                </div>
+                <div className="card-details">
+                  <span>Tipo: {pub.tipoAlojamiento} | Max animales: {pub.cantAnimales}</span>
+                  {pub.exotico && <span className="exotic-badge"> | Acepta exóticos</span>}
+                </div>
+              </div>
+              <div className="card-buttons">
+                <button className="btn-edit">
+                  Editar
+                </button>
+                <button 
+                  onClick={() => deletePublicacion(pub.id)}
+                  className="btn-delete"
+                >
+                  Eliminar
+                </button>
+                <button className="btn-reservas">
+                  Ver Reservas
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderReservas = () => (
+    <div className="dashboard-main">
+      <h2 className="section-title">Mis Reservas</h2>
+      {reservas.length === 0 ? (
+        <p className="loading-message">No tienes reservas aún</p>
+      ) : (
+        <div className="reservas-grid">
+          {reservas.map((reserva) => (
+            <div key={reserva.id} className="reserva-card">
+              <div className="reserva-info">
+                <h3>{reserva.publicacion}</h3>
+                <p><strong>Dueño:</strong> {reserva.dueno}</p>
+                <p><strong>Mascota:</strong> {reserva.mascota}</p>
+                <p>
+                  <strong>Fechas:</strong> {reserva.fechaInicio} - {reserva.fechaFin}
+                </p>
+                <p><strong>Total:</strong> ${reserva.total}</p>
+              </div>
+              <div className="reserva-status">
+                <span className={`status-badge status-${reserva.estado}`}>
+                  {reserva.estado.toUpperCase()}
+                </span>
+                {reserva.estado === 'pendiente' && (
+                  <div className="reserva-actions">
+                    <button 
+                      onClick={() => updateReservaEstado(reserva.id, 'confirmada')}
+                      className="btn-accept"
+                    >
+                      Aceptar
+                    </button>
+                    <button 
+                      onClick={() => updateReservaEstado(reserva.id, 'rechazada')}
+                      className="btn-reject"
+                    >
+                      Rechazar
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderPerfil = () => (
+    <div className="dashboard-main">
+      <div className="perfil-container">
+        <h2 className="section-title">Mi Perfil</h2>
+        <div className="perfil-card">
+          <div className="perfil-field">
+            <label className="field-label">Nombre:</label>
+            <p className="field-value">{user?.nombre}</p>
+          </div>
+          <div className="perfil-field">
+            <label className="field-label">Email:</label>
+            <p className="field-value">{user?.email}</p>
+          </div>
+          <div className="perfil-field">
+            <label className="field-label">Teléfono:</label>
+            <p className="field-value">{user?.telefono}</p>
+          </div>
+          <div className="perfil-field">
+            <label className="field-label">Descripción:</label>
+            <p className="field-value field-description">
+              {user?.descripcion || 'Sin descripción personalizada'}
+            </p>
+          </div>
+          <button className="btn-primary">
+            Editar Perfil
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderNuevaPublicacion = () => (
+    <div className="dashboard-main">
+      <div className="form-container">
+        <h2 className="section-title">Nueva Publicación</h2>
+        
+        <form onSubmit={handleSubmit} className="form-card">
+          <div className="form-group">
+            <label className="form-label">
+              Título:
+            </label>
+            <input
+              type="text"
+              name="titulo"
+              value={formData.titulo}
+              onChange={handleChange}
+              required
+              className="form-input"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">
+              Descripción:
+            </label>
+            <textarea
+              name="descripcion"
+              value={formData.descripcion}
+              onChange={handleChange}
+              rows={4}
+              required
+              className="form-textarea"
+            />
+          </div>
+
+          <div className="form-grid">
+            <div className="form-group">
+              <label className="form-label">
+                Tarifa por día ($):
+              </label>
+              <input
+                type="number"
+                name="tarifaPorDia"
+                value={formData.tarifaPorDia}
+                onChange={handleChange}
+                min="0"
+                step="0.01"
+                required
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                Cantidad de animales:
+              </label>
+              <input
+                type="number"
+                name="cantAnimales"
+                value={formData.cantAnimales}
+                onChange={handleChange}
+                min="1"
+                required
+                className="form-input"
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">
+              Ubicación:
+            </label>
+            <input
+              type="text"
+              name="ubicacion"
+              value={formData.ubicacion}
+              onChange={handleChange}
+              required
+              className="form-input"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">
+              Tipo de alojamiento:
+            </label>
+            <select
+              name="tipoAlojamiento"
+              value={formData.tipoAlojamiento}
+              onChange={handleChange}
+              required
+              className="form-select"
+            >
+              <option value="">Seleccionar...</option>
+              <option value="casa">En mi casa</option>
+              <option value="domicilio">En casa del dueño</option>
+              <option value="ambos">Ambos</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label className="checkbox-group">
+              <input
+                type="checkbox"
+                name="exotico"
+                checked={formData.exotico}
+                onChange={handleChange}
+                className="checkbox-input"
+              />
+              <span>Acepto mascotas exóticas</span>
+            </label>
+          </div>
+
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+
+          <div className="form-buttons">
+            <button 
+              type="button" 
+              onClick={() => setCurrentView('publicaciones')}
+              className="btn-secondary"
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="btn-primary"
+            >
+              {loading ? 'Creando...' : 'Crear Publicación'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
+  if (!user) {
+    return <div className="loading-message">Cargando...</div>;
+  }
+
+  return (
+    <div className="dashboard-container">
+      {/* Navbar del dashboard */}
+      <nav className="dashboard-navbar">
+        <div className="navbar-brand">
+          <h1 className="navbar-title">PetsBnB - Cuidador</h1>
+          <span className="navbar-welcome">Bienvenido, {user?.nombre}</span>
+        </div>
+        
+        <div className="navbar-buttons">
+          <button
+            onClick={() => setCurrentView('publicaciones')}
+            className={`nav-button ${currentView === 'publicaciones' ? 'active' : ''}`}
+          >
+            Mis Publicaciones
+          </button>
+          <button
+            onClick={() => setCurrentView('reservas')}
+            className={`nav-button ${currentView === 'reservas' ? 'active' : ''}`}
+          >
+            Reservas
+          </button>
+          <button
+            onClick={() => setCurrentView('perfil')}
+            className={`nav-button ${currentView === 'perfil' ? 'active' : ''}`}
+          >
+            Mi Perfil
+          </button>
+          <button 
+            onClick={handleLogout}
+            className="logout-button"
+          >
+            Cerrar Sesión
+          </button>
+        </div>
+      </nav>
+
+      {/* Contenido principal */}
+      <main>
+        {currentView === 'publicaciones' && renderPublicaciones()}
+        {currentView === 'reservas' && renderReservas()}
+        {currentView === 'perfil' && renderPerfil()}
+        {currentView === 'nueva-publicacion' && renderNuevaPublicacion()}
+      </main>
+    </div>
+  );
+};
+
+export default CuidadorDashboard;
