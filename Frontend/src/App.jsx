@@ -2,13 +2,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
-
-import HomePage from './views/HomePage';
-import LoginPage from './views/LoginPage';
-import RegisterPage from './views/RegisterPage';
-
+import Navbar from './components/Navbar';
+import HomePage from './views/principal/HomePage';
+import LoginPage from './views/principal/LoginPage';
+import RegisterPage from './views/principal/RegisterPage';
+import PrivateHomePage from './views/homePrivado/PrivateHomePage';
 
 import CuidadorDashboard from './views/dashboards/CuidadorDashboard';
 import DuenoDashboard from './views/dashboards/DuenoDashboard';
@@ -28,40 +28,78 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-            {/* Rutas públicas */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/unauthorized" element={<UnauthorizedPage />} />
-            
-            {/* Rutas protegidas para Cuidadores */}
-            <Route 
-              path="/dashboard/cuidador/*" 
+            {/* Páginas principales con Navbar */}
+            <Route
+              path="/"
+              element={
+                <>
+                  <Navbar />
+                  <HomePage />
+                </>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <>
+                  <Navbar />
+                  <LoginPage />
+                </>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <>
+                  <Navbar />
+                  <RegisterPage />
+                </>
+              }
+            />
+            <Route
+              path="/unauthorized"
+              element={
+                <>
+                  <Navbar />
+                  <UnauthorizedPage />
+                </>
+              }
+            />
+
+              <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute requiredUserType={["cuidador", "dueno"]}>
+                  <>
+                    <PrivateHomePage /> 
+                  </>
+                </ProtectedRoute>
+              }
+            />
+
+
+            {/* Dashboard cuidador */}
+            <Route
+              path="/dashboards/cuidador/*"
               element={
                 <ProtectedRoute requiredUserType="cuidador">
-                  <CuidadorDashboard />
+                  <>
+                    <CuidadorDashboard />
+                  </>
                 </ProtectedRoute>
-              } 
+              }
             />
 
-            {/* Rutas protegidas para Dueños */}
-            <Route 
-              path="/dashboard/dueno/*" 
+            {/* Dashboard dueno */}
+             <Route
+              path="/dashboards/dueno/*"
               element={
                 <ProtectedRoute requiredUserType="dueno">
-                  <DuenoDashboard />
+                  <>
+                    <DuenoDashboard />
+                  </>
                 </ProtectedRoute>
-              } 
-            />
-
-            {/* por defecto*/}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Navigate to="/dashboard/cuidador" replace />
-                </ProtectedRoute>
-              } 
+              }
             />
 
             {/* Ruta catch-all */}
@@ -76,36 +114,3 @@ function App() {
 export default App;
 
 
-
-/*
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import HomePage from './views/HomePage';
-import LoginPage from './views/LoginPage';
-import Navbar from './components/Navbar';
-import RegisterPage from './views/RegisterPage';
-import CuidadorDashboard from "./views/dashboards/CuidadorDashboard";
-
-
-
-
-function App() {
-  return (
-      <BrowserRouter>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/dashboard" element={<CuidadorDashboard />} />
-          
-          
-        </Routes>
-      </BrowserRouter>
-  );
-}
-
-
-
-export default App;
-
-*/

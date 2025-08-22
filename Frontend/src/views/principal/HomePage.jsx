@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import '../styles/Navbar.css';
-const API_URL = 'http://localhost:3000/api'; // Reemplazá 
-
-
-
-
+import Navbar from '../../components/Navbar';
+import '../../styles/Navbar.css';
 import { useEffect, useState } from 'react';
+
+
+const API_URL = 'http://localhost:3000/api'; 
+
+
 
 function HomePage() {
   const [usuario, setUsuario] = useState(null);

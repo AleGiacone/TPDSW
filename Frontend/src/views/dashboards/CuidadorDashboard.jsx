@@ -1,8 +1,11 @@
-// CuidadorDashboard.jsx
+
 import React, { useState, useEffect } from 'react';
-import { publicacionService, reservaService, handleApiError } from './apiService';
-import './CuidadorDashboard.css';
-import useAuth from '../hooks/useAuth';
+//import './CuidadorDashboard.css';
+import { useAuth } from '../../context/AuthContext';
+import { Navigate } from 'react-router-dom';
+import Navbar from '../../components/Navbar';
+import '../../styles/DashboardCuidador.css'
+
 
 const CuidadorDashboard = () => {
   const { user, logout } = useAuth();
@@ -11,6 +14,8 @@ const CuidadorDashboard = () => {
   const [reservas, setReservas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+    
+  const API_BASE_URL = 'http://localhost:3000/api';
 
   // Estado para el formulario de nueva publicación
   const [formData, setFormData] = useState({
@@ -32,6 +37,37 @@ const CuidadorDashboard = () => {
 
   // Cargar reservas del cuidador
   useEffect(() => {
+    const fetchReservas = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/reserva/cuidador/${user.id}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setReservas(data.reservas || data || []);
+        }
+      } catch (err) {
+        console.error('Error al cargar reservas:', err);
+        
+      }
+    };
+
+    
+  if (loading) {
+  return <div className="loading-message">Cargando...</div>;
+     }
+
+  if (!user) {
+  return <Navigate to="/login" replace />;
+}
+
     if (user?.id) {
       fetchReservas();
     }
@@ -44,28 +80,29 @@ const CuidadorDashboard = () => {
     setError('');
     
     try {
-      const data = await publicacionService.obtenerPorCuidador(user.id);
+      const response = await fetch(`${API_BASE_URL}/publicacion/cuidador/${user.id}`, {
+        method: 'GET',
+        credentials: 'include', 
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
       setPublicaciones(data.publicaciones || data || []);
     } catch (err) {
-      const errorMessage = handleApiError(err);
-      setError(errorMessage);
+      setError('Error al cargar publicaciones: ' + err.message);
       console.error('Error al cargar publicaciones:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchReservas = async () => {
-    if (!user?.id) return;
-    
-    try {
-      const data = await reservaService.obtenerPorCuidador(user.id);
-      setReservas(data.reservas || data || []);
-    } catch (err) {
-      console.error('Error al cargar reservas:', err);
-      // No mostrar error para reservas ya que no es crítico
-    }
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,7 +110,24 @@ const CuidadorDashboard = () => {
     setError('');
 
     try {
-      const nuevaPublicacion = await publicacionService.crear(formData);
+      const response = await fetch(`${API_BASE_URL}/publicacion`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...formData,
+          cuidadorId: user.id 
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error ${response.status}`);
+      }
+
+      const nuevaPublicacion = await response.json();
       
       // Actualizar la lista de publicaciones
       setPublicaciones(prev => [...prev, nuevaPublicacion]);
@@ -94,8 +148,7 @@ const CuidadorDashboard = () => {
       
       alert('Publicación creada exitosamente!');
     } catch (err) {
-      const errorMessage = handleApiError(err);
-      setError(errorMessage);
+      setError('Error al crear publicación: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -124,18 +177,39 @@ const CuidadorDashboard = () => {
     }
 
     try {
-      await publicacionService.eliminar(id);
+      const response = await fetch(`${API_BASE_URL}/publicacion/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}`);
+      }
+
       setPublicaciones(prev => prev.filter(pub => pub.id !== id));
       alert('Publicación eliminada exitosamente');
     } catch (err) {
-      const errorMessage = handleApiError(err);
-      alert(`Error al eliminar publicación: ${errorMessage}`);
+      alert('Error al eliminar publicación: ' + err.message);
     }
   };
 
   const updateReservaEstado = async (reservaId, nuevoEstado) => {
     try {
-      await reservaService.actualizarEstado(reservaId, nuevoEstado);
+      const response = await fetch(`${API_BASE_URL}/reserva/${reservaId}/estado`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ estado: nuevoEstado })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}`);
+      }
       
       // Actualizar el estado local
       setReservas(prev => 
@@ -148,8 +222,7 @@ const CuidadorDashboard = () => {
       
       alert(`Reserva ${nuevoEstado === 'confirmada' ? 'aceptada' : 'rechazada'} exitosamente`);
     } catch (err) {
-      const errorMessage = handleApiError(err);
-      alert(`Error al actualizar reserva: ${errorMessage}`);
+      alert('Error al actualizar reserva: ' + err.message);
     }
   };
 
@@ -172,12 +245,6 @@ const CuidadorDashboard = () => {
       {publicaciones.length === 0 && !loading ? (
         <div className="empty-state">
           <p>Aún no tienes publicaciones</p>
-          <button
-            onClick={() => setCurrentView('nueva-publicacion')}
-            className="btn-primary"
-          >
-            Crear mi primera publicación
-          </button>
         </div>
       ) : (
         <div className="publicaciones-grid">

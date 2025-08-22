@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import '../styles/Auth.css';
-import useAuth from '../hooks/useAuth';
+import '../../styles/Auth.css';
+import Navbar from '../../components/Navbar';
+import { useAuth } from '../../context/AuthContext';
 
 
 /*import useAuth from '../hooks/useAuth';
@@ -152,13 +153,16 @@ const RegisterPage = () => {
         {formData.tipoUsuario && (
           <>
             <label>Tipo de documento:</label>
-            <input
-              type="text"
-              name="tipoDocumento"
-              placeholder="DNI / Pasaporte / etc."
-              value={formData.tipoDocumento}
-              onChange={handleChange}
-            />
+                <select
+                  name="Tipo de documento"
+                  value={formData.tipoDoc}
+                  onChange={handleChange}
+                >
+                  <option value="dni">DNI</option>
+                  <option value="pasaporte">Pasaporte</option>
+                  <option value="otro">Otro</option>
+                </select>
+            
 
             <label>Número de documento:</label>
             <input
@@ -199,7 +203,6 @@ const RegisterPage = () => {
                   value={formData.sexo}
                   onChange={handleChange}
                 >
-                  <option value="">Seleccionar</option>
                   <option value="masculino">Masculino</option>
                   <option value="femenino">Femenino</option>
                   <option value="otro">Otro</option>
@@ -227,10 +230,6 @@ const RegisterPage = () => {
         {error && <p className="error">{error}</p>}
         {success && <p className="success">{success}</p>}
       </form>
-
-      <p>
-        ¿Ya tienes cuenta? <Link to="/login">Iniciar sesión</Link>
-      </p>
     </div>
   );
 };
