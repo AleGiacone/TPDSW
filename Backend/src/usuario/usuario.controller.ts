@@ -59,7 +59,7 @@ async function add(req: Request, res: Response) {
   const email = await em.findOne(Usuario, { email: req.body.email });
   if(!email){
     try {
-      await authenticate(req.body.sanitizeInput, res);
+      await authenticate(req.body.sanitizeInput);
       req.body.sanitizeInput.password = await bcrypt.hash(req.body.sanitizeInput.password, 10);
       const usuario = em.create(Usuario, req.body.sanitizeInput);
       await em.flush();
@@ -121,7 +121,7 @@ async function loginCtrl(req: Request, res: Response) {
       res.status(400).json({ message: 'Email and password are required' });
       return;
     }
-    await authenticate(req.body.sanitizeInput, res);
+    await authenticate(req.body.sanitizeInput);
     console.log("Login controller called with body:", email, password);
     const usuario = await em.findOne(Usuario, { email });
     console.log("Found usuario:", usuario);
@@ -167,24 +167,21 @@ async function loginCtrl(req: Request, res: Response) {
 }
 // Arreglar admin, cuidador y dueno
 
-async function authenticate(usuario: Usuario, res: Response) {
+async function authenticate(usuario: Usuario) {
   console.log("Authenticating usuario with body:", usuario);
   try {
     if (usuario.email.includes('@') === false) {
       console.log("Invalid email format:", usuario.email);
-      res.status(400).json({ message: 'Invalid email format' });
-      return;
+      throw new Error('Invalid email format');
     }
     if (usuario.password.length < 4 || usuario.email.length < 5) {
         console.log("Password or email too short:", usuario)
-        res.status(400).json({ message: 'Password or Email too short' });
-        return;
+        throw new Error('Password or Email too short');
     }
     } 
   catch (error) {
     console.log("Error during authentication:", error);
-    res.status(400).json({ message: 'Invalid input data' });
-    return;
+    throw new Error('Invalid input data');
   }
 }
 
@@ -242,7 +239,6 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
-
 async function authMiddleware(req: Request, res: Response, next: NextFunction) {
   console.log("Auth middleware called", req.cookies);
   const token = req.cookies.token;
@@ -262,7 +258,6 @@ async function authMiddleware(req: Request, res: Response, next: NextFunction) {
     return;
   }
 }
-
 
 
 export { sanitizeUsuario, authMiddleware, findAll, findOne, add, update, remove, loginCtrl, authenticate, uploadFiles };

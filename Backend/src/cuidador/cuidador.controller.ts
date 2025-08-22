@@ -48,7 +48,7 @@ async function add(req: Request, res: Response) {
     if(!email){
       try {
         console.log("adding", req.body.sanitizeInput.nombre)
-        await authenticate(req.body.sanitizeInput, res);
+        await authenticate(req.body.sanitizeInput);
         req.body.sanitizeInput.password = await bcrypt.hash(req.body.sanitizeInput.password, 10);
         const cuidador = em.create(Cuidador, req.body.sanitizeInput);
         await em.flush();
