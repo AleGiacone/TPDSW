@@ -29,8 +29,8 @@ const em = orm.em;
 async function findAll(req: Request, res: Response) {
   try {
     const duenos = await em.find(Dueno, {});
+    await em.populate(duenos, ['mascotas']);
     res.status(200).json({ message: 'Found all duenos', data: duenos });
-    console.log("Duenos found:", duenos.map(dueno => dueno.mascotas));
   } catch (error: any) {
     res.status(500).json({ message: "Error retrieving duenos", error: error.message });
   }

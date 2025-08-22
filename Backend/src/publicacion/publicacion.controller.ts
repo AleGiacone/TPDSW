@@ -10,11 +10,8 @@ function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
     precio: req.body.precio,
     fechaPublicacion: new Date(),
   };
-  Object.keys(req.body.sanitizeInput).forEach((key) => { 
-    if (req.body.sanitizeInput[key] === undefined) {
-      delete req.body.sanitizeInput[key];
-    }
-  });
+  // revisar object keys
+
   next();
 }
 
@@ -22,7 +19,8 @@ const em = orm.em;
 
 async function findAll(req: Request, res: Response) {
   try {
-    const publicaciones = await em.find(Publicacion, {}, { populate: ['reservas'] });
+    const publicaciones = await em.find(Publicacion, {}, { populate: ['reservas'],  });
+    await em.populate(publicaciones, ['idCuidador']);
     res.status(200).json({ message: 'Found all publicaciones', data: publicaciones });
   } catch (error: any) {
     res.status(500).json({ message: "Error retrieving publicaciones", error: error.message });
@@ -44,9 +42,7 @@ async function add(req: Request, res: Response) {
 
   console.log("Adding publicacion with body:", req.body);
   try {
-    if(req.session) {
-      req.body.sanitizeInput.idCuidador = req.session.usuario.idUsuario
-    }
+    
     req.body.sanitizeInput.precio = Number(req.body.sanitizeInput.precio);
     const publicacion = em.create(Publicacion, req.body.sanitizeInput);
     await em.flush();
