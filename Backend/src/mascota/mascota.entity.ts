@@ -1,7 +1,8 @@
-import { Cascade, Collection, Entity, ManyToMany, ManyToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
+import { Cascade, Collection, Entity, ManyToMany, ManyToOne, OneToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
 import { Dueno } from "../dueno/dueno.entity.js";
 import { Reserva } from "../reserva/reserva.entity.js";
 import { Especie } from "../especie/especie.entity.js";
+import { Imagen } from "../imagen/imagenes.entity.js";
 
 @Entity()
 export class Mascota {
@@ -39,5 +40,7 @@ export class Mascota {
   @Property({nullable: true, unique: false})
   fotoPerfil?: string;
 
+  @OneToOne(() => Imagen, { cascade: [Cascade.PERSIST, Cascade.MERGE] })
+  imagen?: Imagen;
 
 }

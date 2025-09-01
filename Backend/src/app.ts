@@ -20,6 +20,7 @@ const __dirname = path.dirname(__filename);
 import cors from 'cors'; // 
 import { authMiddleware } from "./usuario/usuario.controller.js";
 import { mascotaRouter } from './mascota/mascota.routes.js';
+import { imagenRouter } from './imagen/imagenes.routes.js';
 
 // Extend Express Request interface to include 'session'
 
@@ -77,7 +78,7 @@ app.use("/api/duenos", duenoRouter);
 app.use("/api/cuidadores", cuidadorRouter);
 app.use("/api/usuario/upload-image", usuarioRouter);
 app.use("/api/publicacion", publicacionRouter);
-
+app.use("/api/imagenes", imagenRouter);
 
 // Middleware funciones donde modificamos peticion o respuesta
 

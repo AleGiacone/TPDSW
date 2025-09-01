@@ -1,6 +1,9 @@
 import {Request, Response, NextFunction} from 'express';
 import { orm } from '../shared/db/orm.js';
 import { Publicacion } from './publicacion.entity.js';
+import path from 'path/win32';
+import multer from 'multer';
+import { Imagen }  from '../imagen/imagenes.entity.js';
 
 function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizeInput = {
@@ -19,7 +22,7 @@ const em = orm.em;
 
 async function findAll(req: Request, res: Response) {
   try {
-    const publicaciones = await em.find(Publicacion, {}, { populate: ['reservas'],  });
+    const publicaciones = await em.find(Publicacion, {}, { populate: ['reservas', 'imagenes'],  });
     await em.populate(publicaciones, ['idCuidador']);
     res.status(200).json({ message: 'Found all publicaciones', data: publicaciones });
   } catch (error: any) {
@@ -31,7 +34,7 @@ async function findOne(req: Request, res: Response) {
   console.log("Adding publicacion with body:", req.body);
   try {
     const idPublicacion = Number(req.params.idPublicacion);
-    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas'] });
+    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas', 'imagenes'] });
     res.status(200).json({ message: 'Publicacion found', data: publicacion });
   } catch (error: any) {
     res.status(500).json({ message: "Error retrieving publicacion", error: error.message });
@@ -56,7 +59,7 @@ async function update(req: Request, res: Response) {
   
   try {
     const idPublicacion = Number.parseInt(req.params.idPublicacion);
-    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion });
+    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas', 'imagenes'] });
     em.assign(publicacion, req.body.sanitizeInput);
     await em.flush();
     res.status(200).json({ message: 'Publicacion updated', data: publicacion });
@@ -68,12 +71,14 @@ async function update(req: Request, res: Response) {
 async function remove(req: Request, res: Response) { 
   try {
     const idPublicacion = Number.parseInt(req.params.idPublicacion);
-    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion });
+    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas', 'imagenes'] });
     await em.removeAndFlush(publicacion);
     res.status(200).json({ message: 'Publicacion removed', data: publicacion });
   } catch (error: any) {
     res.status(500).json({ message: "Error removing publicacion", error: error.message });
   }
 }
+
+
 
 export { sanitizePublicacion, findAll, findOne, add, update, remove };

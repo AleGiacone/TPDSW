@@ -1,4 +1,5 @@
-import { Cascade, Collection, Entity, ManyToMany, PrimaryKey, Property } from "@mikro-orm/core";
+import { Cascade, Collection, Entity, ManyToMany, OneToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Imagen } from "../imagen/imagenes.entity.js";
 
 
 @Entity({
@@ -23,5 +24,8 @@ export class Usuario {
 
   @Property({ nullable: true, unique: false })
   perfilImage?: string;
+
+  @OneToOne(() => Imagen, { cascade: [Cascade.PERSIST, Cascade.MERGE] })
+  imagen?: Imagen;
 
 }

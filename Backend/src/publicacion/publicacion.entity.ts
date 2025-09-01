@@ -1,6 +1,7 @@
 import { Cascade, Collection, Entity, OneToMany, OneToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { Reserva } from "../reserva/reserva.entity.js";
 import { Cuidador } from "../cuidador/cuidador.entity.js";
+import { Imagen } from "../imagen/imagenes.entity.js";
 
 @Entity() 
 export class Publicacion {
@@ -25,7 +26,7 @@ export class Publicacion {
 
   @Property({ nullable: false, unique: false })
   precio!: number;
-  
-  @Property({ nullable: true, unique: false })
-  imagenes?: string[];
+
+  @OneToMany(() => Imagen, imagen => imagen.publicacion, { nullable: true, cascade: [Cascade.ALL] })
+  imagenes = new Collection<Imagen>(this);
 }
