@@ -3,12 +3,13 @@ import { Raza } from './raza.entity.js';
 import { orm } from '../shared/db/orm.js';
 import { OneToMany } from '@mikro-orm/core';
 import { RequestContext } from "@mikro-orm/core";
+import { Especie} from '../especie/especie.entity.js';
 
 function sanitizeRaza(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizeInput = {
     idRaza: req.body.idRaza,
     nomRaza: req.body.nomRaza,
-    especie: req.body.especie
+    idEspecie: req.body.especie
   };
 
   Object.keys(req.body.sanitizeInput).forEach((key) => { 
@@ -36,6 +37,8 @@ async function add(req: Request, res: Response) {
   try {
     const data = req.body;
     const raza = em.create(Raza, data);
+    const especie = await em.findOneOrFail(Especie, { idEspecie: data.idEspecie });
+    raza.especies.add(especie);
     await em.flush()
     res.status(200).json({ message: 'Raza created', data: raza });
     } catch (error: any) {

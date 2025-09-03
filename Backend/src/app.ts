@@ -1,11 +1,9 @@
-import type { Request, Response } from "express";
+import { usuarioRouter } from './usuario/usuario.routes.js';
 import 'reflect-metadata'
 import express from "express";
 import {especieRouter} from "./especie/especie.routes.js";
 import { razaRouter } from './raza/raza.routes.js';
-import { usuarioRouter } from './usuario/usuario.routes.js';
 // Instala los Especies con: pnpm add -D @types/express
-import jwt from 'jsonwebtoken';
 import { orm, syncSchema } from "./shared/db/orm.js";
 import { RequestContext } from '@mikro-orm/core';
 import cookieParser from 'cookie-parser';
@@ -13,18 +11,16 @@ import { SECRET_JWT_KEY } from './config.js';
 import { cuidadorRouter } from './cuidador/cuidador.routes.js';
 import { duenoRouter } from './dueno/dueno.routes.js';
 import { fileURLToPath } from 'url';
-import path from 'path';
 import { publicacionRouter } from './publicacion/publicacion.routes.js';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-import cors from 'cors'; // 
-import { authMiddleware } from "./usuario/usuario.controller.js";
 import { mascotaRouter } from './mascota/mascota.routes.js';
 import { imagenRouter } from './imagen/imagenes.routes.js';
+import jwt from 'jsonwebtoken';
+import path from 'path';
+import cors from 'cors'; // 
 
-import { Especie } from './especie/especie.entity.js';
-import { Raza } from './raza/raza.entity.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Extend Express Request interface to include 'session'
 
@@ -73,8 +69,8 @@ app.use((req,res,next) => {
 
 
 
-app.use("/api/login", usuarioRouter);
 app.use("/api/usuarios", usuarioRouter);
+app.use("/api/login", usuarioRouter);
 app.use("/api/mascotas", mascotaRouter);
 app.use("/api/especies", especieRouter);
 app.use("/api/razas", razaRouter);

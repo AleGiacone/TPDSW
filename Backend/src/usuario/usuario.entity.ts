@@ -2,11 +2,10 @@ import { Cascade, Collection, Entity, OneToOne, PrimaryKey, Property, Rel } from
 import { Imagen } from "../imagen/imagenes.entity.js";
 
 @Entity({
-  abstract: true,
   discriminatorColumn: 'tipo',
   discriminatorValue: 'usuario'
 })
-export class Usuario {
+export abstract class Usuario {
   @PrimaryKey()
   idUsuario!: number;
   
@@ -26,9 +25,11 @@ export class Usuario {
   perfilImage?: string;
 
   // Corregido: relación bidireccional con Imagen
-  @OneToOne(() => Imagen, imagen => imagen.usuario, { 
+
+  @OneToOne('Imagen', 'usuario', {
+    owner: true, 
     cascade: [Cascade.PERSIST, Cascade.MERGE],
     nullable: true 
   })
-  imagen?: Rel<Imagen>;
+  imagen?: Rel<any>;
 }

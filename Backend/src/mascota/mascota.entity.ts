@@ -40,7 +40,11 @@
     @Property({nullable: true, unique: false})
     fotoPerfil?: string;
 
-    @OneToOne(() => Imagen, { cascade: [Cascade.PERSIST, Cascade.MERGE] })
-    imagen?: Imagen;
+    @OneToOne('Imagen', 'mascota', {
+      owner: true, 
+      cascade: [Cascade.PERSIST, Cascade.MERGE],
+      nullable: true 
+    })
+    imagen?: Rel<any>;
 
   }

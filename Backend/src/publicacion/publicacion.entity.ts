@@ -1,8 +1,7 @@
-import { Cascade, Collection, Entity, OneToMany, OneToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Cascade, Collection, Entity, OneToMany, OneToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
 import { Reserva } from "../reserva/reserva.entity.js";
 import { Cuidador } from "../cuidador/cuidador.entity.js";
 import { Imagen } from "../imagen/imagenes.entity.js";
-
 @Entity() 
 export class Publicacion {
 
@@ -18,7 +17,8 @@ export class Publicacion {
   @Property({ nullable: true, unique: false })
   fechaPublicacion!: Date;
 
-  @OneToOne(() => Cuidador, cuidador => cuidador.publicacion, { nullable: true, cascade: [Cascade.ALL] }) idCuidador!: number;
+  @OneToOne(() => Cuidador, cuidador => cuidador.publicacion, { nullable: true, cascade: [Cascade.ALL] }) 
+  idCuidador!: Rel<Cuidador>;
 
   @OneToMany(() => Reserva, reserva => reserva.publicacion, { nullable: true, cascade: [Cascade.ALL] })
   reservas = new Collection<Reserva>(this);

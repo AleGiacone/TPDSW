@@ -1,4 +1,7 @@
-import { Property, ManyToOne, Cascade, PrimaryKey, Entity, OneToOne } from '@mikro-orm/core';
+import { Property, ManyToOne, Cascade, PrimaryKey, Entity, OneToOne, Rel} from '@mikro-orm/core';
+import { Mascota} from '../mascota/mascota.entity.js';
+import { Publicacion } from '../publicacion/publicacion.entity.js';
+import { Usuario } from '../usuario/usuario.entity.js';
 
 @Entity()
 export class Imagen {
@@ -9,22 +12,16 @@ export class Imagen {
   path!: string;
   
   // Usando string references para evitar imports circulares
-  @ManyToOne('Publicacion', { 
-    cascade: [Cascade.PERSIST, Cascade.MERGE],
-    nullable: true 
-  })
-  publicacion?: any;
+  @ManyToOne(() => Publicacion,  
+{ nullable: true })
+  publicacion?: Rel<Publicacion>;
 
-  @OneToOne('Usuario', 'imagen', {
-    cascade: [Cascade.PERSIST, Cascade.MERGE],
-    nullable: true,
-    owner: true
-  })
-  usuario?: any;
+  @OneToOne(() => Usuario, usuario => usuario.imagen, { nullable: true, cascade: [Cascade.ALL] }) 
+  usuario?: Rel<Usuario>;
 
-  @OneToOne('Mascota', {
-    cascade: [Cascade.PERSIST, Cascade.MERGE],
-    nullable: true
-  })
-  mascota?: any;
+  @OneToOne(() => Mascota, mascota => mascota.imagen, { nullable: true, cascade: [Cascade.ALL] }) 
+  mascota?: Rel<Mascota>;
+
+
+
 }
