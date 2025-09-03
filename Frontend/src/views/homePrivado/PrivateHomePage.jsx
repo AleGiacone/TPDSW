@@ -1,4 +1,4 @@
-// HomePage.jsx
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -8,13 +8,13 @@ const PrivateHomePage = () => {
   const { user, logout, isAuthenticated, isCuidador} = useAuth();
   const navigate = useNavigate();
   
-  // Estados
+
   const [publicaciones, setPublicaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
   
-  // Estados para filtros
+
   const [filtros, setFiltros] = useState({
     ubicacion: '',
     tipoAlojamiento: '',
@@ -25,7 +25,7 @@ const PrivateHomePage = () => {
 
   const API_BASE_URL = 'http://localhost:3000/api';
 
-  // Cargar todas las publicaciones
+
   useEffect(() => {
     fetchPublicaciones();
   }, []);
@@ -34,7 +34,7 @@ const PrivateHomePage = () => {
   setLoading(true);
   setError('');
   try {
-    // Construir parámetros de filtro
+    
     const params = new URLSearchParams();
     if (filtros.ubicacion) params.append('ubicacion', filtros.ubicacion);
     if (filtros.tipoAlojamiento) params.append('tipoAlojamiento', filtros.tipoAlojamiento);
@@ -73,7 +73,7 @@ const PrivateHomePage = () => {
 };
     
 
-  // Aplicar filtros
+
   useEffect(() => {
     fetchPublicaciones();
   }, [filtros]);
@@ -96,30 +96,43 @@ const PrivateHomePage = () => {
     });
   };
 
-  const handleUserMenuClick = () => {
-    if (user) {
-      if (user.tipoUsuario === 'cuidador') {
-        navigate('/dashboards/cuidador');
-      } else if (user.tipoUusario === 'dueno' || user.tipoUsuario === 'dueño') {
-        navigate('/dashboards/dueno');
-      }
-    } else {
-      navigate('/login');
-    }
-  };
+ const handleUserMenuClick = () => {
 
-  const handleReservar = (publicacionId) => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
+  console.log('Usuario completo:', user);
+  console.log('Tipo de usuario:', user?.tipoUsuario);
+  
+  if (user) {
+  
+    const tipoUsuario = user.tipoUsuario?.toLowerCase();
+    
+    if (tipoUsuario === 'cuidador') {
+      console.log('Redirigiendo a dashboard cuidador');
+      navigate('/dashboards/cuidador');
+    } else if (tipoUsuario === 'dueno' || tipoUsuario === 'dueño' || tipoUsuario === 'duenio') {
+      console.log('Redirigiendo a dashboard dueño');
+      navigate('/dashboards/dueno');
+    } else {
+      console.error('Tipo de usuario no reconocido:', user.tipoUsuario);
+      alert(`Tipo de usuario no reconocido: ${user.tipoUsuario}`);
     }
+  } else {
+    console.log('Usuario no autenticado, redirigiendo a login');
+    navigate('/login');
+  }
+};
+
+const handleReservar = (publicacionId) => {
+  if (!isAuthenticated) {
+    navigate('/login');
+    return;
+  }
 
     if (isCuidador=== 'cuidador') {
       alert('Los cuidadores no pueden hacer reservas');
       return;
     }
 
-    // Redirigir a página de reserva o abrir modal
+  
     navigate(`/reservar/${publicacionId}`);
   };
 
@@ -281,7 +294,7 @@ const PrivateHomePage = () => {
         {/* Grid de publicaciones */}
         {!loading && publicaciones.length === 0 ? (
           <div className="empty-state">
-            <h3>                                                                                                                                                                                  No se encontraron publicaciones</h3>
+            <h3>No se encontraron publicaciones</h3>
             <p>Intenta ajustar los filtros de búsqueda</p>
         
           </div>

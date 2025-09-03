@@ -10,8 +10,9 @@ import LoginPage from './views/principal/LoginPage';
 import RegisterPage from './views/principal/RegisterPage';
 import PrivateHomePage from './views/homePrivado/PrivateHomePage';
 
-import CuidadorDashboard from './views/dashboards/CuidadorDashboard';
 import DuenoDashboard from './views/dashboards/DuenoDashboard';
+import CuidadorDashboard from './views/dashboards/CuidadorDashboard';
+//import DuenoDashboard from './views/dashboards/DuenoDashboard';
 
 
 const UnauthorizedPage = () => (
@@ -75,10 +76,9 @@ function App() {
                   </>
                 </ProtectedRoute>
               }
-            />
 
 
-            {/* Dashboard cuidador */}
+            />{/* Dashboard cuidador */}
             <Route
               path="/dashboards/cuidador/*"
               element={
@@ -88,10 +88,10 @@ function App() {
                   </>
                 </ProtectedRoute>
               }
-            />
 
-            {/* Dashboard dueno */}
-             <Route
+
+              />{/* Dashboard cuidador */}
+            <Route
               path="/dashboards/dueno/*"
               element={
                 <ProtectedRoute requiredUserType="dueno">
@@ -101,6 +101,12 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+
+            
+
+            
+            
 
             {/* Ruta catch-all */}
             <Route path="*" element={<Navigate to="/" replace />} />

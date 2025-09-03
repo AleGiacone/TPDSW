@@ -7,12 +7,12 @@ import { Publicacion } from "../publicacion/publicacion.entity.js";
   discriminatorValue: 'cuidador'
 })
 export class Cuidador extends Usuario {
-
+  
   @Property({ nullable: true, unique: true })
   nroDocumento!: string;
 
   @Property({ nullable: true, unique: false })
-  tipoDocumento!: string;
+  tipoDocumento!: string; // Corregido el nombre de la propiedad
 
   @Property({ nullable: true, unique: false })
   telefono!: string;
@@ -25,5 +25,4 @@ export class Cuidador extends Usuario {
 
   @OneToOne(() => Publicacion, { nullable: true })
   publicacion?: Rel<Publicacion>;
-
 }

@@ -17,7 +17,6 @@ const CuidadorDashboard = () => {
     
   const API_BASE_URL = 'http://localhost:3000/api';
 
-  // Estado para el formulario de nueva publicación
   const [formData, setFormData] = useState({
     titulo: '',
     descripcion: '',
@@ -28,14 +27,13 @@ const CuidadorDashboard = () => {
     exotico: false
   });
 
-  // Cargar publicaciones del cuidador
+
   useEffect(() => {
     if (user?.id) {
       fetchPublicaciones();
     }
   }, [user?.id]);
 
-  // Cargar reservas del cuidador
   useEffect(() => {
     const fetchReservas = async () => {
       if (!user?.id) return;
@@ -129,10 +127,10 @@ const CuidadorDashboard = () => {
 
       const nuevaPublicacion = await response.json();
       
-      // Actualizar la lista de publicaciones
+    
       setPublicaciones(prev => [...prev, nuevaPublicacion]);
       
-      // Limpiar formulario
+ 
       setFormData({
         titulo: '',
         descripcion: '',
@@ -143,7 +141,7 @@ const CuidadorDashboard = () => {
         exotico: false
       });
       
-      // Cambiar vista a publicaciones
+   
       setCurrentView('publicaciones');
       
       alert('Publicación creada exitosamente!');
@@ -211,7 +209,7 @@ const CuidadorDashboard = () => {
         throw new Error(`Error ${response.status}`);
       }
       
-      // Actualizar el estado local
+    
       setReservas(prev => 
         prev.map(reserva => 
           reserva.id === reservaId 

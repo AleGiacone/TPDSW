@@ -18,8 +18,7 @@ export class Publicacion {
   @Property({ nullable: true, unique: false })
   fechaPublicacion!: Date;
 
-  @OneToOne(() => Cuidador, cuidador => cuidador.publicacion, { nullable: true, cascade: [Cascade.ALL] })
-  idCuidador!: number;
+  @OneToOne(() => Cuidador, cuidador => cuidador.publicacion, { nullable: true, cascade: [Cascade.ALL] }) idCuidador!: number;
 
   @OneToMany(() => Reserva, reserva => reserva.publicacion, { nullable: true, cascade: [Cascade.ALL] })
   reservas = new Collection<Reserva>(this);

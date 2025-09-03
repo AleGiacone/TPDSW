@@ -12,34 +12,32 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
-  // Verificar si hay un token al cargar la app
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Tu backend usa cookies, no localStorage
-        // Llamar al endpoint para verificar si hay sesión activa
-        const response = await fetch('http://localhost:3000/api/usuario/me', {
-          credentials: 'include', // Importante para enviar cookies
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.usuario) {
-            setUser(data.usuario);
-            setToken('authenticated'); // Solo para indicar que está autenticado
-          }
+ useEffect(() => {
+  const checkAuth = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/usuario/me', {
+        credentials: 'include'
+      });
+      
+      console.log('Response status:', response.status); // ← DEBUG
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Datos del usuario desde el backend:', data); // ← DEBUG
+        
+        if (data.usuario) {
+          setUser(data.usuario);
         }
-      } catch (error) {
-        console.error('Error verificando autenticación:', error);
       }
+    } catch (error) {
+      console.error('Error verificando autenticación:', error);
+    } finally {
       setLoading(false);
-    };
-
-    checkAuth();
-  }, []);
+    }
+  };
+  
+  checkAuth();
+}, []);
 
   const login = async (email, password) => {
     try {

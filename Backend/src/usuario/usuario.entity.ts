@@ -1,8 +1,8 @@
-import { Cascade, Collection, Entity, ManyToMany, OneToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Cascade, Collection, Entity, OneToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
 import { Imagen } from "../imagen/imagenes.entity.js";
 
-
 @Entity({
+  abstract: true,
   discriminatorColumn: 'tipo',
   discriminatorValue: 'usuario'
 })
@@ -25,7 +25,10 @@ export class Usuario {
   @Property({ nullable: true, unique: false })
   perfilImage?: string;
 
-  @OneToOne(() => Imagen, { cascade: [Cascade.PERSIST, Cascade.MERGE] })
-  imagen?: Imagen;
-
+  // Corregido: relación bidireccional con Imagen
+  @OneToOne(() => Imagen, imagen => imagen.usuario, { 
+    cascade: [Cascade.PERSIST, Cascade.MERGE],
+    nullable: true 
+  })
+  imagen?: Rel<Imagen>;
 }
