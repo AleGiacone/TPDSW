@@ -22,6 +22,10 @@ import { authMiddleware } from "./usuario/usuario.controller.js";
 import { mascotaRouter } from './mascota/mascota.routes.js';
 import { imagenRouter } from './imagen/imagenes.routes.js';
 
+import { Especie } from './especie/especie.entity.js';
+import { Raza } from './raza/raza.entity.js';
+
+
 // Extend Express Request interface to include 'session'
 
 declare global {
@@ -150,4 +154,3 @@ await syncSchema(); //Never in production
 app.listen(PORT, () => {
   console.log("Server is running on port 3000");
 });
-

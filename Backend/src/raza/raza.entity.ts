@@ -3,7 +3,7 @@ import { Especie } from "../especie/especie.entity.js";
 
 @Entity()
 export class Raza {
-  @PrimaryKey()
+  @PrimaryKey({ autoincrement: true })
   idRaza!: number;
 
   @Property({ nullable: false, unique: true })

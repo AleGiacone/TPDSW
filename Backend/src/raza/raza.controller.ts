@@ -23,10 +23,10 @@ const em = orm.em
 
 
 async function findAll(req: Request, res: Response){
-  try { 
-    // Tipo de retorno promise
-      const razas = await em.find (Raza, {} , {populate : ['especies']})
-      res.status(200).json ({message: 'finded all razas', data: razas })
+  try {
+     
+     const razas = await em.find(Raza, {}, { populate: ['especies'] })
+     res.status(200).json({ message: 'finded all razas', data: razas })
   } catch (error: any) {
     res.status(500).json({ message: "Error retrieving razas", error: error.message });
   }

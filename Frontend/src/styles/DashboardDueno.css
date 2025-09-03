@@ -1,0 +1,55 @@
+
+
+ .form-grid {
+  width: 100%;
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 1rem 2rem;
+    background: #f97136;
+    font-family: 'Nunito', sans-serif;
+    backdrop-filter: blur(10px);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    position: relative;
+    gap: 1rem;
+ }
+
+ .form-group {
+  width: 100%;
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 1rem 2rem;
+    background: #f97136;
+    font-family: 'Nunito', sans-serif;
+    backdrop-filter: blur(10px);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    position: relative;
+    gap: 1rem;
+ }
+ 
+ .form-label{
+  width: 100%;
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 1rem 2rem;
+    background: #f97136;
+    font-family: 'Nunito', sans-serif;
+    backdrop-filter: blur(10px);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    position: relative;
+    gap: 1rem;
+ }

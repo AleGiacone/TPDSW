@@ -24,20 +24,11 @@ const DuenoDashboard = () => {
     idRaza: ''
   });
 
-
   const [especies, setEspecies] = useState([]);
   const [razas, setRazas] = useState([]);
-
   const [editingMascota, setEditingMascota] = useState(null);
 
-  useEffect(() => {
-    console.log('Estado especies actualizado:', especies);
-  }, [especies]);
-
-  useEffect(() => {
-    console.log('Estado razas actualizado:', razas);
-  }, [razas]);
-
+  // Formulario de perfil separado (sin campos de mascota)
   const [perfilForm, setPerfilForm] = useState({
     nombre: user?.nombre || '',
     email: user?.email || '',
@@ -47,6 +38,14 @@ const DuenoDashboard = () => {
   });
   const [editingPerfil, setEditingPerfil] = useState(false);
 
+  // Logs para debugging
+  useEffect(() => {
+    console.log('Estado especies actualizado:', especies);
+  }, [especies]);
+
+  useEffect(() => {
+    console.log('Estado razas actualizado:', razas);
+  }, [razas]);
 
   useEffect(() => {
     if (user?.id) {
@@ -57,21 +56,29 @@ const DuenoDashboard = () => {
     }
   }, [user?.id]);
 
-
+  // Filtrar razas basado en la especie seleccionada
   useEffect(() => {
-  if (mascotaForm.idEspecie) {
-    const especieId = parseInt(mascotaForm.idEspecie);
+    if (mascotaForm.idEspecie) {
+      const especieId = parseInt(mascotaForm.idEspecie);
+      
+      const razasDeEspecie = razas.filter(raza => {
+        // Verificar diferentes posibles estructuras
+        if (raza.especies && Array.isArray(raza.especies)) {
+          return raza.especies.some(especie => especie.idEspecie === especieId);
+        } else if (raza.idEspecie) {
+          return raza.idEspecie === especieId;
+        } else if (raza.especie_id) {
+          return raza.especie_id === especieId;
+        }
+        return false;
+      });
 
-    const razasDeEspecie = razas.filter(raza => 
-      raza.especies?.some(especie => especie.idEspecie === especieId)
-    );
-
-    setRazasFiltradas(razasDeEspecie);
-  } else {
-    setRazasFiltradas([]);
-  }
-}, [mascotaForm.idEspecie, razas]);
-
+      console.log('Razas filtradas para especie', especieId, ':', razasDeEspecie);
+      setRazasFiltradas(razasDeEspecie);
+    } else {
+      setRazasFiltradas([]);
+    }
+  }, [mascotaForm.idEspecie, razas]);
 
   const fetchMascotas = async () => {
     if (!user?.id) return;
@@ -121,7 +128,6 @@ const DuenoDashboard = () => {
 
   const fetchEspecies = async () => {
     try {
-      
       const response = await fetch(`${API_BASE_URL}/especies`, {
         method: 'GET',
         credentials: 'include',
@@ -134,23 +140,39 @@ const DuenoDashboard = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Datos especies:', data); 
+        console.log('Datos especies completos:', data); 
         
+        // Manejar diferentes estructuras de respuesta
+        let especiesArray = [];
+        if (data.especies) {
+          especiesArray = data.especies;
+        } else if (data.data) {
+          especiesArray = data.data;
+        } else if (Array.isArray(data)) {
+          especiesArray = data;
+        }
         
-        const especiesArray = data.especies || data.data || data || [];
-        console.log('Especies array:', especiesArray); 
-        setEspecies(especiesArray);
+        console.log('Especies array procesado:', especiesArray);
+        
+        // Validar que cada especie tenga id y nombre
+        const especiesValidas = especiesArray.filter(especie => 
+          especie && (especie.id || especie.idEspecie) && (especie.nombre || especie.name)
+        );
+        
+        console.log('Especies válidas:', especiesValidas);
+        setEspecies(especiesValidas);
       } else {
         console.error('Error en respuesta especies:', response.status, response.statusText);
+        setError('Error al cargar especies');
       }
     } catch (err) {
       console.error('Error al cargar especies:', err);
+      setError('Error al conectar con el servidor para cargar especies');
     }
   };
 
   const fetchRazas = async () => {
     try {
-
       const response = await fetch(`${API_BASE_URL}/razas`, {
         method: 'GET',
         credentials: 'include',
@@ -163,17 +185,34 @@ const DuenoDashboard = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Datos razas:', data); 
+        console.log('Datos razas completos:', data); 
         
-       
-        const razasArray = data.razas || data.data || data || [];
-        console.log('Razas array:', razasArray); 
-        setRazas(razasArray);
+        // Manejar diferentes estructuras de respuesta
+        let razasArray = [];
+        if (data.razas) {
+          razasArray = data.razas;
+        } else if (data.data) {
+          razasArray = data.data;
+        } else if (Array.isArray(data)) {
+          razasArray = data;
+        }
+        
+        console.log('Razas array procesado:', razasArray);
+        
+        // Validar que cada raza tenga id y nombre
+        const razasValidas = razasArray.filter(raza => 
+          raza && (raza.id || raza.idRaza) && (raza.nombre || raza.name)
+        );
+        
+        console.log('Razas válidas:', razasValidas);
+        setRazas(razasValidas);
       } else {
         console.error('Error en respuesta razas:', response.status, response.statusText);
+        setError('Error al cargar razas');
       }
     } catch (err) {
       console.error('Error al cargar razas:', err);
+      setError('Error al conectar con el servidor para cargar razas');
     }
   };
 
@@ -191,23 +230,22 @@ const DuenoDashboard = () => {
 
       const response = await fetch(url, {
         method,
-         credentials: 'include',
-           headers: {
-    'Content-Type': 'application/json'
-  },
-     body: JSON.stringify({
-  nomMascota: mascotaForm.nombre,           
-  edad: parseInt(mascotaForm.edad),         
-  sexo: mascotaForm.sexo,
-  exotico: mascotaForm.exotico,
-  descripcion: mascotaForm.descripcion,
-  peso: parseFloat(mascotaForm.peso),       
-  especie: parseInt(mascotaForm.idEspecie), 
-  raza: parseInt(mascotaForm.idRaza),      
-  dueno: user.id      
-  })
-});
-
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          nomMascota: mascotaForm.nombre,           
+          edad: parseInt(mascotaForm.edad),         
+          sexo: mascotaForm.sexo,
+          exotico: mascotaForm.exotico,
+          descripcion: mascotaForm.descripcion,
+          peso: parseFloat(mascotaForm.peso),       
+          especie: parseInt(mascotaForm.idEspecie), 
+          raza: parseInt(mascotaForm.idRaza),      
+          dueno: user.id      
+        })
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -304,15 +342,14 @@ const DuenoDashboard = () => {
 
   const startEditMascota = (mascota) => {
     setMascotaForm({
-      nomMascota: mascota.nombre,
+      nombre: mascota.nombre, // Corregido: era nomMascota
       edad: mascota.edad,
       sexo: mascota.sexo,
       exotico: mascota.exotico,
       descripcion: mascota.descripcion || '',
       peso: mascota.peso,
-      especie: mascota.idEspecie.toString(),
-      raza: mascota.idRaza.toString(),
-      dueno: user.id
+      idEspecie: mascota.idEspecie ? mascota.idEspecie.toString() : '', // Corregido
+      idRaza: mascota.idRaza ? mascota.idRaza.toString() : '', // Corregido
     });
     setEditingMascota(mascota);
     setCurrentView('nueva-mascota');
@@ -457,25 +494,8 @@ const DuenoDashboard = () => {
               className="form-input"
             />
           </div>
-          <div className="form-group">
-              <label className="form-label">Raza:</label>
-              <select
-                name="idRaza"
-                value={mascotaForm.idRaza}
-                onChange={handleMascotaChange}
-                required
-                className="form-select"
-                disabled={!mascotaForm.idEspecie}
-              >
-                <option value="">Seleccionar raza...</option>
-                {razasFiltradas.map((raza) => (
-                  <option key={raza.id} value={raza.id}>
-                    {raza.nombre}
-                  </option>
-                ))}
-              </select>
- </div>
-   <div className="form-grid">
+
+          <div className="form-grid">
             <div className="form-group">
               <label className="form-label">Especie:</label>
               <select
@@ -487,16 +507,45 @@ const DuenoDashboard = () => {
               >
                 <option value="">Seleccionar especie...</option>
                 {especies.map((especie) => (
-                  <option key={especie.id} value={especie.id}>
+                  <option 
+                    key={especie.id} 
+                    value={especie.id}
+                  >
                     {especie.nombre}
                   </option>
                 ))}
               </select>
             </div>
 
-           
-</div>
-      
+            <div className="form-group">
+              <label className="form-label">Raza:</label>
+              <select
+                name="idRaza"
+                value={mascotaForm.idRaza}
+                onChange={handleMascotaChange}
+                required
+                className="form-select"
+                disabled={!mascotaForm.idEspecie}
+              >
+                <option value="">
+                  {!mascotaForm.idEspecie 
+                    ? "Primero selecciona una especie..." 
+                    : razasFiltradas.length === 0 
+                      ? "No hay razas disponibles para esta especie"
+                      : "Seleccionar raza..."
+                  }
+                </option>
+                {razasFiltradas.map((raza) => (
+                  <option 
+                    key={raza.id} 
+                    value={raza.id}
+                  >
+                    {raza.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           <div className="form-grid">
             <div className="form-group">
@@ -653,6 +702,7 @@ const DuenoDashboard = () => {
     </div>
   );
 
+  // FORMULARIO DE PERFIL CORREGIDO (sin campos de mascota)
   const renderPerfil = () => (
     <div className="dashboard-main">
       <div className="perfil-container">
@@ -679,44 +729,6 @@ const DuenoDashboard = () => {
                 className="form-input"
               />
             </div>
- <div className="form-group">
-              <label className="form-label">Raza:</label>
-              <select
-                name="idRaza"
-                value={mascotaForm.idRaza}
-                onChange={handleMascotaChange}
-                required
-                className="form-select"
-                disabled={!mascotaForm.idEspecie}
-              >
-                <option value="">Seleccionar raza...</option>
-                {razasFiltradas.map((raza) => (
-                  <option key={raza.id} value={raza.id}>
-                    {raza.nombre}
-                  </option>
-                ))}
-              </select>
-             </div>
-          <div className="form-grid">
-            <div className="form-group">
-              <label className="form-label">Especie:</label>
-              <select
-                name="idEspecie"
-                value={mascotaForm.idEspecie}
-                onChange={handleMascotaChange}
-                required
-                className="form-select"
-              >
-                <option value="">Seleccionar especie...</option>
-                {especies.map((especie) => (
-                  <option key={especie.id} value={especie.id}>
-                    {especie.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-            </div>
-
 
             <div className="form-group">
               <label className="form-label">Email:</label>
@@ -846,18 +858,6 @@ const DuenoDashboard = () => {
         
         <div className="navbar-buttons">
           <button
-            onClick={() => setCurrentView('mascotas')}
-            className={`nav-button ${currentView === 'mascotas' ? 'active' : ''}`}
-          >
-            Mis Mascotas
-          </button>
-          <button
-            onClick={() => setCurrentView('reservas')}
-            className={`nav-button ${currentView === 'reservas' ? 'active' : ''}`}
-          >
-            Mis Reservas
-          </button>
-          <button
             onClick={() => setCurrentView('perfil')}
             className={`nav-button ${currentView === 'perfil' ? 'active' : ''}`}
           >
@@ -883,4 +883,4 @@ const DuenoDashboard = () => {
   );
 };
 
-export default DuenoDashboard;
+export default DuenoDashboard; 
