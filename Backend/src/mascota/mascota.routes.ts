@@ -1,12 +1,13 @@
 import { Router } from 'express';
-import { sanitizeMascota, findAll, findOne, add, update, remove, uploadFiles} from './mascota.controller.js';
+import { sanitizeMascota, findAll, findOne, findByOwner, add, update, remove, uploadFiles} from './mascota.controller.js';
 import multer from 'multer';
 
 const upload = multer({ dest: 'public/img/perfilImages' });
 
 const mascotaRouter = Router();
 
-
+// En mascota.routes.js
+mascotaRouter.get('/duenos/:id', findByOwner);
 mascotaRouter.get('/', findAll);
 mascotaRouter.get('/:idMascota', findOne);
 mascotaRouter.post('/', sanitizeMascota, add);

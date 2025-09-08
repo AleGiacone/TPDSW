@@ -1,55 +1,562 @@
+/* DuenoDashboard.css */
 
+/* Estilos Generales del Dashboard */
+/* DuenoDashboard.css */
 
- .form-grid {
+/* Haz este selector más específico para el contenedor */
+#main-dashboard {
+  height: 100vh;
+  display: flex;
+  font-family: 'Nunito', sans-serif;
+}
+
+/* DuenoDashboard.css */
+
+/* 1. Contenedor principal de la barra de navegación */
+#main-navbar {
+  background: #f95f2d;
+  height: 250px;
   width: 100%;
-    max-width: 1400px;
-    margin: 20px auto;
-    padding: 1rem 2rem;
-    background: #f97136;
-    font-family: 'Nunito', sans-serif;
-    backdrop-filter: blur(10px);
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 20px;
-    position: relative;
-    gap: 1rem;
- }
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 1rem 2rem;
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: row;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+}
 
- .form-group {
+/* 2. Primer "scope": el contenedor para el título y el mensaje de bienvenida */
+.navbar-brand {
   width: 100%;
-    max-width: 1400px;
-    margin: 20px auto;
-    padding: 1rem 2rem;
-    background: #f97136;
-    font-family: 'Nunito', sans-serif;
-    backdrop-filter: blur(10px);
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 20px;
-    position: relative;
-    gap: 1rem;
- }
+  display: flex;
+  font-weight: 700;
+  margin: 20px;
+  
+}
+/* 3. Segundo "scope": el contenedor para los botones */
+.navbar-buttons {
+  width: 10px;
+  display: flex;
+  padding: 20px;
+  margin: 0 auto;
+
+}
+
+#main-title {
+  width: 300px;
+  font-size: 2.5rem;
+  margin: 20px;
+  color: #f95f2d;
+  justify-content:center;
+  
+}
+
+.navbar-welcome {
+  width:400px;
+  font-size: 2rem;
+  margin-left: 50px;
+  color: #fff;
+  background: transparent;
+}
+
+/* Y mantén los estilos de tus botones como los tienes */
+.nav-button,
+.logout-button {
+  width: 200px;
+  padding: 1.5rem;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  font-size: 0.5rem;
+  flex-direction: row;
+  margin: 5px;
+
+}
+
+
+.nav-button {
+  background: #fff;
+  color: #f95f2d;
+}
+
+.nav-button:hover,
+.nav-button.active {
+  color: #f95f2d;
+  background: #ef4444;
+  border-color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav-button.active {
+  background: #fff;
+  color: #f95f2d;
+  border-color: #f97136;
+}
+
+.logout-button {
+  color: #fff;
+  border-color: #fff;
+}
+
+.logout-button:hover {
+  background:  #f95f2d;
+  color: #f95f2d;
+  transform: translateY(-2px);
+}
+
+/* --- */
+
+/* Estilos del Contenido Principal */
+.dashboard-main {
+  flex: 1;
+  max-width: 1200px;
+  margin: 2rem auto;
+  width: 95%;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  
+}
+.section-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #f95f2b;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  margin-top: 20px;
+  
+}
+
+.loading-message,
+.error-message,
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  border-radius: 10px;
+  margin-top: 2rem;
+}
+
+.loading-message {
+  color: #6b7280;
+  background-color: #f3f4f6;
+}
+
+.error-message {
+  color: #ef4444;
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+}
+
+.empty-state {
+  color: #6b7280;
+  background-color: #e5e7eb;
+}
+
+/* --- */
+
+/* Estilos de la Sección de Mascotas */
+.mascotas-header {
+  width:100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: #FFD6C9;
+  border-radius:20px;
  
- .form-label{
+}
+
+.btn-primary {
+  max-width: 30%;
+  padding: 1rem;
+  color: #f95f2d;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.btn-primary:hover {
+  background: #f95f2d;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mascotas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.mascota-card {
+  background: #f963;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid #eee;
+}
+
+.mascota-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.mascota-header {
+  
+  margin-bottom: 1rem;
+}
+
+.mascota-avatar {
+  font-size: 1.5rem;
+  text-align: center;
+  background: #fef3c7;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.mascota-name {
+  width: 70%;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #f95f2d;
+  margin-left: 40px ;
+  padding: 10px;
+  border-radius:10px;
+  justify-content: center;
+  align-items: center;
+  background: #fff
+}
+
+.mascota-details p {
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.mascota-description {
+  font-size: 0.9rem;
+  color: #777;
+  margin-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+}
+
+.mascota-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.btn-edit,
+.btn-delete {
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-edit {
+
+  background: #4c51bf;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #3c366b;
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+/* --- */
+
+/* Estilos del Formulario */
+.form-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-card {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
   width: 100%;
-    max-width: 1400px;
-    margin: 20px auto;
-    padding: 1rem 2rem;
-    background: #f97136;
-    font-family: 'Nunito', sans-serif;
-    backdrop-filter: blur(10px);
-    padding: 1rem 1.5rem;
-    display: flex;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: 'Nunito', sans-serif;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #f97136;
+  box-shadow: 0 0 0 3px rgba(249, 113, 54, 0.2);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn-secondary {
+  padding: 0.7rem 1.5rem;
+  border-radius: 25px;
+  background: #e5e7eb;
+  color: #6b7280;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+  transform: translateY(-2px);
+}
+
+/* Checkbox */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkbox-input {
+  width: 20px;
+  height: 20px;
+  accent-color: #f97136;
+}
+
+/* --- */
+
+/* Estilos de la Sección de Perfil */
+.perfil-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.perfil-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.perfil-card {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.perfil-field {
+  margin-bottom: 1.5rem;
+}
+
+.field-label {
+  display: block;
+  font-weight: bold;
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.field-value {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+/* --- */
+
+/* Estilos de la Sección de Reservas */
+.reservas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.reserva-card {
+  background: #fff;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eee;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.reserva-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.reserva-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.reserva-header h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #f97136;
+  margin: 0;
+}
+
+.status-badge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: white;
+}
+
+.status-aprobada {
+  background: #10b981;
+}
+
+.status-pendiente {
+  background: #f59e0b;
+}
+
+.status-rechazada,
+.status-cancelada {
+  background: #ef4444;
+}
+
+.reserva-info p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.reserva-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-cancel {
+  background: #ef4444;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+/* --- */
+
+/* Responsive para dispositivos móviles */
+@media (max-width: 768px) {
+  .dashboard-navbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+    padding: 1rem;
+  }
+
+  .navbar-brand {
     align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 20px;
-    position: relative;
-    gap: 1rem;
- }
+  }
+
+  .navbar-buttons {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .nav-button,
+  .logout-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .dashboard-main {
+    padding: 1rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mascotas-grid,
+  .reservas-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -150,3 +150,4 @@ await syncSchema(); //Never in production
 app.listen(PORT, () => {
   console.log("Server is running on port 3000");
 });
+

@@ -10,7 +10,7 @@ export class Especie {
   @Property({nullable:false, unique:true})
   nomEspecie!: string
   
-  @ManyToMany(() => Raza, raza => raza.especies, {cascade:[Cascade.ALL]})
+  @OneToMany(() => Raza, raza => raza.especie, {cascade: [Cascade.ALL]})
   razas = new Collection<Raza>(this); 
 
   @OneToMany(() => Mascota, mascota => mascota.especie, { cascade: [Cascade.ALL] })

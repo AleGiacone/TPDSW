@@ -2,6 +2,7 @@
   import { Dueno } from "../dueno/dueno.entity.js";
   import { Reserva } from "../reserva/reserva.entity.js";
   import { Especie } from "../especie/especie.entity.js";
+  import { Raza } from "../raza/raza.entity.js"
   import { Imagen } from "../imagen/imagenes.entity.js";
 
   @Entity()
@@ -21,9 +22,12 @@
     
     @ManyToOne( () => Especie, { nullable: false, cascade: [Cascade.ALL] })
     especie!: Rel<Especie>;
-    
-    @Property()
-    exotico!:({ type: boolean, default: false });
+
+    @ManyToOne(() => Raza, { nullable: true, cascade: [Cascade.ALL] })
+    raza?: Rel<Raza>;
+  
+    @Property({ type: 'boolean', default: false })
+    exotico!: boolean;
 
     @Property({ nullable: true, unique: false })
     peso!: number;
