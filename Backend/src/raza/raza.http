@@ -9,7 +9,8 @@ POST http://localhost:3000/api/razas/
 Content-Type: application/json
 
 {
-  "nomRaza": "Albina"
+  "nomRaza": "Labrador",
+  "idEspecie": 1
 }
 
 

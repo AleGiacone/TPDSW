@@ -1,0 +1,15 @@
+POST http://localhost:3000/api/mascotas/
+Content-Type: application/json
+
+Adding mascota with data: {
+  idMascota: undefined,
+  nomMascota: 'alessandro',
+  edad: 21,
+  sexo: 'hembra',
+  exotico: false,
+  descripcion: 'muerde',
+  especie: 3,
+  raza: 3,
+  dueno: undefined,
+  peso: 77
+}

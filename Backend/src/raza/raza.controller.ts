@@ -7,7 +7,20 @@ import { Especie} from '../especie/especie.entity.js';
 import sanitizeHTML from 'sanitize-html';
 
 function sanitizeRaza(req: Request, res: Response, next: NextFunction) {
+  console.log('req.body completo:', req.body);
+  console.log('req.body.especie:', req.body.especie, typeof req.body.especie);
+  console.log('req.body.idEspecie:', req.body.idEspecie, typeof req.body.idEspecie);
+  const especieValue = req.body.especie || req.body.idEspecie;
+  
+  if (!especieValue) {
+    return res.status(400).json({ 
+      message: 'Campo especie es requerido',
+      received: req.body
+    });
+  }
+  
   req.body.sanitizeInput = {
+<<<<<<< HEAD
     idRaza: sanitizeHTML(req.body.idRaza),
     nomRaza: sanitizeHTML(req.body.nomRaza),
     idEspecie: sanitizeHTML(req.body.especie)
@@ -20,30 +33,71 @@ function sanitizeRaza(req: Request, res: Response, next: NextFunction) {
     }
   })
   next()
+=======
+    idRaza: req.body.idRaza,
+    nomRaza: req.body.nomRaza, // string
+    especie: parseInt(especieValue), // para la relación ManyToOne con Especie
+  };
+  
+  console.log('Datos sanitizados:', req.body.sanitizeInput);
+  
+  // Verificar que el parseInt funcionó
+  if (isNaN(req.body.sanitizeInput.especie)) {
+    return res.status(400).json({ 
+      message: 'El campo especie debe ser un número válido',
+      received: especieValue
+    });
+  }
+  
+  next();
+>>>>>>> 96a01422714203c35f313b5a33bbbca69e853748
 }
 
 const em = orm.em
 
-
-async function findAll(req: Request, res: Response){
+async function findAll(req: Request, res: Response) {
   try {
-     
-     const razas = await em.find(Raza, {}, { populate: ['especies'] })
-     res.status(200).json({ message: 'finded all razas', data: razas })
+    const razas = await em.find(Raza, {}, { populate: ['especie'] });
+    const razasFormateadas = razas.map(raza => ({
+      id: raza.idRaza,
+      idRaza: raza.idRaza,
+      nombre: raza.nomRaza,
+      nomRaza: raza.nomRaza,
+      idEspecie: raza.especie?.idEspecie || null, 
+      especie: raza.especie || null 
+    }));
+    
+    res.status(200).json({ 
+      message: 'found all razas', 
+      data: razasFormateadas 
+    });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving razas", error: error.message });
+    res.status(500).json({ 
+      message: "Error retrieving razas", 
+      error: error.message 
+    });
   }
 }
 
-async function add(req: Request, res: Response) {
+async function add(req: Request, res: Response): Promise<void> {
   try {
-    const data = req.body;
-    const raza = em.create(Raza, data);
-    const especie = await em.findOneOrFail(Especie, { idEspecie: data.idEspecie });
-    raza.especies.add(especie);
-    await em.flush()
-    res.status(200).json({ message: 'Raza created', data: raza });
-    } catch (error: any) {
+    const especie = await em.findOne(Especie, { idEspecie: req.body.sanitizeInput.especie });
+    
+    if (!especie) {
+      res.status(404).json({ message: 'Especie not found' });
+      return;
+    }
+    const raza = new Raza();
+    raza.nomRaza = req.body.sanitizeInput.nomRaza;
+    raza.especie = especie;
+    
+    em.persist(raza);
+    await em.flush();
+  
+    await em.populate(raza, ['especie']);
+    
+    res.status(201).json({ message: 'Raza created', data: raza });
+  } catch (error: any) {
     res.status(500).json({ message: "Error creating raza", error: error.message });
   }
 }
@@ -51,7 +105,7 @@ async function add(req: Request, res: Response) {
 async function findOne(req: Request, res: Response) {
   try{
     const idRaza = Number.parseInt (req.params.idRaza)
-    const raza = await em.findOneOrFail (Raza , {idRaza}, {populate : ['especies']});
+    const raza = await em.findOneOrFail (Raza , {idRaza}, {populate : ['especie']});
     res.status(200).json({ message: 'Raza found', data: raza });
   } catch (error:any){
     res.status(500).json({ message: "Error retrieving raza", error: error.message });
@@ -91,5 +145,4 @@ async function remove (req: Request, res: Response) {
   }
  }
  
-
 export { sanitizeRaza, findAll, findOne, add, update, remove };

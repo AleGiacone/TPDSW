@@ -8,17 +8,15 @@ POST http://localhost:3000/api/especies/
 Content-Type: application/json
 
 {
-  "nomEspecie": "Perro",
-  "razas": []
+  "nomEspecie": "Gato"
 }
-
 
 
 ### ID
 @idEspecie =  {{ createEspecie.response.body.data.idEspecie }}
 
 ### Devolver una especie
-GET http://localhost:3000/api/especies/{{idEspecie}}
+GET http://localhost:3000/api/especies/1
 
 
 ### Actualizar un especie
