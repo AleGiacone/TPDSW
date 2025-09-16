@@ -3,6 +3,8 @@
 /* Estilos Generales del Dashboard */
 /* DuenoDashboard.css */
 
+/* Estilos para las imágenes de mascotas */
+
 /* Haz este selector más específico para el contenedor */
 #main-dashboard {
   height: 100vh;
@@ -206,10 +208,30 @@
   border-radius: 15px;
   padding: 1.5rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
   transition: transform 0.2s, box-shadow 0.2s;
   border: 1px solid #eee;
+
+  /* Nuevo estilo para la disposición horizontal */
+  display: flex;
+  flex-direction: row;
+  /* Coloca los elementos de izquierda a derecha */
+  align-items: center;
+  /* Alinea los elementos verticalmente */
+  gap: 2rem;
+  /* Agrega un espacio entre las secciones de la tarjeta */
+}
+
+.mascota-image-section-horizontal {
+  /* Establece un ancho fijo para la foto, si lo deseas */
+  width: 250px;
+  flex-shrink: 0;
+  /* Evita que el contenedor se encoja */
+}
+.mascota-details-section {
+  flex: 1;
+  /* Permite que este contenedor ocupe todo el espacio restante */
+  display: flex;
+  flex-direction: column;
 }
 
 .mascota-card:hover {
@@ -265,8 +287,11 @@
 
 .mascota-actions {
   display: flex;
+  flex-direction: column;
+  /* Apila los botones de editar y eliminar */
   gap: 0.5rem;
-  margin-top: 1.5rem;
+  margin-left: auto;
+  /* Empuja los botones a la derecha */
 }
 
 .btn-edit,

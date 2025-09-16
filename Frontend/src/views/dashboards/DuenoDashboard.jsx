@@ -11,6 +11,7 @@ const DuenoDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [razasFiltradas, setRazasFiltradas] = useState([]);
+  const [imageUploading, setImageUploading] = useState(false);
   const API_BASE_URL = 'http://localhost:3000/api';
            
   const [mascotaForm, setMascotaForm] = useState({
@@ -36,6 +37,107 @@ const DuenoDashboard = () => {
     tipoDocumento: user?.tipoDocumento || ''
   });
   const [editingPerfil, setEditingPerfil] = useState(false);
+
+// Función para subir imagen de mascota
+const uploadMascotaImage = async (mascotaId, file) => {
+setImageUploading(true);
+ const formData = new FormData();
+ formData.append('imageFile', file);
+ formData.append('idMascota', mascotaId);
+ try {
+  // CORRECCIÓN: Se agregó el idMascota a la URL.
+  const response = await fetch(`${API_BASE_URL}/mascotas/${mascotaId}/upload`, {
+   method: 'POST',
+   credentials: 'include',
+   body: formData
+  });
+  if (!response.ok) {
+   const errorData = await response.json().catch(() => ({}));
+   throw new Error(errorData.message || 'Error al subir imagen');
+  }
+  const result = await response.json();
+  console.log('Imagen subida exitosamente:', result);
+  
+  // Actualizar la lista de mascotas para mostrar la nueva imagen
+  await fetchMascotas();
+  
+  return result;
+ } catch (error) {
+  console.error('Error uploading image:', error);
+  throw error;
+ } finally {
+  setImageUploading(false);
+ }
+};
+
+
+// Función para eliminar imagen de mascota
+// Función para eliminar imagen de mascota
+const deleteMascotaImage = async (mascotaId) => {
+  if (!window.confirm('¿Estás seguro de eliminar la imagen de esta mascota?')) {
+    return;
+  }
+
+  try {
+    setLoading(true);
+    
+    // CORRECCIÓN: Usar el método DELETE y pasar el ID de la mascota en la URL.
+    // Esto es mucho más eficiente y es la forma correcta de hacerlo.
+    const response = await fetch(`${API_BASE_URL}/mascotas/${mascotaId}/imagen`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      // Si el servidor envía un error, lánzalo
+      throw new Error(errorText || 'Error al eliminar la imagen');
+    }
+
+    // Opcional: Actualizar el estado local de la mascota para que la imagen desaparezca
+    setMascotas(prevMascotas =>
+      prevMascotas.map(mascota =>
+        mascota.idMascota === mascotaId ? { ...mascota, imagen: null, fotoPerfil: null } : mascota
+      )
+    );
+
+    alert('Imagen eliminada exitosamente');
+
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    alert('Error al eliminar imagen: ' + error.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Manejar selección de archivo
+const handleImageUpload = async (mascotaId, event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Validar tipo de archivo
+  if (!file.type.startsWith('image/')) {
+    alert('Por favor selecciona un archivo de imagen válido');
+    return;
+  }
+
+  // Validar tamaño (máximo 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    alert('El archivo es muy grande. Máximo 5MB permitido');
+    return;
+  }
+
+  try {
+    await uploadMascotaImage(mascotaId, file);
+    alert('Imagen subida exitosamente');
+  } catch (error) {
+    alert('Error al subir imagen: ' + error.message);
+  }
+
+  // Limpiar el input
+  event.target.value = '';
+};
 
 useEffect(() => {
   console.log('Estado especies actualizado:', especies);
@@ -169,6 +271,13 @@ const fetchMascotas = useCallback(async () => {
         exotico: mascota.exotico,
         descripcion: mascota.descripcion,
         peso: mascota.peso,
+        fotoPerfil: mascota.fotoPerfil,
+        // Normalizar imagen
+        imagen: mascota.imagen ? {
+          idImagen: mascota.imagen.idImagen || mascota.imagen.id,
+          path: mascota.imagen.path || mascota.imagen.url,
+          url: mascota.imagen.path || mascota.imagen.url
+        } : null,
         // Normalizar especie
         especie: mascota.especie ? {
           idEspecie: mascota.especie.idEspecie || mascota.especie.id,
@@ -669,26 +778,71 @@ const fetchRazas = async () => {
           <div className="mascotas-grid">
             {mascotas.map((mascota) => (
               <div key={mascota.id || mascota.idMascota} className="mascota-card">
-                 <div class="mascota-header">
-                <div className="mascota-avatar">
-                  {mascota.exotico ? '🦎' : '🐕'}
+                {/* Sección de imagen */}
+                <div className="mascota-image-section-horizontal">
+                  {mascota.imagen?.path || mascota.fotoPerfil ? (
+                    <div className="mascota-image-container">
+                      <img 
+                        src={mascota.imagen?.path || mascota.fotoPerfil}
+                        alt={`Foto de ${mascota.nomMascota || mascota.nombre}`} width="300" height="350"
+                        className="mascota-image"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                      <div className="image-overlay">
+                        <button 
+                          onClick={() => deleteMascotaImage(mascota.id || mascota.idMascota)}
+                          className="btn-delete-image"
+                          title="Eliminar imagen"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mascota-no-image">
+                      {mascota.exotico ? '🦎' : '🐕'}
+                    </div>
+                  )}
+                  
+                  <div className="image-upload-section">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(mascota.id || mascota.idMascota, e)}
+                      className="file-input-hidden"
+                      id={`file-input-${mascota.id || mascota.idMascota}`}
+                      disabled={imageUploading}
+                    />
+                    <label 
+                      htmlFor={`file-input-${mascota.id || mascota.idMascota}`}
+                      className="btn-upload-image"
+                    >
+                      {imageUploading ? '📤 Subiendo...' : '📷 Cambiar Foto'}
+                    </label>
+                  </div>
                 </div>
+                
+                 <div className="mascota-details-section">
+                <div className="mascota-header">
                   <h3 className="mascota-name">
                     {mascota.nomMascota || mascota.nombre || 'Sin nombre'}
                   </h3>
-                   </div>
-                  <div className="mascota-details">
-                    <p><strong>Especie:</strong> {mascota.especie?.nomEspecie || mascota.especie?.nombre || 'N/A'}</p>
-                    <p><strong>Raza:</strong> {mascota.raza?.nomRaza || mascota.raza?.nombre || 'N/A'}</p>
-                    <p><strong>Edad:</strong> {mascota.edad} años</p>
-                    <p><strong>Sexo:</strong> {mascota.sexo}</p>
-                    <p><strong>Peso:</strong> {mascota.peso} kg</p>
-                    {mascota.exotico && <span className="exotic-badge">Exótica</span>}
-                  </div>
-                  {mascota.descripcion && (
-                    <p className="mascota-description">{mascota.descripcion}</p>
-                  )}
+                </div>
                 
+                <div className="mascota-details">
+                  <p><strong>Especie:</strong> {mascota.especie?.nomEspecie || mascota.especie?.nombre || 'N/A'}</p>
+                  <p><strong>Raza:</strong> {mascota.raza?.nomRaza || mascota.raza?.nombre || 'N/A'}</p>
+                  <p><strong>Edad:</strong> {mascota.edad} años</p>
+                  <p><strong>Sexo:</strong> {mascota.sexo}</p>
+                  <p><strong>Peso:</strong> {mascota.peso} kg</p>
+                  {mascota.exotico && <span className="exotic-badge">Exótica</span>}
+                </div>
+                {mascota.descripcion && (
+                  <p className="mascota-description">{mascota.descripcion}</p>
+                )}
+                </div>
                 <div className="mascota-actions">
                   <button 
                     onClick={() => startEditMascota(mascota)}

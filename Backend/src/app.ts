@@ -151,3 +151,4 @@ app.listen(PORT, () => {
   console.log("Server is running on port 3000");
 });
 
+app.use('/img', express.static('public/img'));
