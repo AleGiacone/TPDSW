@@ -4,19 +4,21 @@ import { orm } from '../shared/db/orm.js';
 import { OneToMany } from '@mikro-orm/core';
 import { RequestContext } from "@mikro-orm/core";
 import { Especie} from '../especie/especie.entity.js';
+import sanitizeHTML from 'sanitize-html';
 
 function sanitizeRaza(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizeInput = {
-    idRaza: req.body.idRaza,
-    nomRaza: req.body.nomRaza,
-    idEspecie: req.body.especie
+    idRaza: sanitizeHTML(req.body.idRaza),
+    nomRaza: sanitizeHTML(req.body.nomRaza),
+    idEspecie: sanitizeHTML(req.body.especie)
   };
 
-  Object.keys(req.body.sanitizeInput).forEach((key) => { 
-    if (req.body.sanitizeInput[key] === undefined) {
+    Object.keys(req.body.sanitizeInput).forEach((key) => {
+    console.log(req.body.sanitizeInput[key])
+    if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
       delete req.body.sanitizeInput[key];
     }
-  });
+  })
   next()
 }
 
@@ -57,7 +59,12 @@ async function findOne(req: Request, res: Response) {
 }
   
 async function update(req: Request, res: Response) {
+  console.log("Updating raza with data:", req.body.sanitizeInput);
   try{
+    if (req.body.sanitizeInput.nomRaza === '' || req.body.sanitizeInput.nomRaza === undefined || req.body.sanitizeInput.nomRaza.length <= 3) {
+      res.status(400).json({ message: "Nombre de raza invalido" });
+      return;
+    }
     const em = RequestContext.getEntityManager()!;
     const idRaza = Number.parseInt(req.params.idRaza);
     console.log("idRaza", idRaza)

@@ -13,5 +13,6 @@ export const razaRouter = Router();
 razaRouter.get('/', findAll);
 razaRouter.get('/:idRaza', findOne);
 razaRouter.post('/', sanitizeRaza, add);
+razaRouter.patch('/:idRaza', sanitizeRaza, update);
 razaRouter.put('/:idRaza', update);
 razaRouter.delete('/:idRaza', remove);

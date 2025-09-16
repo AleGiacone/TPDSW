@@ -12,8 +12,7 @@ export class Cuidador extends Usuario {
   nroDocumento!: string;
 
   @Property({ nullable: true, unique: false })
-  tipoDocumento!: string; // Corregido el nombre de la propiedad
-
+  tipoDocumento!: string; 
   @Property({ nullable: true, unique: false })
   telefono!: string;
 

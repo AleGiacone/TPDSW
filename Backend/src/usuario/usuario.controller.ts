@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import { SECRET_JWT_KEY } from '../config.js';
 import multer from 'multer';
 import path from 'path';
+import sanitizeHTML from 'sanitize-html';
 
 // Extiende la interfaz Request para incluir 'usuario'
 declare global {
@@ -23,9 +24,9 @@ const em = orm.em
 
 async function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizeInput = {
-    email: req.body.email,
-    password: req.body.password,
-    nombre: req.body.nombre,
+    email: sanitizeHTML(req.body.email),
+    password: sanitizeHTML(req.body.password),
+    nombre: sanitizeHTML(req.body.nombre),
     tipoUsuario: 'usuario'
   };
   

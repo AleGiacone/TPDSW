@@ -4,21 +4,34 @@ import { Publicacion } from './publicacion.entity.js';
 import path from 'path/win32';
 import multer from 'multer';
 import { Imagen }  from '../imagen/imagenes.entity.js';
+import sanitizeHTML from 'sanitize-html'
 
 function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizeInput = {
-    idCuidador: req.body.idCuidador,
-    titulo: req.body.titulo,
-    descripcion: req.body.descripcion,
-    precio: req.body.precio,
+    idCuidador: sanitizeHTML(req.body.idCuidador),
+    titulo: sanitizeHTML(req.body.titulo),
+    descripcion: sanitizeHTML(req.body.descripcion),
+    precio: sanitizeHTML(req.body.precio),
     fechaPublicacion: new Date(),
   };
-  // revisar object keys
-
+    Object.keys(req.body.sanitizeInput).forEach((key) => {
+    console.log(req.body.sanitizeInput[key])
+    if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
+      delete req.body.sanitizeInput[key];
+    }
+  });
   next();
 }
 
 const em = orm.em;
+
+async function authenticatePublicacion(req: Request, res: Response) {
+  if(req.body.sanitizeInput.titulo <= 3 || req.body.sanitizeInput.descripcion <= 10 || req.body.sanitizeInput.precio <= 0){
+    res.status(400).json({ message: "Datos invalidos" });
+    return;
+  }
+}
+
 
 async function findAll(req: Request, res: Response) {
   try {
@@ -43,7 +56,7 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
 
-  console.log("Adding publicacion with body:", req.body);
+  authenticatePublicacion(req, res);
   try {
     
     req.body.sanitizeInput.precio = Number(req.body.sanitizeInput.precio);

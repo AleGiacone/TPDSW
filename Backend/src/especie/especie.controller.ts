@@ -1,22 +1,20 @@
 import {Request, Response, NextFunction} from 'express';
 import { Especie } from './especie.entity.js';
 import { orm } from '../shared/db/orm.js';
-
+import sanitizeHTML from 'sanitize-html';
 
 
 function sanitizeEspecie(req: Request, res: Response, next: NextFunction) {
-  console.log("Sanitizing especie with body:", req.body);
-  console.log("Nombre especie:", req.body.nomEspecie);
+
   req.body.sanitizeInput = {
-    nomEspecie: req.body.nomEspecie,
+    nomEspecie: sanitizeHTML(req.body.nomEspecie),
   };
-// cambiar el object keys
-  // Object.keys(req.body.sanitizeInput).forEach((key) => { 
-  //   if (req.body.sanitizeInput[key] === undefined) {
-  //     delete req.body.sanitizeInput[key];
-  //   }
-    
-  // });
+  Object.keys(req.body.sanitizeInput).forEach((key) => {
+    console.log(req.body.sanitizeInput[key])
+    if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
+      delete req.body.sanitizeInput[key];
+    }
+  })
   next()
 }
 
@@ -56,6 +54,10 @@ async function add(req: Request, res: Response) {
 
 async function update(req: Request, res: Response) {
   try{
+    if (req.body.sanitizeInput.nomEspecie === '' || req.body.sanitizeInput.nomEspecie === undefined || Object.keys(req.body.sanitizeInput).length <= 3) {
+      res.status(400).json({ message: "Nombre de especie invalido" });
+      return;
+    }
     const idEspecie = Number.parseInt (req.params.idEspecie);
     const especie = await em.findOneOrFail( Especie, {idEspecie} );
     // Traquea
