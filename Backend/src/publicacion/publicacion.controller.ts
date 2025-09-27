@@ -47,7 +47,7 @@ async function findOne(req: Request, res: Response) {
   console.log("Adding publicacion with body:", req.body);
   try {
     const idPublicacion = Number(req.params.idPublicacion);
-    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas', 'imagenes'] });
+    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas', 'imagenes','idCuidador'] });
     res.status(200).json({ message: 'Publicacion found', data: publicacion });
   } catch (error: any) {
     res.status(500).json({ message: "Error retrieving publicacion", error: error.message });

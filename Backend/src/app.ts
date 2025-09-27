@@ -17,7 +17,7 @@ import { imagenRouter } from './imagen/imagenes.routes.js';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import cors from 'cors'; // 
-
+import { reservaRouter } from './reserva/reserva.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,6 +79,7 @@ app.use("/api/cuidadores", cuidadorRouter);
 app.use("/api/usuario/upload-image", usuarioRouter);
 app.use("/api/publicacion", publicacionRouter);
 app.use("/api/imagenes", imagenRouter);
+app.use("/api/reservas", reservaRouter)
 
 // Middleware funciones donde modificamos peticion o respuesta
 

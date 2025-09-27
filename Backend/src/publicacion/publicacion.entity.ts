@@ -17,15 +17,15 @@ export class Publicacion {
   @Property({ nullable: true, unique: false })
   fechaPublicacion!: Date;
 
-  @OneToOne(() => Cuidador, cuidador => cuidador.publicacion, { nullable: true, cascade: [Cascade.ALL] }) 
+  @OneToOne(() => Cuidador, cuidador => cuidador.publicacion, { nullable: true,  }) 
   idCuidador!: Rel<Cuidador>;
 
-  @OneToMany(() => Reserva, reserva => reserva.publicacion, { nullable: true, cascade: [Cascade.ALL] })
+  @OneToMany(() => Reserva, reserva => reserva.publicacion, { nullable: true})
   reservas = new Collection<Reserva>(this);
 
   @Property({ nullable: false, unique: false })
   precio!: number;
 
-  @OneToMany(() => Imagen, imagen => imagen.publicacion, { nullable: true, cascade: [Cascade.ALL] })
+  @OneToMany(() => Imagen, imagen => imagen.publicacion, { nullable: true })
   imagenes = new Collection<Imagen>(this);
 }
