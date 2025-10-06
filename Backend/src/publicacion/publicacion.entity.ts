@@ -17,6 +17,18 @@ export class Publicacion {
   @Property({ nullable: true, unique: false })
   fechaPublicacion!: Date;
 
+  @Property({ nullable: true, unique: false })
+  ubicacion!: string;
+
+  @Property({ nullable: true, unique: false })
+  tipoAlojamiento!: string;
+
+  @Property({ nullable: true, unique: false })
+  exotico!: boolean;
+
+  @Property({ nullable: true, unique: false })
+  cantAnimales!: number;                 
+  
   @OneToOne(() => Cuidador, cuidador => cuidador.publicacion, { nullable: true,  }) 
   idCuidador!: Rel<Cuidador>;
 
@@ -24,8 +36,8 @@ export class Publicacion {
   reservas = new Collection<Reserva>(this);
 
   @Property({ nullable: false, unique: false })
-  precio!: number;
+  tarifaPorDia!: number;
 
-  @OneToMany(() => Imagen, imagen => imagen.publicacion, { nullable: true })
+  @OneToMany(() => Imagen, imagen => imagen.publicacion, { nullable: true, cascade: [Cascade.ALL] })
   imagenes = new Collection<Imagen>(this);
 }

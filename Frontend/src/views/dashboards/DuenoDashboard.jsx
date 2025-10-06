@@ -72,7 +72,6 @@ setImageUploading(true);
 
 
 // Función para eliminar imagen de mascota
-// Función para eliminar imagen de mascota
 const deleteMascotaImage = async (mascotaId) => {
   if (!window.confirm('¿Estás seguro de eliminar la imagen de esta mascota?')) {
     return;

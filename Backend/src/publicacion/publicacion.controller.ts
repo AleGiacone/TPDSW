@@ -5,13 +5,18 @@ import path from 'path/win32';
 import multer from 'multer';
 import { Imagen }  from '../imagen/imagenes.entity.js';
 import sanitizeHTML from 'sanitize-html'
+import { authToken } from '../auth.js';
 
 function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizeInput = {
     idCuidador: sanitizeHTML(req.body.idCuidador),
     titulo: sanitizeHTML(req.body.titulo),
     descripcion: sanitizeHTML(req.body.descripcion),
-    precio: sanitizeHTML(req.body.precio),
+    ubicacion: sanitizeHTML(req.body.ubicacion),
+    exotico: sanitizeHTML(req.body.exotico),
+    tipoAlojamiento: sanitizeHTML(req.body.tipoAlojamiento),
+    cantAnimales: sanitizeHTML(req.body.cantAnimales),
+    tarifaPorDia: sanitizeHTML(req.body.tarifaPorDia),
     fechaPublicacion: new Date(),
   };
     Object.keys(req.body.sanitizeInput).forEach((key) => {
@@ -55,11 +60,15 @@ async function findOne(req: Request, res: Response) {
 }
 
 async function add(req: Request, res: Response) {
+  authenticatePublicacion(req, res); // Rompe tarifa por dia
+  const token = await authToken(req, res);
 
-  authenticatePublicacion(req, res);
   try {
-    
-    req.body.sanitizeInput.precio = Number(req.body.sanitizeInput.precio);
+    const publi = new Publicacion();
+    if (token && typeof token === 'object' && 'idUsuario' in token) {
+      req.body.sanitizeInput.idCuidador = Number(token.idUsuario);
+    }
+    req.body.sanitizeInput.tarifaPorDia = Number(req.body.sanitizeInput.tarifaPorDia);
     const publicacion = em.create(Publicacion, req.body.sanitizeInput);
     await em.flush();
     res.status(200).json({ message: 'Publicacion created', data: publicacion });

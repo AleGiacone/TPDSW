@@ -50,7 +50,6 @@ app.use('/img', express.static(path.join(__dirname, '../public/img')));
 
 app.use((req, res, next) => {
   console.log('Token recibido:', req.cookies.access_token);
-
   const token = req.cookies.access_token;
   req.session = { usuario: null }
   try {
