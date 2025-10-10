@@ -31,33 +31,40 @@ const sanitizeCuidador = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
-async function authenticateCuidador(req: Request, res: Response) {
+async function authenticateCuidador(req: Request, res: Response): Promise<boolean> {
   try {
     const existingUser = await em.findOne(Usuario, { email: req.body.sanitizeInput.email });
     if (existingUser) {
       res.status(400).json({ message: 'El email ya está en uso' });
-      return;
+      
+      return false;
     }
     const existingDocumento = await em.findOne(Cuidador, { nroDocumento: req.body.sanitizeInput.nroDocumento });
     if (existingDocumento) {
       res.status(400).json({ message: 'El número de documento ya está en uso' });
-      return;
+      
+      return false;
     }
     if (req.body.sanitizeInput.password.length < 6) {
       res.status(400).json({ message: 'La contrase;a debe tener al menos 6 caracteres' });
-      return;
+      return false;
     }
     if (req.body.sanitizeInput.nombre.length < 3) {
       res.status(400).json({ message: 'El nombre debe tener al menos 3 caracteres' });
-      return;
+      ;
+      return false;
     }
-    if (req.body.sanitizeInput.nroDocumento.length < 7 && req.body.sanitizeInput.nroDocumento.length > 9) {
+      console.log("nroDocumento", req.body.sanitizeInput.nroDocumento.length)
+    if (req.body.sanitizeInput.nroDocumento.length < 7 || req.body.sanitizeInput.nroDocumento.length > 9) {
       res.status(400).json({ message: 'El numero de documento debe tener entre 7 y 9 caracteres' });
-      return;
+      ;
+      return false;
     }
+    return true;
 
   } catch (error: any) {
     res.status(500).json({ message: "Error authenticating cuidador", error: error.message });
+    return false;
   }
 }
 
@@ -90,13 +97,14 @@ async function add(req: Request, res: Response) {
             res.status(400).json({ message: `El campo ${key} es requerido` });
           }
         });
+        const bandera = await authenticateCuidador(req, res);
         console.log("adding", req.body.sanitizeInput.nombre)
-        await authenticateCuidador(req, res);
+        if (bandera){
         req.body.sanitizeInput.password = await bcrypt.hash(req.body.sanitizeInput.password, 10);
         const cuidador = em.create(Cuidador, req.body.sanitizeInput);
-        await em.flush();
+        await em.persistAndFlush(cuidador);
         res.status(200).json({ message: 'cuidador created', data: cuidador });
-        return;
+        return;}
 
     } catch (error: any) {
       res.status(500).json({ message: "Error creating cuidador", error: error.message });
@@ -108,11 +116,16 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
  
   try {
+    const bandera = await authenticateUpdate(req, res);
+    if (!bandera) return;
     const idUsuario = Number.parseInt(req.params.idUsuario);
     const cuidador = await em.findOneOrFail(Cuidador, { idUsuario: idUsuario });
     if (!cuidador) {
       res.status(404).json({ message: 'Cuidador not found', data: idUsuario });
       return;
+    }
+    if (req.body.sanitizeInput.password) {
+      req.body.sanitizeInput.password = await bcrypt.hash(req.body.sanitizeInput.password, 10);
     }
     em.assign(cuidador, req.body.sanitizeInput);
     await em.flush();
@@ -120,6 +133,55 @@ async function update(req: Request, res: Response) {
   } catch (error: any) {
     res.status(500).json({ message: "Error updating cuidador", error: error.message });
   }
+}
+
+async function authenticateUpdate(req: Request, res: Response): Promise<boolean> {
+  try {
+    const existingUser = await em.findOne(Cuidador, { idUsuario: req.body.sanitizeInput.idUsuario });
+    if (!existingUser) {
+      res.status(404).json({ message: 'Usuario not found', data: req.body.sanitizeInput.idUsuario });
+      return false;
+    } else {
+      if (req.body.sanitizeInput.nroDocumento != existingUser.nroDocumento && req.body.sanitizeInput.nroDocumento != undefined) {
+        const nroDocumento = await em.findOne(Cuidador, { nroDocumento: req.body.sanitizeInput.nroDocumento });
+        if (nroDocumento) {
+          res.status(400).json({ message: 'El número de documento ya está en uso' });
+          return false;
+        } else {
+          if (req.body.sanitizeInput.nroDocumento.length < 7 || req.body.sanitizeInput.nroDocumento.length > 9) {
+            res.status(400).json({ message: 'El numero de documento debe tener entre 7 y 9 caracteres' });
+            return false;
+          }
+        }
+      }
+      if (req.body.sanitizeInput.email != existingUser.email && req.body.sanitizeInput.email != undefined) {
+        const emailInUse = await em.findOne(Usuario, { email: req.body.sanitizeInput.email });
+        if (emailInUse) {
+          res.status(400).json({ message: 'El email ya está en uso' });
+          return false;
+        }
+      if (req.body.sanitizeInput.password != undefined && req.body.sanitizeInput.password.length < 6) {
+        res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
+        return false;
+      }
+      if (req.body.sanitizeInput.nombre != undefined && req.body.sanitizeInput.nombre.length < 3) {
+        res.status(400).json({ message: 'El nombre debe tener al menos 3 caracteres' });
+        return false;
+      }
+      if (req.body.sanitizeInput.nroDocumento != undefined && (req.body.sanitizeInput.nroDocumento.length < 7 || req.body.sanitizeInput.nroDocumento.length > 9)) {
+        res.status(400).json({ message: 'El numero de documento debe tener entre 7 y 9 caracteres' });
+        return false;
+      }
+      
+      return true;
+    }
+    
+  } 
+  } catch (error: any) {
+    res.status(500).json({ message: "Error authenticating update", error: error.message });
+    return false;
+}
+  return true;
 }
 
 async function remove(req: Request, res: Response) {

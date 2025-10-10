@@ -1,4 +1,4 @@
-import { Cascade, Collection, Entity, OneToMany, ManyToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
+import { Cascade, Collection, Entity, OneToMany, ManyToOne,OneToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
 import { Reserva } from "../reserva/reserva.entity.js";
 import { Cuidador } from "../cuidador/cuidador.entity.js";
 import { Imagen } from "../imagen/imagenes.entity.js";
@@ -17,14 +17,17 @@ export class Publicacion {
   @Property({ nullable: true, unique: false })
   fechaPublicacion!: Date;
 
-  @ManyToOne(() => Cuidador, { nullable: false })
+  @Property({ nullable: true, unique: false })
+  exotico!: boolean;           
+  
+  @OneToOne(() => Cuidador, cuidador => cuidador.publicaciones, { nullable: true,  }) 
   idCuidador!: Rel<Cuidador>;
 
-  @OneToMany(() => Reserva, reserva => reserva.publicacion, { nullable: true, cascade: [Cascade.ALL] })
+  @OneToMany(() => Reserva, reserva => reserva.publicacion, { nullable: true})
   reservas = new Collection<Reserva>(this);
 
   @Property({ nullable: false, unique: false })
-  precio!: number;
+  tarifaPorDia!: number;
 
   @OneToMany(() => Imagen, imagen => imagen.publicacion, { nullable: true, cascade: [Cascade.ALL] })
   imagenes = new Collection<Imagen>(this);
@@ -38,6 +41,4 @@ export class Publicacion {
   @Property({ nullable: true, unique: false, default: 1 })
   cantAnimales?: number;
 
-  @Property({ nullable: true, unique: false, default: false })
-  exotico?: boolean;
 }

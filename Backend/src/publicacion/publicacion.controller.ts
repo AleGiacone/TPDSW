@@ -6,6 +6,7 @@ import path from 'path/win32';
 import multer from 'multer';
 import { Imagen }  from '../imagen/imagenes.entity.js';
 import sanitizeHTML from 'sanitize-html'
+import { authToken } from '../auth.js';
 
 function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
    console.log("=== MIDDLEWARE SANITIZE ===");
@@ -14,7 +15,7 @@ function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
     idUsuario: sanitizeHTML(req.body.idUsuario),
     titulo: sanitizeHTML(req.body.titulo),
     descripcion: sanitizeHTML(req.body.descripcion),
-    precio: sanitizeHTML(req.body.precio),
+    tarifaPorDia: sanitizeHTML(req.body.tarifaPorDia),
     fechaPublicacion: new Date(),
     // Agregar las nuevas propiedades que están en tu entidad
     ubicacion: req.body.ubicacion ? sanitizeHTML(req.body.ubicacion) : undefined,
@@ -88,7 +89,7 @@ async function findOne(req: Request, res: Response) {
   console.log("Adding publicacion with body:", req.body);
   try {
     const idPublicacion = Number(req.params.idPublicacion);
-    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas', 'imagenes'] });
+    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas', 'imagenes','idCuidador'] });
     res.status(200).json({ message: 'Publicacion found', data: publicacion });
   } catch (error: any) {
     res.status(500).json({ message: "Error retrieving publicacion", error: error.message });
@@ -122,7 +123,7 @@ async function findByCuidador(req: Request, res: Response): Promise<void> {
         id: pub.idPublicacion,
         titulo: pub.titulo,
         descripcion: pub.descripcion,
-        precio: pub.precio,
+        precio: pub.tarifaPorDia,
         ubicacion: pub.ubicacion,
         tipoAlojamiento: pub.tipoAlojamiento,
         cantAnimales: pub.cantAnimales,
@@ -134,8 +135,8 @@ async function findByCuidador(req: Request, res: Response): Promise<void> {
         id: pub.idPublicacion,
         titulo: pub.titulo,
         descripcion: pub.descripcion,
-        tarifaPorDia: pub.precio,
-        precio: pub.precio,
+        tarifaPorDia: pub.tarifaPorDia,
+        precio: pub.tarifaPorDia,
         fechaPublicacion: pub.fechaPublicacion,
         // Usar los valores reales de la base de datos
         ubicacion: pub.ubicacion || 'No especificada',
@@ -160,6 +161,27 @@ async function findByCuidador(req: Request, res: Response): Promise<void> {
     });
   }
 }
+/*async function add(req: Request, res: Response) {
+  authenticatePublicacion(req, res); // Rompe tarifa por dia
+  const token = await authToken(req, res);
+
+  try {
+    const publi = new Publicacion();
+    if (token && typeof token === 'object' && 'idUsuario' in token) {
+      req.body.sanitizeInput.idCuidador = Number(token.idUsuario);
+    }
+    req.body.sanitizeInput.tarifaPorDia = Number(req.body.sanitizeInput.tarifaPorDia);
+    const publicacion = em.create(Publicacion, req.body.sanitizeInput);
+    await em.flush();
+    res.status(200).json({ message: 'Publicacion created', data: publicacion });
+  } catch (error: any) {
+    console.error('Error en findByCuidador:', error);
+    res.status(500).json({ 
+      message: "Error retrieving publicaciones del cuidador", 
+      error: error.message 
+    });
+  }
+}*/
 async function add(req: Request, res: Response): Promise<void> {
   console.log("=== INICIANDO CREACION DE PUBLICACION ===");
   console.log("req.body COMPLETO:", JSON.stringify(req.body, null, 2));
@@ -228,7 +250,7 @@ async function add(req: Request, res: Response): Promise<void> {
     // Asignar propiedades básicas
     publicacion.titulo = titulo;
     publicacion.descripcion = descripcion;
-    publicacion.precio = Number(precio);
+    publicacion.tarifaPorDia = Number(precio);
     publicacion.fechaPublicacion = fechaPublicacion || new Date();
     publicacion.idCuidador = cuidador;
     
@@ -258,7 +280,7 @@ async function add(req: Request, res: Response): Promise<void> {
     console.log("Publicación antes de persistir:", {
       titulo: publicacion.titulo,
       descripcion: publicacion.descripcion,
-      precio: publicacion.precio,
+      precio: publicacion.tarifaPorDia,
       fechaPublicacion: publicacion.fechaPublicacion,
       ubicacion: publicacion.ubicacion,
       tipoAlojamiento: publicacion.tipoAlojamiento,
@@ -283,7 +305,7 @@ if (publicacionGuardada) {
     idPublicacion: publicacionGuardada.idPublicacion,
     titulo: publicacionGuardada.titulo,
     descripcion: publicacionGuardada.descripcion,
-    precio: publicacionGuardada.precio,
+    precio: publicacionGuardada.tarifaPorDia,
     fechaPublicacion: publicacionGuardada.fechaPublicacion,
     ubicacion: publicacionGuardada.ubicacion,
     tipoAlojamiento: publicacionGuardada.tipoAlojamiento,
@@ -304,8 +326,8 @@ if (publicacionGuardada) {
       id: publicacion.idPublicacion,
       titulo: publicacion.titulo,
       descripcion: publicacion.descripcion,
-      tarifaPorDia: publicacion.precio,
-      precio: publicacion.precio,
+      tarifaPorDia: publicacion.tarifaPorDia,
+      precio: publicacion.tarifaPorDia,
       ubicacion: publicacion.ubicacion,
       tipoAlojamiento: publicacion.tipoAlojamiento,
       cantAnimales: publicacion.cantAnimales,

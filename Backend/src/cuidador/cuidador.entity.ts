@@ -13,6 +13,7 @@ export class Cuidador extends Usuario {
 
   @Property({ nullable: true, unique: false })
   tipoDocumento!: string; 
+  
   @Property({ nullable: true, unique: false })
   telefono!: string;
 

@@ -35,10 +35,11 @@
     @Property({ nullable: false, unique: false })
     descripcion?: string;
     
-    @ManyToOne({ entity: () => Dueno, nullable: false, cascade: [Cascade.ALL] })
+    @ManyToOne({ entity: () => Dueno, nullable: false,  })
     dueno!: Rel<Dueno>;
 
-    @ManyToMany(() => Reserva, reserva => reserva.mascotas, { cascade: [Cascade.ALL] })
+
+    @ManyToMany(() => Reserva, reserva => reserva.mascotas)
     reservas = new Collection<Reserva>(this);
 
     @Property({nullable: true, unique: false})

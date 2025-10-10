@@ -6,6 +6,7 @@ import { Usuario } from '../usuario/usuario.entity.js';
 import bcrypt from 'bcrypt';
 import { Mascota } from '../mascota/mascota.entity.js';
 import sanitizeHTML from 'sanitize-html';
+import { nextTick } from 'process';
 
 function sanitizeDueno(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizeInput = {
@@ -33,7 +34,7 @@ function sanitizeDueno(req: Request, res: Response, next: NextFunction) {
 
 const em = orm.em;
 
-async function authenticateDueno(req: Request, res: Response) {
+async function authenticateDueno(req: Request, res: Response, next: NextFunction) {
   try {
     const existingUser = await em.findOne(Usuario, { email: req.body.sanitizeInput.email });
     if (existingUser) {
@@ -53,15 +54,69 @@ async function authenticateDueno(req: Request, res: Response) {
       res.status(400).json({ message: 'El nombre debe tener al menos 3 caracteres' });
       return;
     }
-    if (req.body.sanitizeInput.nroDocumento.length >= 7 && req.body.sanitizeInput.nroDocumento.length <= 9) {
+    console.log("nroDocumento", req.body.sanitizeInput.nroDocumento.length)
+
+    if (req.body.sanitizeInput.nroDocumento.length <= 7 || req.body.sanitizeInput.nroDocumento.length >= 9) {
       res.status(400).json({ message: 'El numero de documento debe tener entre 7 y 9 caracteres' });
       return;
     }
-
+    next();
   } catch (error: any) {
     res.status(500).json({ message: "Error authenticating dueno", error: error.message });
   }
 }
+
+async function authenticateUpdate(req: Request, res: Response, next: NextFunction) {
+  try {
+    const idUsuario = Number.parseInt(req.params.idUsuario);
+    const existingUser = await em.findOne(Dueno, { idUsuario: idUsuario });
+    if (!existingUser) {
+      res.status(404).json({ message: 'Usuario not found', data: req.body.sanitizeInput.idUsuario });
+      return ;
+    } else {
+      if (req.body.sanitizeInput.nroDocumento != existingUser.nroDocumento && req.body.sanitizeInput.nroDocumento != undefined) {
+        const nroDocumento = await em.findOne(Dueno, { nroDocumento: req.body.sanitizeInput.nroDocumento });
+        if (nroDocumento) {
+          res.status(400).json({ message: 'El número de documento ya está en uso' });
+          return ;
+        } else {
+          if (req.body.sanitizeInput.nroDocumento.length < 7 || req.body.sanitizeInput.nroDocumento.length > 9) {
+            res.status(400).json({ message: 'El numero de documento debe tener entre 7 y 9 caracteres' });
+            return ;
+          }
+        }
+      }
+      if (req.body.sanitizeInput.email != existingUser.email && req.body.sanitizeInput.email != undefined) {
+        const emailInUse = await em.findOne(Usuario, { email: req.body.sanitizeInput.email });
+        if (emailInUse) {
+          res.status(400).json({ message: 'El email ya está en uso' });
+          return ;
+        }
+      if (req.body.sanitizeInput.password != undefined && req.body.sanitizeInput.password.length < 6) {
+        res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
+        return ;
+      }
+      if (req.body.sanitizeInput.nombre != undefined && req.body.sanitizeInput.nombre.length < 3) {
+        res.status(400).json({ message: 'El nombre debe tener al menos 3 caracteres' });
+        return ;
+      }
+      if (req.body.sanitizeInput.nroDocumento != undefined && (req.body.sanitizeInput.nroDocumento.length < 7 || req.body.sanitizeInput.nroDocumento.length > 9)) {
+        res.status(400).json({ message: 'El numero de documento debe tener entre 7 y 9 caracteres' });
+        return ;
+      }
+      
+      return ;
+    }
+    
+  } 
+  next();
+  } catch (error: any) {
+    res.status(500).json({ message: "Error authenticating update", error: error.message });
+    return ;
+}
+
+}
+
 
 
 async function findAll(req: Request, res: Response) {
@@ -92,7 +147,6 @@ async function add(req: Request, res: Response) {
     const email = await em.findOne(Usuario, { email: req.body.email });
     if(!email){
       try {
-        await authenticateDueno(req, res);
         req.body.sanitizeInput.password = await bcrypt.hash(req.body.sanitizeInput.password, 10);
         const dueno = em.create(Dueno, req.body.sanitizeInput);
         await em.flush();
@@ -125,6 +179,8 @@ async function findPets(req: Request, res: Response) {
 async function updateDueno(req: Request, res: Response) {
   try {
     const idUsuario = Number.parseInt(req.params.idUsuario);
+
+
     const dueno = await em.findOneOrFail(Dueno, { idUsuario });
     if (!dueno) {
       console.log("Dueno not found with id:", idUsuario);
@@ -149,4 +205,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeDueno, findAll, findOne, add, updateDueno, remove, findPets };
+export { sanitizeDueno, findAll, findOne, add, updateDueno, remove, findPets, authenticateDueno, authenticateUpdate };

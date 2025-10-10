@@ -8,25 +8,17 @@ import sanitizeHTML from 'sanitize-html';
 
 function sanitizeRaza(req: Request, res: Response, next: NextFunction) {
   console.log('req.body completo:', req.body);
-  console.log('req.body.especie:', req.body.especie, typeof req.body.especie);
+  console.log('req.body.especie:', req.body.idEspecie, typeof req.body.especie);
   console.log('req.body.idEspecie:', req.body.idEspecie, typeof req.body.idEspecie);
-  const especieValue = req.body.especie || req.body.idEspecie;
-  
-  if (!especieValue) {
-    return res.status(400).json({ 
-      message: 'Campo especie es requerido',
-      received: req.body
-    });
-  }
   
   req.body.sanitizeInput = {
     idRaza: sanitizeHTML(req.body.idRaza),
     nomRaza: sanitizeHTML(req.body.nomRaza),
-    idEspecie: sanitizeHTML(req.body.especie)
+    idEspecie: sanitizeHTML(req.body.idEspecie)
   };
 
     Object.keys(req.body.sanitizeInput).forEach((key) => {
-    console.log(req.body.sanitizeInput[key])
+    console.log(`Sanitizando ${key}:`, req.body.sanitizeInput[key]);
     if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
       delete req.body.sanitizeInput[key];
     }
@@ -62,7 +54,8 @@ async function findAll(req: Request, res: Response) {
 
 async function add(req: Request, res: Response): Promise<void> {
   try {
-    const especie = await em.findOne(Especie, { idEspecie: req.body.sanitizeInput.especie });
+    console.log("IdEspecie recibido:", req.body.sanitizeInput.idEspecie);
+    const especie = await em.findOne(Especie, { idEspecie: req.body.sanitizeInput.idEspecie });
     
     if (!especie) {
       res.status(404).json({ message: 'Especie not found' });
@@ -74,9 +67,7 @@ async function add(req: Request, res: Response): Promise<void> {
     
     em.persist(raza);
     await em.flush();
-  
     await em.populate(raza, ['especie']);
-    
     res.status(201).json({ message: 'Raza created', data: raza });
   } catch (error: any) {
     res.status(500).json({ message: "Error creating raza", error: error.message });
