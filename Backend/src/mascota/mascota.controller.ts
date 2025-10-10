@@ -7,17 +7,12 @@ import { Raza } from '../raza/raza.entity.js';
 import { Imagen } from '../imagen/imagenes.entity.js';
 import multer from 'multer';
 import path from 'path';
-<<<<<<< Updated upstream
 import sanitizeHTML from 'sanitize-html';
-=======
 import fs from 'fs';
->>>>>>> Stashed changes
 
 function sanitizeMascota(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizeInput = {
     idMascota: req.body.idMascota,
-<<<<<<< Updated upstream
-<<<<<<< HEAD
     nomMascota: sanitizeHTML(req.body.nomMascota), //req
     edad: sanitizeHTML(req.body.edad),
     sexo: sanitizeHTML(req.body.sexo),
@@ -34,34 +29,7 @@ function sanitizeMascota(req: Request, res: Response, next: NextFunction) {
       delete req.body.sanitizeInput[key];
     }
   })
-
-=======
-    nomMascota: req.body.nomMascota, // string
-    edad: parseInt(req.body.edad), // number
-    sexo: req.body.sexo, // string
-    exotico: req.body.exotico === true || req.body.exotico === 'true', // boolean
-    descripcion: req.body.descripcion, // string
-    especie: parseInt(req.body.especie), // para la relación ManyToOne
-    raza: req.body.raza ? parseInt(req.body.raza) : null, // para la relación ManyToOne
-    dueno: parseInt(req.body.dueno), // para la relación ManyToOne
-    peso: parseFloat(req.body.peso) // number
-=======
-    nomMascota: req.body.nomMascota,
-    edad: parseInt(req.body.edad),
-    sexo: req.body.sexo,
-    exotico: req.body.exotico === true || req.body.exotico === 'true',
-    descripcion: req.body.descripcion,
-    especie: parseInt(req.body.especie),
-    raza: req.body.raza ? parseInt(req.body.raza) : null,
-    dueno: parseInt(req.body.dueno),
-    peso: parseFloat(req.body.peso)
->>>>>>> Stashed changes
-  };
-  
->>>>>>> 96a01422714203c35f313b5a33bbbca69e853748
-  next();
-} 
-
+}
 const em = orm.em;
 
 async function findAll(req: Request, res: Response) {
@@ -91,75 +59,24 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
-<<<<<<< Updated upstream
-async function uploadFiles(req: Request, res: Response) {
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, './public/img/perfilImages');
-    },
-    filename: (req, file, cb) => {
-      const uniqueName = Date.now().toString(16) + path.extname(file.originalname);
-      cb(null, uniqueName);
-    }
-  });
-  console.log("Files uploaded:", req);
-  console.log("Uploading files with body:", req.body);
-
-  if(!req.file) {
-    console.log("No file uploaded");
-    return;
-  }
-  console.log("Files uploaded:", req.file.path);
-  if (!req.session) {
-    console.log("Session not found");
-    return;
-  } else {
-    console.log("Session found:", req.session.usuario);
-    const emFork = em.fork();
-      try {
-        if (!req.file) {
-          res.status(400).json({ message: 'No file uploaded' });
-          return;
-        }
-        const mascota = await emFork.findOneOrFail(Mascota, { idMascota: req.session.usuario.idMascota })
-        console.log("Found mascota for upload:", mascota);
-        mascota.fotoPerfil = '/img/perfilImages/' + req.file.filename;
-        await emFork.flush();
-
-      } catch (error) {
-        console.log("Error during file upload:", error);
-        return;
-      }
-    }
-}
 
 async function add(req: Request, res: Response) {
   console.log("Adding mascota with data:", req.body.sanitizeInput);
   try {
-<<<<<<< HEAD
     authenticate(req.body.sanitizeInput, res);
     const dueno = await em.findOneOrFail(Dueno, { idUsuario: req.body.sanitizeInput.dueno });
     const especie = await em.findOneOrFail(Especie, { idEspecie: req.body.sanitizeInput.especie });
-=======
-    await authenticate(req.body.sanitizeInput, res);
-    
->>>>>>> 96a01422714203c35f313b5a33bbbca69e853748
     const mascota = em.create(Mascota, req.body.sanitizeInput);
     dueno.mascotas?.add(mascota);
     especie.mascotas?.add(mascota);
     await em.persistAndFlush(mascota);
-<<<<<<< HEAD
     
     res.status(200).json({ message: 'Mascota created', data: mascota });
-=======
-    await em.populate(mascota, ['dueno', 'especie', 'raza']);
-    
-    res.status(201).json({ message: 'Mascota created', data: mascota });
->>>>>>> 96a01422714203c35f313b5a33bbbca69e853748
   } catch (error: any) {
     res.status(500).json({ message: "Error creating mascota", error: error.message });
   }
 }
+
 
 async function update(req: Request, res: Response) {
     try {
@@ -167,11 +84,11 @@ async function update(req: Request, res: Response) {
         const mascota = await em.findOneOrFail(
             Mascota, 
             { idMascota: idMascota },
-            { populate: ['dueno', 'especie', 'raza'] }
+            { populate: ['dueno', 'especie', 'raza', 'imagen'] }
         );
         em.assign(mascota, req.body);
         await em.flush();
-        await em.populate(mascota, ['dueno', 'especie', 'raza']);
+        await em.populate(mascota, ['dueno', 'especie', 'raza', 'imagen']);
         res.status(200).json({ message: 'Mascota updated', data: mascota });
     } catch (error: any) {
         console.error("Error al actualizar la mascota:", error);
@@ -179,16 +96,7 @@ async function update(req: Request, res: Response) {
     }
 }
 
-async function remove(req: Request, res: Response) {
-  try {
-    const idMascota = Number(req.params.idMascota);
-    const mascota = await em.findOneOrFail(Mascota, { idMascota });
-    await em.removeAndFlush(mascota);
-    res.status(200).json({ message: 'Mascota removed', data: mascota });
-  } catch (error: any) {
-    res.status(500).json({ message: "Error removing mascota", error: error.message });
-  }
-}
+
 
 async function authenticate(sanitizeInput: any, res: Response) {
   console.log("Sanitized input completo:", sanitizeInput);
@@ -256,7 +164,6 @@ async function authenticate(sanitizeInput: any, res: Response) {
     });
     throw new Error('Dueno not found');
   }
-<<<<<<< HEAD
 
   if (sanitizeInput.sexo !== 'M' && sanitizeInput.sexo !== 'F') {
     res.status(400).json({ message: 'Sexo must be M or F', data: sanitizeInput.sexo });
@@ -277,12 +184,8 @@ async function authenticate(sanitizeInput: any, res: Response) {
     res.status(400).json({ message: 'El peso tiene que ser mayor a 0', data: sanitizeInput.peso });
     return;
   }
-=======
->>>>>>> 96a01422714203c35f313b5a33bbbca69e853748
 }
 
-=======
->>>>>>> Stashed changes
 async function findByOwner(req: Request, res: Response) {
   try {
     const idDueno = Number(req.params.id);
@@ -309,7 +212,6 @@ async function findByOwner(req: Request, res: Response) {
   }
 }
 
-// FUNCIÓN CORREGIDA: uploadFiles ahora maneja la imagen directamente
 async function uploadFiles(req: Request, res: Response): Promise<void> {
   try {
     console.log('📸 STEP 1 - Iniciando uploadFiles');
@@ -468,40 +370,6 @@ async function uploadFiles(req: Request, res: Response): Promise<void> {
   }
 }
 
-async function add(req: Request, res: Response) {
-  console.log("Adding mascota with data:", req.body.sanitizeInput);
-  try {
-    await authenticate(req.body.sanitizeInput, res);
-    
-    const mascota = em.create(Mascota, req.body.sanitizeInput);
-    await em.persistAndFlush(mascota);
-    await em.populate(mascota, ['dueno', 'especie', 'raza', 'imagen']);
-    
-    res.status(201).json({ message: 'Mascota created', data: mascota });
-  } catch (error: any) {
-    res.status(500).json({ message: "Error creating mascota", error: error.message });
-  }
-}
-
-async function update(req: Request, res: Response) {
-  try {
-    const idMascota = Number(req.params.idMascota);
-    const mascota = await em.findOneOrFail(
-      Mascota, 
-      { idMascota: idMascota },
-      { populate: ['dueno', 'especie', 'raza', 'imagen'] }
-    );
-    
-    em.assign(mascota, req.body);
-    await em.flush();
-    await em.populate(mascota, ['dueno', 'especie', 'raza', 'imagen']);
-    
-    res.status(200).json({ message: 'Mascota updated', data: mascota });
-  } catch (error: any) {
-    console.error("Error al actualizar la mascota:", error);
-    res.status(500).json({ message: "Error updating mascota", error: error.message });
-  }
-}
 
 async function remove(req: Request, res: Response) {
   try {
@@ -533,44 +401,5 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-async function authenticate(sanitizeInput: any, res: Response) {
-  console.log("Sanitized input completo:", sanitizeInput);
-  
-  const especie = await em.findOne(Especie, { idEspecie: sanitizeInput.especie });
-  if (!especie) {
-    res.status(404).json({ 
-      message: 'Especie not found', 
-      data: { especieId: sanitizeInput.especie }
-    });
-    throw new Error('Especie not found');
-  }
-  
-  if (sanitizeInput.raza) {
-    const raza = await em.findOne(Raza, { 
-      idRaza: sanitizeInput.raza,
-      especie: { idEspecie: sanitizeInput.especie }
-    });
-    
-    if (!raza) {
-      res.status(404).json({ 
-        message: 'Raza not found or does not belong to the specified especie', 
-        data: { 
-          razaId: sanitizeInput.raza, 
-          especieId: sanitizeInput.especie
-        }
-      });
-      throw new Error('Raza not found or invalid for especie');
-    }
-  }
-  
-  const dueno = await em.findOne(Dueno, { idUsuario: sanitizeInput.dueno });
-  if (!dueno) {
-    res.status(404).json({ 
-      message: 'Dueno not found', 
-      data: { duenoId: sanitizeInput.dueno }
-    });
-    throw new Error('Dueno not found');
-  }
-}
 
 export { sanitizeMascota, findAll, findOne, findByOwner, add, update, remove, uploadFiles };

@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-//import './CuidadorDashboard.css';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import '../../styles/DashboardCuidador.css'
@@ -29,10 +28,10 @@ const CuidadorDashboard = () => {
 
 
   useEffect(() => {
-    if (user?.id) {
+    if (user?.idUsuario) {
       fetchPublicaciones();
     }
-  }, [user?.id]);
+  }, [user?.idUsuario]);
 
   useEffect(() => {
     const fetchReservas = async () => {
@@ -72,85 +71,121 @@ const CuidadorDashboard = () => {
   }, [user?.id]);
 
   const fetchPublicaciones = async () => {
-    if (!user?.id) return;
+  if (!user?.idUsuario) return;
+  
+  setLoading(true);
+  setError('');
+  
+  try {
+    const userId = user.idUsuario;
+    console.log('Obteniendo publicaciones para usuario:', userId);
     
-    setLoading(true);
-    setError('');
-    
-    try {
-      const response = await fetch(`${API_BASE_URL}/publicacion/cuidador/${user.id}`, {
-        method: 'GET',
-        credentials: 'include', 
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+    const response = await fetch(`${API_BASE_URL}/publicacion/cuidador/${userId}`, {
+      method: 'GET',
+      credentials: 'include', 
+      headers: {
+        'Content-Type': 'application/json'
       }
+    });
 
-      const data = await response.json();
-      setPublicaciones(data.publicaciones || data || []);
-    } catch (err) {
-      setError('Error al cargar publicaciones: ' + err.message);
-      console.error('Error al cargar publicaciones:', err);
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
     }
-  };
 
-
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/publicacion`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...formData,
-          cuidadorId: user.id 
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Error ${response.status}`);
-      }
-
-      const nuevaPublicacion = await response.json();
-      
+    const data = await response.json();
+    console.log('Respuesta completa del servidor:', data);
     
-      setPublicaciones(prev => [...prev, nuevaPublicacion]);
-      
- 
-      setFormData({
-        titulo: '',
-        descripcion: '',
-        tarifaPorDia: '',
-        ubicacion: '',
-        tipoAlojamiento: '',
-        cantAnimales: '',
-        exotico: false
-      });
-      
-   
-      setCurrentView('publicaciones');
-      
-      alert('Publicación creada exitosamente!');
-    } catch (err) {
-      setError('Error al crear publicación: ' + err.message);
-    } finally {
-      setLoading(false);
+    const publicacionesRecibidas = data.publicaciones || data || [];
+    console.log('Publicaciones procesadas:', publicacionesRecibidas);
+    
+    setPublicaciones(publicacionesRecibidas);
+  } catch (err) {
+    setError('Error al cargar publicaciones: ' + err.message);
+    console.error('Error al cargar publicaciones:', err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+
+  // DEBUGGING: Verificar qué contiene user
+  console.log('=== USER OBJECT DEBUG ===');
+  console.log('user completo:', user);
+  console.log('user.id:', user.id);
+  console.log('typeof user.id:', typeof user.id);
+  console.log('user.idUsuario:', user.idUsuario);
+  console.log('typeof user.idUsuario:', typeof user.idUsuario);
+
+  // Determinar qué propiedad usar para el ID
+  const userId = user.id || user.idUsuario || user.userId;
+  
+  console.log('userId seleccionado:', userId);
+  console.log('typeof userId:', typeof userId);
+
+  if (!userId) {
+    setError('Error: No se pudo obtener el ID del usuario');
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const dataToSend = {
+      idUsuario: userId, // Usar la variable verificada
+      titulo: formData.titulo,
+      descripcion: formData.descripcion,
+      precio: formData.tarifaPorDia,
+      ubicacion: formData.ubicacion,
+      tipoAlojamiento: formData.tipoAlojamiento,
+      cantAnimales: parseInt(formData.cantAnimales) || 1,
+      exotico: formData.exotico
+    };
+
+    console.log('Datos a enviar:', dataToSend);
+
+    const response = await fetch(`${API_BASE_URL}/publicacion`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(dataToSend)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Error ${response.status}`);
     }
-  };
+
+    const result = await response.json();
+    console.log('Respuesta del servidor:', result);
+
+    await fetchPublicaciones();
+
+    setFormData({
+      titulo: '',
+      descripcion: '',
+      tarifaPorDia: '',
+      ubicacion: '',
+      tipoAlojamiento: '',
+      cantAnimales: '',
+      exotico: false
+    });
+
+    setCurrentView('publicaciones');
+    alert('Publicación creada exitosamente!');
+
+  } catch (err) {
+    console.error('Error completo:', err);
+    setError('Error al crear publicación: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

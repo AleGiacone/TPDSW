@@ -4,6 +4,7 @@ import '../../styles/Navbar.css';
 import { useEffect, useState } from 'react';
 
 
+
 const API_URL = 'http://localhost:3000/api'; 
 
 

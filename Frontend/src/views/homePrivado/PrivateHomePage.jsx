@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import '../../styles/PrivateHomePage.css';
 
 const PrivateHomePage = () => {
@@ -57,12 +57,7 @@ const PrivateHomePage = () => {
     }
 
     const data = await response.json();
-    setPublicaciones(
-      Array.isArray(data.publicaciones)
-        ? data.publicaciones
-        : Array.isArray(data)
-          ? data
-          : []
+    setPublicaciones(Array.isArray(data.data) ? data.data : []
     );
   } catch (err) {
     setError('Error al cargar publicaciones: ' + err.message);
@@ -301,12 +296,12 @@ const handleReservar = (publicacionId) => {
         ) : (
           <div className="publicaciones-grid">
             { Array.isArray(publicaciones) && publicaciones.map((pub) => (
-              <div key={pub.id} className="publicacion-card">
+              <div key={pub.idPublicacion} className="publicacion-card">
                 <div className="card-header">
                   <h3 className="card-title">{pub.titulo}</h3>
                   <div className="cuidador-info">
                     <span className="cuidador-name">
-                      Por: {pub.cuidador?.nombre || 'Cuidador'}
+                      Por: {pub.idCuidador?.nombre || 'Cuidador'}
                     </span>
                   </div>
                 </div>
@@ -357,7 +352,7 @@ const handleReservar = (publicacionId) => {
                       </button>
                     ) : (
                       <button 
-                        onClick={() => handleReservar(pub.id)}
+                        onClick={() => handleReservar(pub.idPublicacion)}
                         className="reserve-btn"
                       >
                         🎯 Reservar

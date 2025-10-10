@@ -1,9 +1,158 @@
-/* DuenoDashboard.css */
+/*RENDER MASCOTAS*/
+/*NAVBAR SECUNDARIAS*/
 
-/* Estilos Generales del Dashboard */
-/* DuenoDashboard.css */
+.mascota-details-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
 
-/* Estilos para las imágenes de mascotas */
+.mascotas-header {
+  width:100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: #FFD6C9;
+  border-radius:20px;
+ 
+}
+
+.btn-primary {
+  max-width: 30%;
+  padding: 1rem;
+  color: #f95f2d;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.btn-primary:hover {
+  background: #f97363;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mascotas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.mascota-card {
+  width: 1150px;
+  height: 500px;
+  background: #f97363;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid #eee;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2rem;
+}
+
+.mascota-image-section-horizontal {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.mascota-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.mascota-avatar {
+  font-size: 1.5rem;
+  text-align: center;
+  background: #fef3c7;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.mascota-name {
+  width: 50%;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #f97363;
+  margin-left: 40px ;
+  padding: 10px;
+  border-radius:10px;
+  justify-content: center;
+  align-items: center;
+  background: #FFD6C9;
+}
+
+.mascota-details p {
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.mascota-description {
+  font-size: 0.9rem;
+  color: #777;
+  margin-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+}
+
+.mascota-actions {
+  display: flex;
+  flex-direction: column;
+  /* Apila los botones de editar y eliminar */
+  gap: 0.5rem;
+  margin-left: auto;
+  /* Empuja los botones a la derecha */
+}
+
+.btn-edit,
+.btn-delete {
+  padding: 0.6rem 1pnpm starrem;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-edit {
+
+  background: #4c51bf;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #3c366b;
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+/* --- */
 
 /* Haz este selector más específico para el contenedor */
 #main-dashboard {
@@ -164,168 +313,7 @@
 /* --- */
 
 /* Estilos de la Sección de Mascotas */
-.mascotas-header {
-  width:100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-  background: #FFD6C9;
-  border-radius:20px;
- 
-}
 
-.btn-primary {
-  max-width: 30%;
-  padding: 1rem;
-  color: #f95f2d;
-  border: none;
-  border-radius: 25px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1rem;
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.btn-primary:hover {
-  background: #f95f2d;
-  color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.mascotas-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.mascota-card {
-  background: #f963;
-  border-radius: 15px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s, box-shadow 0.2s;
-  border: 1px solid #eee;
-
-  /* Nuevo estilo para la disposición horizontal */
-  display: flex;
-  flex-direction: row;
-  /* Coloca los elementos de izquierda a derecha */
-  align-items: center;
-  /* Alinea los elementos verticalmente */
-  gap: 2rem;
-  /* Agrega un espacio entre las secciones de la tarjeta */
-}
-
-.mascota-image-section-horizontal {
-  /* Establece un ancho fijo para la foto, si lo deseas */
-  width: 250px;
-  flex-shrink: 0;
-  /* Evita que el contenedor se encoja */
-}
-.mascota-details-section {
-  flex: 1;
-  /* Permite que este contenedor ocupe todo el espacio restante */
-  display: flex;
-  flex-direction: column;
-}
-
-.mascota-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
-.mascota-header {
-  
-  margin-bottom: 1rem;
-}
-
-.mascota-avatar {
-  font-size: 1.5rem;
-  text-align: center;
-  background: #fef3c7;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-right: 1rem;
-  flex-shrink: 0;
-}
-
-.mascota-name {
-  width: 70%;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #f95f2d;
-  margin-left: 40px ;
-  padding: 10px;
-  border-radius:10px;
-  justify-content: center;
-  align-items: center;
-  background: #fff
-}
-
-.mascota-details p {
-  margin: 1.5rem 0;
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.mascota-description {
-  font-size: 0.9rem;
-  color: #777;
-  margin-top: 1rem;
-  border-top: 1px solid #e5e7eb;
-  padding-top: 1rem;
-}
-
-.mascota-actions {
-  display: flex;
-  flex-direction: column;
-  /* Apila los botones de editar y eliminar */
-  gap: 0.5rem;
-  margin-left: auto;
-  /* Empuja los botones a la derecha */
-}
-
-.btn-edit,
-.btn-delete {
-  padding: 0.6rem 1.2rem;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.btn-edit {
-
-  background: #4c51bf;
-  color: white;
-}
-
-.btn-edit:hover {
-  background: #3c366b;
-  transform: translateY(-2px);
-}
-
-.btn-delete {
-  background: #ef4444;
-  color: white;
-}
-
-.btn-delete:hover {
-  background: #dc2626;
-  transform: translateY(-2px);
-}
-
-/* --- */
 
 /* Estilos del Formulario */
 .form-container {

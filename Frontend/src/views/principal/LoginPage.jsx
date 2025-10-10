@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import '../../styles/Auth.css';
 //import { loginCtrl } from '../api/auth';
 import Navbar from '../../components/Navbar';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 function LoginPage() {
   

@@ -22,6 +22,9 @@ export class Cuidador extends Usuario {
   @Property({ nullable: true, unique: false })
   descripcion!: string;
 
-  @OneToOne(() => Publicacion, { nullable: true })
-  publicacion?: Rel<Publicacion>;
+  @OneToMany(() => Publicacion, publicacion => publicacion.idCuidador, { 
+    nullable: true,
+    cascade: [Cascade.ALL]
+  })
+  publicaciones = new Collection<Publicacion>(this);
 }

@@ -51,7 +51,7 @@ async function authenticateCuidador(req: Request, res: Response) {
       res.status(400).json({ message: 'El nombre debe tener al menos 3 caracteres' });
       return;
     }
-    if (req.body.sanitizeInput.nroDocumento.length >= 7 && req.body.sanitizeInput.nroDocumento.length <= 9) {
+    if (req.body.sanitizeInput.nroDocumento.length < 7 && req.body.sanitizeInput.nroDocumento.length > 9) {
       res.status(400).json({ message: 'El numero de documento debe tener entre 7 y 9 caracteres' });
       return;
     }

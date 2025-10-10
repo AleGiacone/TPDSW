@@ -20,7 +20,6 @@ function sanitizeRaza(req: Request, res: Response, next: NextFunction) {
   }
   
   req.body.sanitizeInput = {
-<<<<<<< HEAD
     idRaza: sanitizeHTML(req.body.idRaza),
     nomRaza: sanitizeHTML(req.body.nomRaza),
     idEspecie: sanitizeHTML(req.body.especie)
@@ -33,24 +32,6 @@ function sanitizeRaza(req: Request, res: Response, next: NextFunction) {
     }
   })
   next()
-=======
-    idRaza: req.body.idRaza,
-    nomRaza: req.body.nomRaza, // string
-    especie: parseInt(especieValue), // para la relación ManyToOne con Especie
-  };
-  
-  console.log('Datos sanitizados:', req.body.sanitizeInput);
-  
-  // Verificar que el parseInt funcionó
-  if (isNaN(req.body.sanitizeInput.especie)) {
-    return res.status(400).json({ 
-      message: 'El campo especie debe ser un número válido',
-      received: especieValue
-    });
-  }
-  
-  next();
->>>>>>> 96a01422714203c35f313b5a33bbbca69e853748
 }
 
 const em = orm.em
