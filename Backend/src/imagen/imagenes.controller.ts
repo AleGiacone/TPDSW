@@ -9,7 +9,6 @@ import path from 'path';
 import fs from 'fs';
 const em = orm.em;
 
-// Reemplaza tu función add completa con esta:
 async function add(req: Request, res: Response): Promise<void> {
  try {
   const imagen = new Imagen();
@@ -18,11 +17,9 @@ async function add(req: Request, res: Response): Promise<void> {
    return;
   }
   
-  // Aquí se construye la URL completa
   const fullUrl = `${req.protocol}://${req.get('host')}/img/perfilImages/${req.file.filename}`;
   imagen.path = fullUrl;
-  
-  // Asignar relaciones basadas en el cuerpo de la solicitud
+
   if (req.body.idUsuario != null) {
    const usuario = await em.findOne(Usuario, { idUsuario: parseInt(req.body.idUsuario) });
    if (usuario) {
@@ -47,8 +44,7 @@ async function add(req: Request, res: Response): Promise<void> {
   res.status(201).json({ message: 'Imagen added', data: imagen });
  } catch (error: any) {
   console.error('Error completo en add imagen:', error);
-  // Si hay un error, el archivo ya ha sido subido por multer, 
-  // por lo que debes eliminarlo manualmente
+
   if (req.file) {
    fs.unlink(req.file.path, (unlinkErr) => {
     if (unlinkErr) console.error("Error deleting uploaded file:", unlinkErr);
@@ -82,7 +78,6 @@ async function remove(req: Request, res: Response): Promise<void> {
     const idImagen = Number(req.params.idImagen);
     const imagen = await em.findOneOrFail(Imagen, { idImagen });
     
-    // Eliminar archivo físico si existe
     if (imagen.path) {
       const filename = path.basename(imagen.path);
       const filePath = path.join('public/img/perfilImages', filename);
@@ -111,12 +106,12 @@ async function update(req: Request, res: Response): Promise<void> {
   }
 }
 
-// Nueva función para eliminar imagen de mascota específicamente
+
 async function removeMascotaImage(req: Request, res: Response): Promise<void> {
   try {
     const idMascota = Number(req.params.idMascota);
     
-    // Buscar imagen asociada a la mascota
+
     const imagen = await em.findOne(Imagen, { mascota: { idMascota: idMascota } });
     
     if (!imagen) {
@@ -124,7 +119,6 @@ async function removeMascotaImage(req: Request, res: Response): Promise<void> {
       return;
     }
     
-    // Eliminar archivo físico si existe
     if (imagen.path) {
       const filename = path.basename(imagen.path);
       const filePath = path.join('public/img/perfilImages', filename);
@@ -134,7 +128,6 @@ async function removeMascotaImage(req: Request, res: Response): Promise<void> {
       });
     }
     
-    // También limpiar el campo fotoPerfil de la mascota
     const mascota = await em.findOne(Mascota, { idMascota });
     if (mascota) {
       mascota.fotoPerfil = undefined;

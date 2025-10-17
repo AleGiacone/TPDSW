@@ -1,14 +1,15 @@
 /* HomePage.css */
 
 .homepage {
-  background: url('./fondo.png') repeat center fixed;
+  width:100%;
   height: 100vh;
   background-size: 400px;
   display: flex;
   flex-direction: column;
   font-family: 'Nunito', sans-serif;
   padding: 50px;
-
+  background-image: none !important;
+  background-color: #fbfbfb !important;
 }
 
 /* NAVBAR */
@@ -42,88 +43,238 @@
   padding: 10px 15px;
   border-radius: 15px;
   cursor: pointer;
-   
-
+  
+}
+.nav-link{
+    font-size: 1.3rem;
+    display: flex;
+    color: #f97316;
 }
 
+.nav-link:hover {
+  transform: scale(1.05);
+}
 .navbar-brand .brand-title:hover {
   transform: scale(1.05);
 }
 
-/* FILTROS DE BÚSQUEDA */
-.search-filters {
+.register {
+  background-color: #fff;
+  color: #f97316 !important;
+  padding: 8px !important; 
+  border-radius: 15px;
+  text-decoration: none;
+
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 1rem !important;
+}
+
+.register:hover {
+  transition: background-color 0.4s, color 0.5s;
+  color: #FFD6C9;
+  transform: translateY(-2px) !important;
+}
+
+.wrap-authenticated-user{
   display: flex;
-  gap: 0.5rem;
-  padding: 12px;
-  max-width: 800px;
-  width: 90%;
-  flex-wrap: nowrap;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.9rem;
-  flex-direction: column;
-  flex: 1;
-  
-}
-
-.filter-input,
-.filter-select {
-  padding: 10px 12px;
-  margin: 0;
-  border: 2px solid #e2e8f0;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-  background-color: #fff!important;
-  color: #222;
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.filter-input:focus,
-.filter-select:focus {
-  outline: none;
-  border-color: #fff;
-  box-shadow: 0 0 0 3px rgba(76, 81, 191, 0.1);
-  transform: translateY(-2px);
-}
-
-.checkbox-filter {
-  display: flex;
+  gap: 1rem;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  outline: none;
-  white-space: nowrap;
-  
 }
 
-.checkbox-filter input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: #fff;
-  
+.link-dashboard{
+  color: #fff !important;
+  padding: 8px !important;
+  border-radius: 15px;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 1rem !important;
 }
 
-.clear-filters-btn {
-  width: 400px;
-  font-size: 0.85rem;
-  background: #fff;
-  color: #ef4444;
-  border: none;
-  border-radius: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-  
-}
-
-.clear-filters-btn:hover {
+.link-logout-btn{
+  width: 200px;
   color: #fff;
-  
+  padding: 8px !important;
+  border-radius: 15px;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 1rem !important;
 }
+
+/* ========================================= */
+/* BARRA DE BÚSQUEDA ESTILO AIRBNB - PETSBNB */
+/* ========================================= */
+
+      .search-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        display: flex;
+        justify-content: center;
+        position: sticky;
+        top:0;
+        z-index: 100;
+        padding: 10px 0;
+        transition: all 0.3s ease;
+      }
+
+      .search-filters {
+        background: #fff;
+        border-radius: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        padding: 6px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 0;
+        overflow: visible;
+        transition: box-shadow 0.3s ease;
+        width: fit-content;
+        max-width: 100%;
+      }
+
+      .search-filters:hover {
+        box-shadow: 0 14px 50px rgba(0, 0, 0, 0.14);
+      }
+
+      .filter-group {
+        flex: 0 1 auto;
+        min-width: 120px;
+        max-width: 180px;
+        padding: 12px 16px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        border-radius: 32px;
+        position: relative;
+        height: 80px;
+      }
+
+      .filter-group:not(:last-of-type):not(.checkbox-group)::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 32px;
+        width: 1px;
+        background-color: rgba(0, 0, 0, 0.08);
+      }
+
+      .filter-group:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+      }
+
+      .filter-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #222;
+        margin-bottom: 0;
+        margin-top: 30px;
+        pointer-events: none;
+        white-space: nowrap;
+        line-height: 1.2;
+      
+      }
+
+      .filter-input-field,
+      .filter-select-field {
+        border: none;
+        background: transparent;
+        font-size: 0.8rem;
+        color: #717171;
+        outline: none;
+        width: 100%;
+        cursor: pointer;
+        font-family: inherit;
+        line-height: 1.2;
+        margin-top: 9px;
+        padding: 5px;
+        margin-bottom: 30px;
+      }
+
+      .filter-input-field::placeholder {
+        color: #b0b0b0;
+      }
+
+      .filter-select-field {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23717171' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right center;
+      }
+
+      .checkbox-group {
+        flex: 0 0 auto;
+        padding: 12px 14px;
+        min-width: auto;
+    
+      }
+
+      /* Estilos específicos para Tipo de Alojamiento */
+      .tipo-alojamiento-group {
+        min-width: 160px;
+        margin: 0;
+      }
+
+
+      .checkbox-group::after {
+        display: none;
+      }
+
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        user-select: none;
+        margin: 10px;
+      }
+
+      .checkbox-input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #ff385c;
+        margin: 10px;
+      }
+
+      .checkbox-text {
+        font-size: 0.875rem;
+        color: #222;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      .search-btn {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #ff385c 0%, #e61e4d 100%);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        margin-left: 8px;
+        flex: 0 0 auto;
+        box-shadow: 0 4px 12px rgba(255, 56, 92, 0.2);
+      }
+
+      .search-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(255, 56, 92, 0.3);
+      }
+
+      .search-btn:active {
+        transform: scale(0.98);
+      }
 
 /* USER SECTION */
 .user-section {
@@ -273,24 +424,17 @@ width: 100%;
 /* HERO SECTION */
 .hero-section {
   text-align: center;
-  color: white;
-  margin-bottom: 3rem;
+  color: white; 
+  margin-bottom: 50px;
 }
 
 .hero-title {
+  margin-top: 0;
   font-size: 2.5rem;
   font-weight: bold;
-  margin-bottom: 1rem;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   color: #f97136;
   background-color: #fff;
-}
-
-.hero-subtitle {
-  font-size: 1.2rem;
-  opacity: 0.9;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  color: #f97136;
 }
 
 /* ESTADOS DE CARGA */
@@ -393,6 +537,7 @@ width: 100%;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
+  align-items: center;
 }
 
 .publicacion-card:hover {
@@ -405,24 +550,31 @@ width: 100%;
 }
 
 .card-title {
+  max-width: 300px;
+  width: 100%;
   font-size: 1.3rem;
   font-weight: bold;
   color: #2d3748;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 20px 0;
+  padding:30px;
+  min-width: 0;
 }
 
 .cuidador-info {
   color: #666;
   font-size: 0.9rem;
   font-style: italic;
+  
 }
 
 .cuidador-name {
   color: #4c51bf;
   font-weight: 500;
+  font-size: 1.1rem;
 }
 
 .card-description {
+
   color: #4a5568;
   margin-bottom: 1.5rem;
   line-height: 1.5;
@@ -506,6 +658,8 @@ width: 100%;
   background: #a0aec0;
   cursor: not-allowed;
   opacity: 0.6;
+  width: 100%;
+
 }
 
 /* FOOTER */

@@ -1,22 +1,44 @@
 /*LOGIN*/
-
+     
      .auth-container {
-     max-width: 100%;
-     margin:50px;
-     padding: 30px;
+     max-width: 90%;
+     margin:0 auto;
+     padding: 20px;
      border-radius: 20px;
      justify-content: center;
      font-family: "Nunito", "Sans-serif";
      display: flex;
      flex-direction: column;
      align-items: center;
+     box-sizing: border-box;
 }
 
+ .auth-wrapper {
+      min-height: 100vh;
+      /* Esto es lo que pone la imagen de animalitos */
+      background: url('/fondo.png') repeat center fixed;
+      background-size: 500px;
+      /* Tu tamaño original */
+      padding: 0;
+      margin: 0;
+ }
+
+
+  .auth-container,
+  .auth-container-register {
+       /* ... tus estilos existentes ... */
+       /* Asegurarse de que el formulario esté centrado y tenga un margen superior si es necesario */
+       margin-top: 50px;
+       /* Ajustar el formulario hacia abajo para que no choque con la navbar transparente */
+       /* ... */
+  }
+  
      .auth-form {
      display: flex;
      flex-direction: column;
      align-items: center;
      font-family: "Nunito", "Sans-serif";
+     
 }
 
      .auth-form input {
@@ -30,6 +52,7 @@
      color: #222222;
      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
      outline: none;
+     
      
 }
 
@@ -162,7 +185,7 @@
    
 }
  
-     button {
+     button  {
      width: 700px;
      padding: 20px;
      margin: 20px;
@@ -242,6 +265,7 @@
      background-color: #f97136;
      color: white;
 }
+
 
 @media ( max-width: 768px ) {
 

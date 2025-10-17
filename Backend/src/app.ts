@@ -3,7 +3,6 @@ import 'reflect-metadata'
 import express from "express";
 import {especieRouter} from "./especie/especie.routes.js";
 import { razaRouter } from './raza/raza.routes.js';
-// Instala los Especies con: pnpm add -D @types/express
 import { orm, syncSchema } from "./shared/db/orm.js";
 import { RequestContext } from '@mikro-orm/core';
 import cookieParser from 'cookie-parser';
@@ -16,13 +15,11 @@ import { mascotaRouter } from './mascota/mascota.routes.js';
 import { imagenRouter } from './imagen/imagenes.routes.js';
 import jwt from 'jsonwebtoken';
 import path from 'path';
-import cors from 'cors'; // 
+import cors from 'cors';
 import { reservaRouter } from './reserva/reserva.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Extend Express Request interface to include 'session'
 
 declare global {
   namespace Express {
@@ -35,18 +32,14 @@ declare global {
 const app = express();
 
 
-
 app.use(cookieParser());
 app.use(cors({ origin: 'http://localhost:3308', credentials: true }));
 app.use(express.json());
 
-// 
 app.use('/img', express.static(path.join(__dirname, '../public/img')));
 
+console.log('📂 Sirviendo archivos estáticos desde:', path.join(__dirname, '../public/img'));
 
-
-
-//Luego de los middlewares base
 
 app.use((req, res, next) => {
   console.log('Token recibido:', req.cookies.access_token);
@@ -57,15 +50,12 @@ app.use((req, res, next) => {
     req.session.usuario = data;
   } catch {}
   next();
-
 })
 
-app.use((req,res,next) => {
+
+app.use((req, res, next) => {
   RequestContext.create(orm.em, next)
 });
-
-
-
 
 
 app.use("/api/usuarios", usuarioRouter);
@@ -78,71 +68,59 @@ app.use("/api/cuidadores", cuidadorRouter);
 app.use("/api/usuario/upload-image", usuarioRouter);
 app.use("/api/publicacion", publicacionRouter);
 app.use("/api/imagenes", imagenRouter);
-app.use("/api/reservas", reservaRouter)
+app.use("/api/reservas", reservaRouter);
 
-// Middleware funciones donde modificamos peticion o respuesta
 
 app.get('/', (req, res) => {
   console.log('Session:', req.session);
-  console.log('Cookies:', req.cookies);
-  console.log('Headers:', req.headers);
   const { usuario } = req.session ?? { usuario: null };
   if (!usuario) {
     res.status(401).send('Acceso no autorizado')
     return 
   }
-  console.log('estoy aca',usuario);
-  res.render('index', { usuario });
+  res.json({ message: 'Bienvenido', usuario });
 });
+
 
 app.use((req, res, next) => {
   console.log(`[REQ] ${req.method} ${req.url}`);
   next();
 });
 
-
 app.get('/api/usuario/me', (req, res) => {
   res.json({ usuario: req.session?.usuario || null });
 })
 
-
-
 app.get('/register', (req, res) => {
-  res.render("register");
+  res.json({ message: 'Register page' });
 });
-
-
 
 app.post('/register', (req, res) => {
   
 });
 
-
-
 app.post('/logout', (req, res) => {
   res.clearCookie('access_token');
   res.json({ message: 'Logged out successfully' });
-
 });
 
 app.get('/protected', (req, res) => {
+
 });
 
-
-
-
+// 404 Handler
 app.use((_, res) => {
   res.status(404).send({ message: "Not Found" });
   return;  
 })
 
+
 const PORT = process.env.PORT || 3000;
 
-await syncSchema(); //Never in production
-
+await syncSchema(); // Never in production
 
 app.listen(PORT, () => {
-  console.log("Server is running on port 3000");
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+  console.log(`📸 Images available at http://localhost:${PORT}/img/`);
 });
 
-app.use('/img', express.static('public/img'));
