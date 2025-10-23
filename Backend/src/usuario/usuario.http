@@ -12,3 +12,11 @@ Content-Type: application/json
   "email": "Pilaraguirrezabalatra@gmail.com",
   "password": "Brownie123"
 }
+
+### Actualizar un especie
+PUT http://localhost:3000/api/usuario/9   
+Content-Type: application/json
+
+{
+  "nombre": "Gabriela Vivas",
+}

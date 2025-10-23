@@ -24,8 +24,6 @@ export abstract class Usuario {
   @Property({ nullable: true, unique: false })
   perfilImage?: string;
 
-  // Corregido: relación bidireccional con Imagen
-
   @OneToOne('Imagen', 'usuario', {
     owner: true, 
     cascade: [Cascade.PERSIST, Cascade.MERGE],

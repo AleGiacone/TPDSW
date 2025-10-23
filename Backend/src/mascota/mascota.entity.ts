@@ -10,7 +10,6 @@
 
     @PrimaryKey()
     idMascota!: number;
-    // Comprobar que el nombre de las mascotas por cada dueño sea único
     @Property({ nullable: false, unique: false })
     nomMascota!: string;
     

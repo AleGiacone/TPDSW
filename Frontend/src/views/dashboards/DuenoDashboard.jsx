@@ -2,9 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 import '../../styles/DashboardDueno.css';
+import { useNavigate } from 'react-router-dom';
+import { Home, PawPrint, CalendarCheck, User, LogOut } from 'lucide-react';
 
 const DuenoDashboard = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, updateUser } = useAuth();
     const [currentView, setCurrentView] = useState('mascotas');
     const [mascotas, setMascotas] = useState([]);
     const [reservas, setReservas] = useState([]);
@@ -12,7 +14,11 @@ const DuenoDashboard = () => {
     const [error, setError] = useState('');
     const [razasFiltradas, setRazasFiltradas] = useState([]);
     const [imageUploading, setImageUploading] = useState(false);
+    const navigate = useNavigate();
     const API_BASE_URL = 'http://localhost:3000/api';
+    const [profileImageFile, setProfileImageFile] = useState(null);
+    
+    const [mascotaImageFile, setMascotaImageFile] = useState(null);
     
     const [mascotaForm, setMascotaForm] = useState({
         nombre: '',
@@ -38,9 +44,6 @@ const DuenoDashboard = () => {
     });
     const [editingPerfil, setEditingPerfil] = useState(false);
 
-// --------------------------------------------------
-// LÓGICA DE IMÁGENES
-// --------------------------------------------------
 
     const uploadMascotaImage = async (mascotaId, file) => {
         setImageUploading(true);
@@ -129,21 +132,136 @@ const DuenoDashboard = () => {
         event.target.value = '';
     };
 
-// --------------------------------------------------
-// EFECTOS Y LÓGICA DE FILTROS (Mascotas/Especies/Razas)
-// --------------------------------------------------
+    const handleMascotaImageChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor selecciona un archivo de imagen válido');
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) {
+                alert('El archivo es muy grande. Máximo 5MB permitido');
+                return;
+            }
+            
+            setMascotaImageFile(file);
+        }
+    };
+
+    const deleteMascotaImageFromForm = async () => {
+        if (!editingMascota?.idMascota) {
+            setMascotaImageFile(null);
+            return;
+        }
+
+        try {
+            setImageUploading(true);
+            const response = await fetch(
+                `${API_BASE_URL}/mascotas/${editingMascota.idMascota}/imagen`,
+                {
+                    method: 'DELETE',
+                    credentials: 'include'
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('Error al eliminar imagen');
+            }
+
+            setEditingMascota(prev => ({
+                ...prev,
+                imagen: null,
+                fotoPerfil: null
+            }));
+            setMascotaImageFile(null);
+            alert('Imagen de mascota eliminada.');
+        } catch (error) {
+            console.error('Error al eliminar imagen de mascota:', error);
+            alert('Error: ' + error.message);
+        } finally {
+            setImageUploading(false);
+        }
+    };
+
+ 
+    const handleProfileImageChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setProfileImageFile(e.target.files[0]);
+        }
+    };
+
+    const uploadDuenoProfileImage = async () => {
+        if (!profileImageFile) return user.perfilImage;
+
+        setImageUploading(true);
+        const formData = new FormData();
+        formData.append('profileImage', profileImageFile);
+
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/duenos/${user.idUsuario}/profile-image`,
+                {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                }
+            );
+
+            if (!response.ok) {
+                const imgError = await response.json().catch(() => ({}));
+                throw new Error(imgError.message || 'Error al actualizar la imagen');
+            }
+
+            const imageData = await response.json();
+            return imageData.data.perfilImage;
+        } catch (error) {
+            console.error('Error al subir imagen de perfil:', error);
+            throw error;
+        } finally {
+            setImageUploading(false);
+        }
+    };
+
+    const deleteDuenoProfileImage = async () => {
+        try {
+            setImageUploading(true);
+            const response = await fetch(
+                `${API_BASE_URL}/duenos/${user.idUsuario}/profile-image`,
+                {
+                    method: 'DELETE',
+                    credentials: 'include'
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('Error al eliminar imagen');
+            }
+
+            const updatedUserData = { ...user, perfilImage: undefined };
+            updateUser(updatedUserData);
+            setProfileImageFile(null);
+            alert('Imagen de perfil eliminada.');
+        } catch (error) {
+            console.error('Error al eliminar imagen de perfil:', error);
+            alert('Error: ' + error.message);
+        } finally {
+            setImageUploading(false);
+        }
+    };
+
 
     useEffect(() => {
         fetchEspecies();
         fetchRazas();
-    }, []); // Ya no depende de user?.idUsuario para cargar estáticos de la API
+    }, []);
 
     useEffect(() => {
         if (mascotaForm.idEspecie) {
             const especieId = parseInt(mascotaForm.idEspecie);
             
             const razasDeEspecie = razas.filter(raza => {
-                // Asegura la comparación como número
                 return parseInt(raza.idEspecie) === especieId; 
             });
 
@@ -153,15 +271,12 @@ const DuenoDashboard = () => {
         }
     }, [mascotaForm.idEspecie, razas]);
 
-// --------------------------------------------------
-// FUNCIONES DE FETCH REALES (sin Mock Data)
-// --------------------------------------------------
 
     const fetchMascotas = useCallback(async () => {
-        console.log(' FETCHMASCOTAS INICIADO');
+        console.log('FETCHMASCOTAS INICIADO');
         
         if (!user?.idUsuario) {
-            console.log(' FETCHMASCOTAS: No hay user.idUsuario, saliendo');
+            console.log('FETCHMASCOTAS: No hay user.idUsuario, saliendo');
             return;
         }
         
@@ -216,7 +331,7 @@ const DuenoDashboard = () => {
             } else {
                 console.error('FETCH Error status:', response.status);
                 const errorText = await response.text();
-                console.error(' FETCH Error response:', errorText);
+                console.error('FETCH Error response:', errorText);
                 setError(`Error del servidor: ${response.status}`);
                 setMascotas([]);
             }
@@ -320,7 +435,6 @@ const DuenoDashboard = () => {
                     return {
                         id: raza.idRaza || raza.id,
                         nombre: raza.nomRaza || raza.nombre,
-                        // Convertir a cadena si es un número para usar en el select
                         idEspecie: especieId ? String(especieId) : '' 
                     };
                 });
@@ -335,10 +449,6 @@ const DuenoDashboard = () => {
             setError(prev => prev + ' | Error de conexión al cargar razas.');
         }
     };
-
-// --------------------------------------------------
-// LÓGICA DE SUBMIT, DELETE Y EDITAR (Mascotas/Perfil)
-// --------------------------------------------------
 
     const handleMascotaSubmit = async (e) => {
         e.preventDefault();
@@ -397,7 +507,18 @@ const DuenoDashboard = () => {
                 throw new Error(errorData.message || `Error ${response.status}`);
             }
 
-            
+            const result = await response.json();
+            const mascotaId = result.data.idMascota || editingMascota?.idMascota;
+
+            if (mascotaImageFile && mascotaId) {
+                try {
+                    await uploadMascotaImage(mascotaId, mascotaImageFile);
+                } catch (imgError) {
+                    console.error('Error al subir imagen:', imgError);
+                    alert('Mascota guardada pero hubo un error al subir la imagen: ' + imgError.message);
+                }
+            }
+
             await fetchMascotas(); 
 
             alert(editingMascota ? 'Mascota actualizada exitosamente!' : 'Mascota creada exitosamente!');
@@ -407,6 +528,7 @@ const DuenoDashboard = () => {
                 peso: '', idEspecie: '', idRaza: ''
             });
             
+            setMascotaImageFile(null); 
             setEditingMascota(null);
             setCurrentView('mascotas');
             
@@ -425,13 +547,37 @@ const DuenoDashboard = () => {
         } 
     }, [user?.idUsuario, fetchMascotas, fetchReservas]);
 
+    useEffect(() => {
+        if (user) {
+            setPerfilForm({
+                nombre: user?.nombre || '',
+                email: user?.email || '',
+                telefono: user?.telefono || '',
+                nroDocumento: user?.nroDocumento || '',
+                tipoDocumento: user?.tipoDocumento || 'DNI'
+            });
+        }
+    }, [user]);
+
+    const handlePerfilFormChange = (e) => {
+        setPerfilForm({ ...perfilForm, [e.target.name]: e.target.value });
+    };
+
     const handlePerfilSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
-        
+
         try {
-            const response = await fetch(`${API_BASE_URL}/usuarios/${user.idUsuario}`, {
+           
+
+            let updatedImagePath = user?.perfilImage;
+            if (profileImageFile) {
+                updatedImagePath = await uploadDuenoProfileImage();
+            }
+
+
+            const response = await fetch(`${API_BASE_URL}/duenos/${user.idUsuario}`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
@@ -441,13 +587,28 @@ const DuenoDashboard = () => {
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.message || `Error ${response.status}`);
-            } 
+            }
 
-            alert('Perfil actualizado exitosamente!');
+            const data = await response.json();
+            console.log(' Respuesta del servidor:', data);
+
+            const updatedUserData = {
+                ...user,
+                ...perfilForm,
+                perfilImage: updatedImagePath
+            };
+
+            console.log('🔄 Actualizando contexto con:', updatedUserData);
+            updateUser(updatedUserData);
+
+            alert(' Perfil actualizado exitosamente!');
             setEditingPerfil(false);
-            
+            setProfileImageFile(null);
+
         } catch (err) {
+            console.error(' Error al actualizar perfil:', err);
             setError('Error al actualizar perfil: ' + err.message);
+            alert(' Error al actualizar perfil: ' + err.message);
         } finally {
             setLoading(false);
         }
@@ -487,7 +648,6 @@ const DuenoDashboard = () => {
     };
 
     const startEditMascota = (mascota) => {
-        
         setMascotaForm({
             nombre: mascota.nomMascota || mascota.nombre || '',
             edad: mascota.edad || '',
@@ -500,23 +660,15 @@ const DuenoDashboard = () => {
         });
         
         setEditingMascota(mascota);
+        setMascotaImageFile(null); 
         setCurrentView('nueva-mascota');
     };
-
 
     const handleMascotaChange = (e) => {
         const { name, value, type, checked } = e.target;
         setMascotaForm(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value
-        }));
-    };
-
-    const handlePerfilChange = (e) => {
-        const { name, value } = e.target;
-        setPerfilForm(prev => ({
-            ...prev,
-            [name]: value
         }));
     };
 
@@ -567,6 +719,7 @@ const DuenoDashboard = () => {
                 <button
                     onClick={() => {
                         setEditingMascota(null); 
+                        setMascotaImageFile(null); 
                         setCurrentView('nueva-mascota');
                     }}
                     className="btn-primary"
@@ -591,7 +744,6 @@ const DuenoDashboard = () => {
                 <div className="mascotas-grid">
                     {mascotas.map((mascota) => (
                         <div key={mascota.id || mascota.idMascota} className="mascota-card">
-                            {/* Sección de imagen */}
                             <div className="mascota-image-section-horizontal">
                                 {mascota.imagen?.path || mascota.fotoPerfil ? (
                                     <div className="mascota-image-container">
@@ -648,7 +800,7 @@ const DuenoDashboard = () => {
                                     <p><strong>Especie:</strong> {mascota.especie?.nomEspecie || mascota.especie?.nombre || 'N/A'}</p>
                                     <p><strong>Raza:</strong> {mascota.raza?.nomRaza || mascota.raza?.nombre || 'N/A'}</p>
                                     <p><strong>Edad:</strong> {mascota.edad} años</p>
-                                    <p><strong>Sexo:</strong> {mascota.sexo}</p>
+                                    <p><strong>Sexo:</strong> {mascota.sexo === 'M' ? 'Macho' : mascota.sexo === 'F' ? 'Hembra' : mascota.sexo}</p>
                                     <p><strong>Peso:</strong> {mascota.peso} kg</p>
                                     {mascota.exotico && <span className="exotic-badge">Exótica</span>}
                                 </div>
@@ -685,6 +837,50 @@ const DuenoDashboard = () => {
                 </h2>
                 
                 <form onSubmit={handleMascotaSubmit} className="form-card">
+                    {/* 🆕 CAMPO DE IMAGEN DE MASCOTA */}
+                    <div className="form-group" style={{ textAlign: 'center', marginBottom: '30px' }}>
+                        <label className="form-label">Foto de la mascota:</label>
+                        <div style={{ margin: '15px 0' }}>
+                            {mascotaImageFile ? (
+                                <img
+                                    src={URL.createObjectURL(mascotaImageFile)}
+                                    alt="Preview"
+                                    style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #3b82f6' }}
+                                />
+                            ) : editingMascota?.imagen?.path || editingMascota?.fotoPerfil ? (
+                                <img
+                                    src={editingMascota.imagen?.path || editingMascota.fotoPerfil}
+                                    alt="Foto actual"
+                                    style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #3b82f6' }}
+                                />
+                            ) : (
+                                <div style={{ width: '150px', height: '150px', borderRadius: '50%', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontSize: '48px', color: '#6b7280' }}>
+                                    🐾
+                                </div>
+                            )}
+                        </div>
+
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleMascotaImageChange}
+                            className="form-input"
+                            style={{ marginTop: '10px' }}
+                        />
+
+                        {(editingMascota?.imagen?.path || editingMascota?.fotoPerfil || mascotaImageFile) && (
+                            <button
+                                type="button"
+                                onClick={deleteMascotaImageFromForm}
+                                className="btn-delete"
+                                disabled={imageUploading}
+                                style={{ marginTop: '10px' }}
+                            >
+                                {imageUploading ? 'Eliminando...' : 'Eliminar Foto'}
+                            </button>
+                        )}
+                    </div>
+
                     <div className="form-group">
                         <label className="form-label">Nombre:</label>
                         <input
@@ -774,8 +970,8 @@ const DuenoDashboard = () => {
                                 className="form-select"
                             >
                                 <option value="">Seleccionar...</option>
-                                <option value="macho">Macho</option>
-                                <option value="hembra">Hembra</option>
+                                <option value="M">Macho</option>
+                                <option value="F">Hembra</option>
                             </select>
                         </div>
                     </div>
@@ -831,6 +1027,7 @@ const DuenoDashboard = () => {
                             onClick={() => {
                                 setCurrentView('mascotas');
                                 setEditingMascota(null);
+                                setMascotaImageFile(null); 
                                 setMascotaForm({
                                     nombre: '', edad: '', sexo: '', exotico: false, descripcion: '',
                                     peso: '', idEspecie: '', idRaza: ''
@@ -842,10 +1039,10 @@ const DuenoDashboard = () => {
                         </button>
                         <button 
                             type="submit" 
-                            disabled={loading}
+                            disabled={loading || imageUploading}
                             className="btn-primary"
                         >
-                            {loading ? 'Guardando...' : editingMascota ? 'Actualizar Mascota' : 'Agregar Mascota'}
+                            {loading || imageUploading ? 'Guardando...' : editingMascota ? 'Actualizar Mascota' : 'Agregar Mascota'}
                         </button>
                     </div>
                 </form>
@@ -907,130 +1104,147 @@ const DuenoDashboard = () => {
             <div className="perfil-container">
                 <div className="perfil-header">
                     <h2 className="section-title">Mi Perfil</h2>
-                    <button 
-                        onClick={() => setEditingPerfil(!editingPerfil)}
+                    <button
+                        onClick={() => {
+                            setEditingPerfil(!editingPerfil);
+                            setProfileImageFile(null);
+                            setError('');
+                            if(editingPerfil) {
+                                setPerfilForm({
+                                    nombre: user?.nombre || '',
+                                    email: user?.email || '',
+                                    telefono: user?.telefono || '',
+                                    nroDocumento: user?.nroDocumento || '',
+                                    tipoDocumento: user?.tipoDocumento || ''
+                                });
+                            }
+                        }}
                         className="btn-primary"
                     >
-                        {editingPerfil ? 'Cancelar' : 'Editar Perfil'}
+                        {editingPerfil ? 'Cancelar Edición' : 'Editar Perfil'}
                     </button>
                 </div>
 
+                {error && <p className="error-message">{error}</p>}
+
                 {editingPerfil ? (
                     <form onSubmit={handlePerfilSubmit} className="form-card">
+                        <div className="form-group" style={{ textAlign: 'center', marginBottom: '30px' }}>
+                            <label className="form-label">Foto de perfil:</label>
+                            <div style={{ margin: '15px 0' }}>
+                                {profileImageFile ? (
+                                    <img
+                                        src={URL.createObjectURL(profileImageFile)}
+                                        alt="Preview"
+                                        style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #f97840' }}
+                                    />
+                                ) : user?.perfilImage ? (
+                                    <img
+                                        src={`http://localhost:3000${user.perfilImage}`}
+                                        alt="Foto actual"
+                                        style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #3b82f6' }}
+                                    />
+                                ) : (
+                                    <div style={{ width: '150px', height: '150px', borderRadius: '50%', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontSize: '48px', color: '#6b7280' }}>
+                                        👤
+                                    </div>
+                                )}
+                            </div>
+
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleProfileImageChange}
+                                className="form-input"
+                                style={{ marginTop: '10px' }}
+                            />
+
+                            {user?.perfilImage && (
+                                <button
+                                    type="button"
+                                    onClick={deleteDuenoProfileImage}
+                                    className="btn-delete"
+                                    disabled={imageUploading}
+                                    style={{ marginTop: '10px' }}
+                                >
+                                    {imageUploading ? 'Eliminando...' : 'Eliminar Foto Actual'}
+                                </button>
+                            )}
+                        </div>
+
                         <div className="form-group">
-                            <label className="form-label">Nombre:</label>
+                            <label>Nombre:</label>
                             <input
                                 type="text"
                                 name="nombre"
                                 value={perfilForm.nombre}
-                                onChange={handlePerfilChange}
+                                onChange={handlePerfilFormChange}
                                 required
-                                className="form-input"
                             />
                         </div>
-
                         <div className="form-group">
-                            <label className="form-label">Email:</label>
+                            <label>Email:</label>
                             <input
                                 type="email"
                                 name="email"
                                 value={perfilForm.email}
-                                onChange={handlePerfilChange}
+                                onChange={handlePerfilFormChange}
                                 required
-                                className="form-input"
                             />
                         </div>
-
                         <div className="form-group">
-                            <label className="form-label">Teléfono:</label>
+                            <label>Teléfono:</label>
                             <input
-                                type="tel"
+                                type="text"
                                 name="telefono"
                                 value={perfilForm.telefono}
-                                onChange={handlePerfilChange}
-                                required
-                                className="form-input"
+                                onChange={handlePerfilFormChange}
                             />
                         </div>
-
-                        <div className="form-grid">
-                            <div className="form-group">
-                                <label className="form-label">Tipo de documento:</label>
-                                <select
-                                    name="tipoDocumento"
-                                    value={perfilForm.tipoDocumento}
-                                    onChange={handlePerfilChange}
-                                    required
-                                    className="form-select"
-                                >
-                                    <option value="">Seleccionar...</option>
-                                    <option value="DNI">DNI</option>
-                                    <option value="Pasaporte">Pasaporte</option>
-                                    <option value="Cedula">Cédula</option>
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">Número de documento:</label>
-                                <input
-                                    type="text"
-                                    name="nroDocumento"
-                                    value={perfilForm.nroDocumento}
-                                    onChange={handlePerfilChange}
-                                    required
-                                    className="form-input"
-                                />
-                            </div>
+                        <div className="form-group">
+                            <label>Número de Documento:</label>
+                            <input
+                                type="text"
+                                name="nroDocumento"
+                                value={perfilForm.nroDocumento}
+                                onChange={handlePerfilFormChange}
+                            />
                         </div>
-
-                        {error && (
-                            <div className="error-message">
-                                {error}
-                            </div>
-                        )}
-
-                        <div className="form-buttons">
-                            <button 
-                                type="button"
-                                onClick={() => setEditingPerfil(false)}
-                                className="btn-secondary"
+                        <div className="form-group">
+                            <label>Tipo de Documento:</label>
+                            <select
+                                name="tipoDocumento"
+                                value={perfilForm.tipoDocumento}
+                                onChange={handlePerfilFormChange}
                             >
-                                Cancelar
-                            </button>
-                            <button 
-                                type="submit"
-                                disabled={loading}
-                                className="btn-primary"
-                            >
-                                {loading ? 'Guardando...' : 'Guardar Cambios'}
-                            </button>
+                                <option value="">Selecciona tipo</option>
+                                <option value="DNI">DNI</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                                <option value="Libreta Civica">Libreta Cívica</option>
+                            </select>
                         </div>
+                        <button type="submit" className="btn-primary" disabled={loading || imageUploading}>
+                            {loading || imageUploading ? 'Guardando...' : 'Guardar Cambios'}
+                        </button>
                     </form>
                 ) : (
-                    <div className="perfil-card">
-                        <div className="perfil-field">
-                            <label className="field-label">Nombre:</label>
-                            <p className="field-value">{user?.nombre}</p>
+                    <div className="profile-details-card">
+                        <div className="profile-image-display">
+                            {user?.perfilImage ? (
+                                <img
+                                    src={`http://localhost:3000${user.perfilImage}`}
+                                    alt="Foto de perfil"
+                                    className="profile-display-img"
+                                />
+                            ) : (
+                                <div className="profile-placeholder-img">👤</div>
+                            )}
                         </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Email:</label>
-                            <p className="field-value">{user?.email}</p>
-                        </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Teléfono:</label>
-                            <p className="field-value">{user?.telefono}</p>
-                        </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Tipo de documento:</label>
-                            <p className="field-value">{user?.tipoDocumento}</p>
-                        </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Número de documento:</label>
-                            <p className="field-value">{user?.nroDocumento}</p>
-                        </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Tipo de usuario:</label>
-                            <p className="field-value">Dueño de mascotas</p>
+                        <div className="profile-info">
+                            <p><strong>Nombre:</strong> {user?.nombre}</p>
+                            <p><strong>Email:</strong> {user?.email}</p>
+                            <p><strong>Teléfono:</strong> {user?.telefono || 'N/A'}</p>
+                            <p><strong>Documento:</strong> {user?.tipoDocumento} {user?.nroDocumento || 'N/A'}</p>
                         </div>
                     </div>
                 )}
@@ -1048,41 +1262,48 @@ const DuenoDashboard = () => {
 
     return (
         <div id="main-dashboard" className="dashboard-container">
-            {/* Navbar del dashboard */}
-            <nav id= "main-navbar" className="dashboard-navbar">
+            <nav id="main-navbar" className="dashboard-navbar">
                 <div className="navbar-brand">
-                    <h1 id= "main-title" className="navbar-title">PetsBnB Dueño</h1>
+                    <h1 id="main-title" className="navbar-title">PetsBnB Dueño</h1>
                     <span className="navbar-welcome">Bienvenido, {user?.nombre}</span>
                 </div>
                 <div className="navbar-buttons">
+                    <div className="navbar-buttons-general">
+                    <button
+                        onClick={() => navigate('/')} 
+                        className="nav-button btn-home"
+                    >
+                        <Home size={18} style={{marginRight: '5px'}}/>
+                        Ver Publicaciones
+                    </button>
                     <button
                         onClick={() => setCurrentView('mascotas')}
                         className={`nav-button ${currentView === 'mascotas' ? 'active' : ''}`}
-                    >
+                    >   <PawPrint size={18} style={{marginRight: '5px'}}/>
                         Mascotas
                     </button>
                     <button
                         onClick={() => setCurrentView('reservas')}
                         className={`nav-button ${currentView === 'reservas' ? 'active' : ''}`}
-                    >
+                    >   <CalendarCheck size={18} style={{marginRight: '5px'}}/>
                         Reservas
                     </button>
+                    </div>
+                    <div className="navbar-buttons-especifico">
                     <button
                         onClick={() => setCurrentView('perfil')}
                         className={`nav-button ${currentView === 'perfil' ? 'active' : ''}`}
-                    >
-                        Mi Perfil
+                    >   <User size={18} style={{marginRight: '5px'}}/>
                     </button>
                     <button 
                         onClick={handleLogout}
                         className="logout-button"
-                    >
-                        Cerrar Sesión
+                    >    <LogOut size={18} style={{marginRight: '5px'}}/>
                     </button>
+                    </div>
                 </div>
             </nav>
 
-            {/* Contenido principal */}
             <main>
                 {currentView === 'mascotas' && renderMascotas()}
                 {currentView === 'reservas' && renderReservas()}
@@ -1093,4 +1314,4 @@ const DuenoDashboard = () => {
     );
 };
 
-export default DuenoDashboard;
+export default DuenoDashboard; 

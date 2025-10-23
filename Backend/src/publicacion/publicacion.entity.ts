@@ -29,7 +29,7 @@ export class Publicacion {
   @Property({ nullable: false, unique: false })
   tarifaPorDia!: number;
 
-  @OneToMany(() => Imagen, imagen => imagen.publicacion, { nullable: true, cascade: [Cascade.ALL] })
+  @OneToMany(() => Imagen, imagen => imagen.publicacion, { nullable: true, cascade: [Cascade.ALL],  orphanRemoval: true })
   imagenes = new Collection<Imagen>(this);
   
   @Property({ nullable: true, unique: false })
