@@ -6,6 +6,8 @@ import '../../styles/DashboardCuidador.css';
 import { Home, CalendarCheck, User, LogOut } from 'lucide-react';
 
 
+// mi pequenio dashboard de cuidador
+
 
 const CuidadorDashboard = () => {
     const navigate = useNavigate(); 
