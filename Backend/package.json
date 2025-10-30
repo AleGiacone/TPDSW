@@ -12,7 +12,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.18.1",
+  "packageManager": "pnpm@10.20.0",
   "dependencies": {
     "@mikro-orm/core": "6.4.16",
     "@mikro-orm/mysql": "6.4.16",
@@ -23,6 +23,7 @@
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "mercadopago": "^2.9.0",
     "mongoose": "^8.16.4",
     "multer": "^2.0.2",
     "reflect-metadata": "0.2.2",
