@@ -1,10 +1,33 @@
-### Crear publicacion
-POST http://localhost:3000/api/publicacion
+### Obtener todos los especies
+
+GET http://localhost:3000/api/publicacion/
+
+### Crear un especie 
+# @name createEspecie
+POST http://localhost:3000/api/especies/
 Content-Type: application/json
 
 {
-  "titulo": "Un hogar para tu cachorrito",
-  "descripcion": "Gran persona amantes de los animales",
-  "idCuidador": 3,
-  "precio": 3000
+  "nomEspecie": "Gato"
 }
+
+
+### ID
+@idEspecie =  {{ createEspecie.response.body.data.idEspecie }}
+
+### Devolver una especie
+GET http://localhost:3000/api/especies/4
+
+
+### Actualizar un especie
+PUT http://localhost:3000/api/especies/{{idEspecie}}   
+Content-Type: application/json
+
+{
+  "nomEspecie": "Nutria",
+  "razas": []
+
+}
+
+### Eliminar un especie
+DELETE http://localhost:3000/api/publicacion/8

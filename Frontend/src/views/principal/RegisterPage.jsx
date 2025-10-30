@@ -3,13 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../../styles/Auth.css';
 import Navbar from '../../components/Navbar';
 import { useAuth } from '../../hooks/useAuth';
-
-
-/*import useAuth from '../hooks/useAuth';
-
-function Dashboard() {
-  const { user, logout } = useAuth();*/
-
   
 const RegisterPage = () => {
   const { register } = useAuth();
@@ -46,7 +39,6 @@ const RegisterPage = () => {
     setSuccess('');
     setLoading(true);
 
-    // Validaciones básicas
     if (!formData.nombre || !formData.email || !formData.password || !formData.confirmarPassword) {
       setError('Todos los campos obligatorios deben completarse');
       setLoading(false);
@@ -84,11 +76,12 @@ const RegisterPage = () => {
   };
 
   return (
+    <div className="auth-page-layout">
+    <Navbar />
     <div className="auth-wrapper auth-page-wrapper">
     <div className="auth-container-register">
       <h4>Registrarse</h4>
 
-      {/* Selector de tipoUsuario */}
       <div className="selector-tipo">
         <div className="opciones-tipo">
           <button
@@ -110,7 +103,6 @@ const RegisterPage = () => {
       </div>
 
       <form onSubmit={handleSubmit}>
-        {/* Campos comunes */}
         <label>Nombre completo:</label>
         <input
           type="text"
@@ -150,7 +142,6 @@ const RegisterPage = () => {
           required
         />
 
-        {/* Campos específicos */}
         {formData.tipoUsuario && (
           <>
             <label>Tipo de documento:</label>
@@ -232,6 +223,7 @@ const RegisterPage = () => {
         {success && <p className="success">{success}</p>}
       </form>
       </div>
+    </div>
     </div>
   );
 };

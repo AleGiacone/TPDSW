@@ -35,6 +35,7 @@ const app = express();
 app.use(cookieParser());
 app.use(cors({ origin: 'http://localhost:3308', credentials: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/img', express.static(path.join(__dirname, '../public/img')));
 
@@ -59,12 +60,11 @@ app.use((req, res, next) => {
 
 
 app.use("/api/usuarios", usuarioRouter);
-app.use("/api/login", usuarioRouter);
 app.use("/api/mascotas", mascotaRouter);
 app.use("/api/especies", especieRouter);
 app.use("/api/razas", razaRouter);
 app.use("/api/duenos", duenoRouter);
-app.use("/api/cuidadores", cuidadorRouter);
+app.use("/api/cuidador", cuidadorRouter);
 app.use("/api/usuario/upload-image", usuarioRouter);
 app.use("/api/publicacion", publicacionRouter);
 app.use("/api/imagenes", imagenRouter);
@@ -120,7 +120,6 @@ const PORT = process.env.PORT || 3000;
 await syncSchema(); // Never in production
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
-  console.log(`📸 Images available at http://localhost:${PORT}/img/`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
 

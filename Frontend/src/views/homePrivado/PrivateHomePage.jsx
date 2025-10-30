@@ -205,7 +205,7 @@ const PublicacionesView = () => {
                                         titulo={pub.titulo}
                                     />
                                 </div>
-                                
+                                <div className="card-content">
                                 <div className="card-header">
                                     <h3 className="card-title">{pub.titulo}</h3>
                                     <div className="cuidador-info">
@@ -236,7 +236,7 @@ const PublicacionesView = () => {
                                         </div>
                                     )}
                                 </div>
-                                
+                                </div>
                                 <div className="card-footer">
                                     <div className="price-section">
                                         <span className="price">${pub.tarifaPorDia}</span>

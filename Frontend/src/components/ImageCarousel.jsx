@@ -1,4 +1,4 @@
-
+import '../styles/PrivateHomePage.css';
 import React, { useState } from 'react';
 
 const ImageCarousel = ({ imagenes, titulo }) => {

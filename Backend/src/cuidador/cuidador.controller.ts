@@ -8,26 +8,28 @@ import fs from 'fs';
 import path from 'path';
 
 const sanitizeCuidador = (req: Request, res: Response, next: NextFunction) => {
-  req.body.sanitizeInput = {
-    idUsuario: req.params.idUsuario,
-    email: sanitizeHTML(req.body.email),
-    password: sanitizeHTML(req.body.password),
-    nombre: sanitizeHTML(req.body.nombre),
-    nroDocumento: sanitizeHTML(req.body.nroDocumento),
-    tipoDocumento: sanitizeHTML(req.body.tipoDocumento),
-    telefono: sanitizeHTML(req.body.telefono),
-    telefonoEmergencia: sanitizeHTML(req.body.telefonoEmergencia),
-    sexoCuidador: sanitizeHTML(req.body.sexoCuidador),
-    descripcion: sanitizeHTML(req.body.descripcion),
-    tipoUsuario: 'cuidador'
-  };
-  
-  Object.keys(req.body.sanitizeInput).forEach((key) => {
-    console.log(req.body.sanitizeInput[key])
-    if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
-      delete req.body.sanitizeInput[key];
+  const sanitizedData: any = {};
+
+  const campos = [
+    'email', 'password', 'nombre', 'nroDocumento', 'tipoDocumento',
+    'telefono', 'telefonoEmergencia', 'sexoCuidador', 'descripcion'
+  ];
+
+  if (req.params.idUsuario) {
+    sanitizedData.idUsuario = Number(req.params.idUsuario);
+  }
+
+  campos.forEach(campo => {
+    if (req.body[campo] !== undefined && req.body[campo] !== '') {
+      sanitizedData[campo] = sanitizeHTML(String(req.body[campo]));
     }
-  })
+  });
+
+  if (req.method === 'POST' && !req.params.idUsuario) {
+    sanitizedData.tipoUsuario = 'cuidador';
+  }
+
+  req.body.sanitizeInput = sanitizedData;
   next();
 };
 
@@ -92,7 +94,6 @@ async function add(req: Request, res: Response) {
       }
     });
     const bandera = await authenticateCuidador(req, res);
-    console.log("adding", req.body.sanitizeInput.nombre)
     if (bandera){
       req.body.sanitizeInput.password = await bcrypt.hash(req.body.sanitizeInput.password, 10);
       const cuidador = em.create(Cuidador, req.body.sanitizeInput);
@@ -109,9 +110,6 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-    const bandera = await authenticateUpdate(req, res);
-    if (!bandera) return;
-    
     const idUsuario = Number.parseInt(req.params.idUsuario);
     const cuidador = await em.findOneOrFail(Cuidador, { idUsuario: idUsuario });
     
@@ -120,17 +118,84 @@ async function update(req: Request, res: Response) {
       return;
     }
     
+    const bandera = await authenticateUpdate(req, res);
+    
+    if (!bandera) {
+      return;
+    }
+    
     if (req.body.sanitizeInput.password) {
       req.body.sanitizeInput.password = await bcrypt.hash(req.body.sanitizeInput.password, 10);
+    }
+    
+    if (req.file) {
+      if (cuidador.perfilImage) {
+        const oldImagePath = path.join('public', cuidador.perfilImage);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+      req.body.sanitizeInput.perfilImage = `/img/perfilImages/${req.file.filename}`;
     }
     
     em.assign(cuidador, req.body.sanitizeInput);
     await em.flush();
     
-    res.status(200).json({ message: 'Cuidador updated', data: cuidador });
+    res.status(200).json(cuidador);
   } catch (error: any) {
     res.status(500).json({ message: "Error updating cuidador", error: error.message });
   }
+}
+
+async function updateProfile(req: Request, res: Response): Promise<void> {
+    try {
+        const em = orm.em.fork();
+        const { idUsuario } = req.params;
+
+        const cuidador = await em.findOne(Cuidador, { idUsuario: Number(idUsuario) });
+        
+        if (!cuidador) {
+            res.status(404).json({ message: 'Cuidador no encontrado' });
+            return;
+        }
+
+        const dataToUpdate = req.body.sanitizeInput || req.body;
+        const camposPermitidos = ['nombre', 'email', 'telefono', 'descripcion', 'sexoCuidador'];
+        
+        if (dataToUpdate.email && dataToUpdate.email !== cuidador.email) {
+            const emailExists = await em.findOne(Usuario, { email: dataToUpdate.email });
+            if (emailExists) {
+                res.status(400).json({ message: 'El email ya está en uso' });
+                return;
+            }
+        }
+
+        let actualizaciones: Record<string, string> = {};
+        for (const campo of camposPermitidos) {
+            if (dataToUpdate[campo] !== undefined && dataToUpdate[campo] !== '') {
+                actualizaciones[campo] = sanitizeHTML(dataToUpdate[campo]);
+            }
+        }
+
+        if (Object.keys(actualizaciones).length === 0) {
+            res.status(400).json({ message: 'No hay campos para actualizar' });
+            return;
+        }
+
+        em.assign(cuidador, actualizaciones);
+        await em.flush();
+
+        res.status(200).json({
+            message: 'Perfil actualizado correctamente',
+            data: cuidador
+        });
+
+    } catch (error: any) {
+        res.status(500).json({
+            message: 'Error al actualizar perfil',
+            error: error?.message ?? String(error)
+        });
+    }
 }
 
 async function updateProfileImage(req: Request, res: Response): Promise<void> {
@@ -199,14 +264,16 @@ async function deleteProfileImage(req: Request, res: Response): Promise<void> {
 async function authenticateUpdate(req: Request, res: Response): Promise<boolean> {
   try {
     const em = orm.em.fork();
-    const existingUser = await em.findOne(Cuidador, { idUsuario: req.body.sanitizeInput.idUsuario });
+    const idUsuario = Number(req.params.idUsuario);
+    const existingUser = await em.findOne(Cuidador, { idUsuario });
     
     if (!existingUser) {
-      res.status(404).json({ message: 'Usuario not found', data: req.body.sanitizeInput.idUsuario });
+      res.status(404).json({ message: 'Usuario not found', data: idUsuario });
       return false;
     }
     
-    if (req.body.sanitizeInput.nroDocumento != existingUser.nroDocumento && req.body.sanitizeInput.nroDocumento != undefined) {
+    if (req.body.sanitizeInput?.nroDocumento && 
+        req.body.sanitizeInput.nroDocumento !== existingUser.nroDocumento) {
       const nroDocumento = await em.findOne(Cuidador, { nroDocumento: req.body.sanitizeInput.nroDocumento });
       if (nroDocumento) {
         res.status(400).json({ message: 'El número de documento ya está en uso' });
@@ -218,7 +285,8 @@ async function authenticateUpdate(req: Request, res: Response): Promise<boolean>
       }
     }
     
-    if (req.body.sanitizeInput.email != existingUser.email && req.body.sanitizeInput.email != undefined) {
+    if (req.body.sanitizeInput?.email && 
+        req.body.sanitizeInput.email !== existingUser.email) {
       const emailInUse = await em.findOne(Usuario, { email: req.body.sanitizeInput.email });
       if (emailInUse) {
         res.status(400).json({ message: 'El email ya está en uso' });
@@ -226,12 +294,12 @@ async function authenticateUpdate(req: Request, res: Response): Promise<boolean>
       }
     }
     
-    if (req.body.sanitizeInput.password != undefined && req.body.sanitizeInput.password.length < 6) {
+    if (req.body.sanitizeInput?.password && req.body.sanitizeInput.password.length < 6) {
       res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
       return false;
     }
     
-    if (req.body.sanitizeInput.nombre != undefined && req.body.sanitizeInput.nombre.length < 3) {
+    if (req.body.sanitizeInput?.nombre && req.body.sanitizeInput.nombre.length < 3) {
       res.status(400).json({ message: 'El nombre debe tener al menos 3 caracteres' });
       return false;
     }
@@ -263,4 +331,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeCuidador, findAll, findOne, add, update, remove, updateProfileImage, deleteProfileImage };
+export { sanitizeCuidador, findAll, findOne, add, update, remove, updateProfileImage, deleteProfileImage, updateProfile };

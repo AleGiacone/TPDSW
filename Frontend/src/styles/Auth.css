@@ -1,384 +1,50 @@
-/*LOGIN*/
-     
-     .auth-container {
-     max-width: 90%;
-     margin:0 auto;
-     padding: 20px;
-     border-radius: 20px;
-     justify-content: center;
-     font-family: "Nunito", "Sans-serif";
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-     box-sizing: border-box;
-}
 
- .auth-wrapper {
-      min-height: 100vh;
-      /* Esto es lo que pone la imagen de animalitos */
-      background: url('/fondo.png') repeat center fixed;
-      background-size: 500px;
-      /* Tu tamaño original */
-      padding: 0;
-      margin: 0;
- }
-
-
-  .auth-container,
-  .auth-container-register {
-       /* ... tus estilos existentes ... */
-       /* Asegurarse de que el formulario esté centrado y tenga un margen superior si es necesario */
-       margin-top: 50px;
-       /* Ajustar el formulario hacia abajo para que no choque con la navbar transparente */
-       /* ... */
-  }
-  
-     .auth-form {
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-     font-family: "Nunito", "Sans-serif";
-     
-}
-
-     .auth-form input {
-     width: 700px;
-     padding: 20px;
-     margin-bottom: 30px;
-     font-size: 1rem;
-     border: 1px solid #ccc;
-     border-radius: 10px;
-     background-color: #ffff;
-     color: #222222;
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-     outline: none;
-     
-     
-}
-
-     .auth-form button {
-     padding: 20px;
-     width: 700px;
-     margin: 0 auto;
-     font-family: "Nunito";
-     text-align: center;
-     background-color: #f97136;
-     color: #ffff;
-     border: none;
-     border-radius: 6px;
-     font-weight: bold;
-     font-size: 1.2rem;
-     cursor: pointer;
-     transition: 0.3s ease;
-     border-radius:20px;
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-}
-
-     .auth-form button:hover {
-     background-color: #f976;
-}
-
-/*INGRESAR*/
-
-     h3{
-     width: 700px;
-     background-color: #fff;
-     color: #f97316;
-     text-align: center;
-     font-weight: bold;
-     font-size: 4rem;
-     line-height: 1.1;
-     padding: 30px;
-     margin: 30px;
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-     border-radius: 30px;
-}
- /*MISMO PARA AMBOS*/
-
-     label{
-     font-weight: bold;
-     margin-bottom: 10px;  
-     text-align: center;
-     padding: 10px;
-     width: 150px;
-     display: block;
-     background-color: #ffff;
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-     border-radius:20px;
-     color: #222222;
-}
-
-     .error-message {
-     color:#f97136;
-     text-align: center;
-     font-family: 'Nunito', 'Sans-serif';
-     font-size: 1.2rem;
-     margin-bottom: 20px;
-     background-color: #fff;
-     padding: 10px;
-     border-radius: 20px;
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-}
-
-     .auth-form input:focus{
-     outline: none;
-}
-     .auth-form input:-webkit-autofill {
-     -webkit-box-shadow: 0 0 0 1000px white inset !important;
-     -webkit-text-fill-color: black !important;
-}
-
-/*REGISTER*/
-
-     .auth-container-register{
-     max-width: 900px;
-     width: 100%;
-     margin: 0 auto;
-     border-radius: 20px;
-     justify-content: center;
-     font-family: "Nunito", "Sans-serif";
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-     box-sizing: border-box;
-}
-
-     .form {
-     max-width: 900px;
-     width: 100%;
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-     font-family: "Nunito", "Sans-serif";
-}
-
-/*REGISTRAR*/
-
-     h4 {
-     width: 700px;
-     background-color: #fff;
-     color: #f97316;
-     text-align: center;
-     font-weight: bold;
-     font-size: 4rem;
-     line-height: 1.1;
-     padding: 30px;
-     margin: 20px;
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-     border-radius: 30px;
-}
-
-     input{
-     width: 100%;
-     padding: 20px;
-     margin-bottom: 20px;
-     font-size: 1rem;
-     border: 1px solid #ccc;
-     border-radius: 10px;
-     background-color: #ffff;
-     color: #222222;
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-     outline: none;
-     box-sizing: border-box;
+html,
+body {
+     margin: 0;
+     padding: 0;
+     height: 100%;
+     overflow-x: hidden;
    
 }
- 
-     button  {
-     width: 700px;
-     padding: 20px;
-     margin: 20px;
-     font-family: "Nunito";
-     background-color: #f97136;
-     color: #ffff;
-     border: none;
-     border-radius: 6px;
-     font-weight: bold;
-     font-size: 1.2rem;
-     cursor: pointer;
-     transition: 0.3s ease;
-     border-radius: 20px;
+
+* {
      box-sizing: border-box;
-     text-align: center;
-     flex-direction: column;
-     display: flex;
-     transition: transform 0.1s ease, box-shadow 0.1s ease;
-     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-     transform: translateY(0);
 }
 
-     button:active {
-     transform: translateY(2px);
-     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
-}
 
-     button:hover{
-     background-color: #f976;
-}
-
-     .auth-container-register .error {
-     background-color: #fff;
-     color: #f97136;
-     font-family: 'Nunito';
+.auth-page-layout {
+     min-height: 100vh;
+     background: url('/fondo.png') repeat center fixed;
+     background-size: 500px;
+     padding: 0;
+     margin: 0;
      display: flex;
      flex-direction: column;
-     align-items: center;
+     overflow-y: auto;
 }
 
-     .auth-container-register .success {
-     background-color: #fff;
-     color: #f97136;
-     font-family: 'Nunito';
+.auth-wrapper,
+.layout-wrapper {
+     background: transparent !important;
+     padding: 0;
+     margin: 0;
+}
+
+.auth-page-content {
+     flex-grow: 1;
      display: flex;
-     flex-direction: column;
-     align-items: center;
-}
-
-     input:-webkit-autofill {
-     -webkit-box-shadow: 0 0 0 1000px white inset !important;
-     -webkit-text-fill-color: black !important;
-}
-
-
-/*BOTONES*/
-
-     .opciones-tipo {
-     display: flex;
-     gap: 10px;
-     margin-bottom: 10px;
-}
-
-     .opciones-tipo button {
-     width:100%;
-     padding: 10px;
-     border: 2px solid #f97136;
-     background-color: white;
-     color: #f97136;
-     border-radius: 10px;
-     cursor: pointer;
-     transition: all 0.3s ease;
-     font-weight: bold;
-}
-
-     .opciones-tipo button.selected {
-     background-color: #f97136;
-     color: white;
-}
-
-
-@media ( max-width: 768px ) {
-
-     .auth-container {
-     width: 100%;
-     max-width: 300px;
-     margin: 0 auto;
-     border-radius: 20px;
      justify-content: center;
-     font-family: "Nunito", "Sans-serif";
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-     box-sizing: border-box;
+     align-items: flex-start;
+     padding-top: 20px;
 }
-  
-      .auth-form {
-      width: 100%;
-      max-width: 90%;
-      display: flex-start;
-      flex-direction: column;
-      align-items: center;
-}
-  
-      .auth-form input {
-      width: 100%;
-      max-width: 90%;
-      margin: 0 auto 10px;
-      padding: 15px;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      background-color: #ffff;
-      color: #222222;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-      outline: none;
-}
-  
-      .auth-form button {
-      width: 100%;
-      max-width: 90%;
-      margin: 0  auto;
-      padding: 15px;
-      font-family: "Nunito";
-      text-align: center;
-      background-color: #f97136;
-      color: #ffff;
-      border: none;
-      font-weight: bold;
-      font-size: 1.2rem;
-      cursor: pointer;
-      transition: 0.3s ease;
-      border-radius: 20px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-}
-  
-    .auth-form button:hover {
-      background-color: #f976;
-}
-  
-      h3 {
-      width:100%;
-      max-width: 90%;
-      background-color: #fff;
-      color: #f97316;
-      text-align: center;
-      font-weight: bold;
-      font-size: 2rem;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-      border-radius: 30px;
-}
-  
-     label {
-     font-weight: bold;
-     margin-bottom: 5px;
-     text-align: center;
-     display: block;
-     background-color: #ffff;
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-     border-radius: 20px;
-     color: #222222;
-    }
-  
-    .error-message {
-     color: #f97136;
-     text-align: center;
-     font-family: 'Nunito', 'Sans-serif';
-     font-size: 1rem;
-     margin-bottom: 20px;
-     background-color: #fff;
-     padding: 10px;
-     border-radius: 20px;
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-}
-  
-    .auth-form input:focus {
-      outline: none;
-}
-  
-     .auth-form input:-webkit-autofill {
-     -webkit-box-shadow: 0 0 0 1000px white inset !important;
-     -webkit-text-fill-color: black !important;
- }
 
-
-/*REGISTER*/
-
-    .auth-container-register {
-     max-width: 300px;
+/* LOGIN */
+.auth-container {
      width: 100%;
+     max-width: 1400px;
      margin: 0 auto;
+     padding: 20px;
      border-radius: 20px;
      justify-content: center;
      font-family: "Nunito", "Sans-serif";
@@ -388,34 +54,25 @@
      box-sizing: border-box;
 }
 
-     .form {
-     max-width: 300px;
-     width: 100%;
+.auth-container,
+.auth-container-register {
+     margin-top: 50px;
+     margin-bottom: 50px;
+    
+}
+
+.auth-form {
      display: flex;
+     flex-direction: column;
      align-items: center;
      font-family: "Nunito", "Sans-serif";
+
 }
 
-     h4 {
-     max-width: 200px;
-     width: 100%;
-     background-color: #fff;
-     color: #f97316;
-     text-align: center;
-     font-weight: bold;
-     font-size: 2rem;
-     line-height: 1.1;
-     padding: 30px;
-     margin: 20px;
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-     border-radius: 30px;
-}
-
-     input {
+.auth-form input {
      width: 100%;
      padding: 20px;
-     margin-bottom: 20px;
-     font-size: 1rem;
+     margin-bottom: 30px;
      border: 1px solid #ccc;
      border-radius: 10px;
      background-color: #ffff;
@@ -426,87 +83,322 @@
 
 }
 
-     button {
-     max-width: 200px;
-     width: 100%;
+.form-group{
+     display:flex;
+     flex-direction: column;
+     width: 1400px;
+     max-width: 90%;
      margin: 0 auto;
+     align-items: center;
+}
+
+
+.auth-form button {
      padding: 20px;
+     width: 60%;
+     max-width: 400px;
+     margin: 0 auto;
      font-family: "Nunito";
-     background-color: #f97136;
+     text-align: center;
+     background-color: #f97840;
      color: #ffff;
      border: none;
-     border-radius: 6px;
+     border-radius: 20px;
      font-weight: bold;
-     font-size: 1rem;
+     font-size: 1.2rem;
      cursor: pointer;
      transition: 0.3s ease;
-     border-radius: 20px;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.auth-form button:hover {
+     background: linear-gradient(145deg, #FFAD66, #FA8351);
+     box-shadow: 0 10px 20px rgba(249, 113, 54, 0.5);
+     transform: translateY(-2px);
+}
+
+/*INGRESAR y REGISTRARSE TÍTULOS (H3/H4) */
+h3,
+h4 {
+     width: 700px;
+     max-width: 90%;
+     background-color: #fff;
+     color: #f97316;
      text-align: center;
+     font-weight: bold;
+     font-size: 4rem;
+     line-height: 1.1;
+     padding: 1rem;
+     margin: 0 auto 30px;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+     border-radius: 30px;
+     box-sizing: border-box;
+
+}
+
+/* MISMO PARA AMBOS (Labels y otros ) */
+label {
+     font-weight: bold;
+     margin-bottom: 10px;
+     text-align: center;
+     padding: 10px;
+     width:30%;
+     display: block;
      flex-direction: column;
-     display: flex;
-     transition: transform 0.1s ease, box-shadow 0.1s ease;
-     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-     transform: translateY(0);
+     background-color: #ffff;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+     border-radius: 20px;
+     color: #222222;
 }
 
-     button:active {
-     transform: translateY(2px);
-     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
-}
-
-     button:hover{
-     background-color: #f976;
-}
-
-     .auth-container-register .error {
-     background-color: #fff;
+.error-message {
      color: #f97136;
-     font-family: 'Nunito';
+     text-align: center;
+     font-family: 'Nunito', 'Sans-serif';
+     font-size: 1.2rem;
+     margin-bottom: 20px;
+     background-color: #fff;
+     padding: 10px;
+     border-radius: 20px;
      display: flex;
      flex-direction: column;
      align-items: center;
 }
 
-     .auth-container-register .success {
-     background-color: #fff;
-     color: #f97136;
-     font-family: 'Nunito';
-     display: flex;
-     flex-direction: column;
-     align-items: center;
+.auth-form input:focus {
+     outline: none;
 }
 
-     input:-webkit-autofill {
+.auth-form input:-webkit-autofill {
      -webkit-box-shadow: 0 0 0 1000px white inset !important;
      -webkit-text-fill-color: black !important;
 }
 
-
-/*BOTONES TIPO*/
-
-     .opciones-tipo {
+/* REGISTER */
+.auth-container-register {
+     max-width: 900px;
+     width: 100%;
+     margin: 0 auto;
+     border-radius: 20px;
+     justify-content: center;
+     font-family: "Nunito", "Sans-serif";
      display: flex;
-     gap: 10px;
-     margin-bottom: 10px;
+     flex-direction: column;
+     align-items: center;
+     box-sizing: border-box;
+     margin-top: 30px;
+     margin-bottom: 30px;
 }
 
-     .opciones-tipo button {
+/* Estilo para el botón de REGISTRARSE (dentro del formulario) */
+.auth-container-register form button[type="submit"] {
+     display: flex;
+     flex-direction: column;
+     padding: 20px;
+     width: 60%;
+     max-width: 400px;
+     margin: 0 auto;
+     font-family: "Nunito";
+     text-align: center;
+     background-color: #f97840;
+     color: #ffff;
+     border: none;
+     border-radius: 20px;
+     font-weight: bold;
+     font-size: 1.2rem;
+     cursor: pointer;
+     transition: 0.3s ease;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.auth-container-register form button[type="submit"]:hover {
+     background: linear-gradient(145deg, #FFAD66, #FA8351);
+     box-shadow: 0 10px 20px rgba(249, 113, 54, 0.5);
+     transform: translateY(-2px);
+}
+
+.auth-container-register form button[type="submit"]:active {
+     transform: translateY(1px);
+     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* BOTONES USUARIO */
+.selector-tipo {
      width: 100%;
-     padding: 10px;
+     max-width: 600px;
+     /* Limitar el ancho */
+     margin-bottom: 30px;
+}
+
+.opciones-tipo {
+     display: flex;
+     gap: 15px;
+     justify-content: center;
+}
+
+.opciones-tipo button {
+     flex-grow: 1;
+     max-width: 300px;
+     padding: 12px 25px;
      border: 2px solid #f97136;
      background-color: white;
      color: #f97136;
-     border-radius: 10px;
+     border-radius: 30px;
      cursor: pointer;
      transition: all 0.3s ease;
-     font-weight: bold;
+     font-weight: 700;
+     font-size: 1rem;
+     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-     .opcines-tipo button:hover {
-     background-color: #f976;
-     }
-     .opciones-tipo button.selected {
+.opciones-tipo button:hover {
+     background-color: #f971361a;
+     transform: translateY(-1px);
+}
+
+.opciones-tipo button.selected {
      background-color: #f97136;
      color: white;
+     box-shadow: 0 4px 10px rgba(249, 113, 54, 0.4);
+     transform: scale(1.02);
 }
+
+input,
+select {
+     width: 100%;
+     max-width: 600px;
+     padding: 15px;
+     margin-bottom: 20px;
+     font-size: 1rem;
+     border: 1px solid #ccc;
+     border-radius: 10px;
+     background-color: #ffff;
+     color: #222222;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+     outline: none;
+     box-sizing: border-box;
+}
+
+/* ========================================= */
+/* RESPONSIVE: MÓVILES (Max-width 768px) */
+/* ========================================= */
+@media (max-width: 768px) {
+
+     /* TÍTULOS */
+     h3,
+     h4 {
+          max-width: 90%;
+          font-size: 2.5rem;
+          padding: 15px;
+          margin: 15px auto 20px;
+     }
+
+     /* CONTENEDOR DE LOGIN */
+     .auth-container {
+          max-width: 95%;
+          padding: 10px;
+     }
+
+     /* CONTENEDOR DE REGISTER */
+     .auth-container-register {
+          max-width: 95%;
+          padding: 10px;
+     }
+
+     /* FORMULARIO Y CAMPOS (Login y Register) */
+     .auth-form {
+          width: 100%;
+          max-width: 90%;
+     }
+
+     .auth-form input,
+     input,
+     select {
+          width: 100%;
+          max-width: 100%;
+          padding: 12px;
+          font-size: 0.95rem;
+          margin-bottom: 15px;
+     }
+
+     /* LABELS */
+     label {
+          width: auto;
+          padding: 8px 15px;
+          font-size: 0.9rem;
+          margin-bottom: 5px;
+     }
+
+     /* BOTÓN LOGIN */
+     .auth-form button {
+          width: 100%;
+          max-width: 250px;
+          padding: 15px;
+          font-size: 1.1rem;
+          margin-top: 10px;
+     }
+
+     /* BOTONES TIPO DE USUARIO */
+     .selector-tipo {
+          max-width: 100%;
+          padding: 0 10px;
+     }
+
+     .opciones-tipo {
+          flex-direction: column;
+          gap: 10px;
+     }
+
+     .opciones-tipo button {
+          width: 100%;
+          max-width: 100%;
+          padding: 10px 15px;
+          font-size: 0.9rem;
+     }
+
+     /* BOTÓN REGISTRARSE */
+     .auth-container-register form button[type="submit"] {
+          max-width: 250px;
+          font-size: 1.1rem;
+          padding: 15px;
+          margin-top: 20px;
+     }
+}
+
+/* ========================================= */
+/* RESPONSIVE: PANTALLAS PEQUEÑAS (Max-width 480px) */
+/* ========================================= */
+@media (max-width: 480px) {
+
+     h3,
+     h4 {
+          font-size: 2rem;
+          padding: 10px;
+          margin-bottom: 15px;
+     }
+
+     .auth-container,
+     .auth-container-register {
+          margin-top: 20px;
+          padding: 5px;
+     }
+
+     .auth-form input,
+     input,
+     select {
+          padding: 10px;
+          font-size: 0.9rem;
+     }
+
+     .opciones-tipo button {
+          padding: 8px 10px;
+          font-size: 0.85rem;
+     }
+
+     .auth-form button,
+     .auth-container-register form button[type="submit"] {
+          padding: 12px;
+          font-size: 1rem;
+     }
+
 }
