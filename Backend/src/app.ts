@@ -64,7 +64,7 @@ app.use("/api/mascotas", mascotaRouter);
 app.use("/api/especies", especieRouter);
 app.use("/api/razas", razaRouter);
 app.use("/api/duenos", duenoRouter);
-app.use("/api/cuidador", cuidadorRouter);
+app.use("/api/cuidadores", cuidadorRouter);
 app.use("/api/usuario/upload-image", usuarioRouter);
 app.use("/api/publicacion", publicacionRouter);
 app.use("/api/imagenes", imagenRouter);
@@ -123,3 +123,4 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
+export default app;

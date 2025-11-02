@@ -8,6 +8,7 @@ import fs from 'fs';
 import path from 'path';
 
 const sanitizeCuidador = (req: Request, res: Response, next: NextFunction) => {
+  console.log('Sanitizing cuidador input...');
   const sanitizedData: any = {};
 
   const campos = [
@@ -236,6 +237,20 @@ async function updateProfileImage(req: Request, res: Response): Promise<void> {
   }
 }
 
+async function findByEmail(req: Request, res: Response) {
+  try {
+    const em = orm.em.fork();
+    const email = req.body.email;
+    const cuidador = await em.findOneOrFail(Cuidador, { email });
+    res.status(200).json({ message: 'Cuidador found', data: cuidador });
+
+  } catch (error: any) {
+    res.status(500).json({ message: "Error finding cuidador", error: error.message });
+  }
+
+}
+
+
 async function deleteProfileImage(req: Request, res: Response): Promise<void> {
   try {
     const em = orm.em.fork();
@@ -331,4 +346,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeCuidador, findAll, findOne, add, update, remove, updateProfileImage, deleteProfileImage, updateProfile };
+export { sanitizeCuidador, findAll, findOne, add, update, remove, updateProfileImage, deleteProfileImage, updateProfile, findByEmail };
