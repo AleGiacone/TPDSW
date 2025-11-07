@@ -21,9 +21,6 @@ export abstract class Usuario {
   @Property({ nullable: false, unique: false })
   tipoUsuario!: string;  
 
-  @Property({ nullable: true, unique: false })
-  perfilImage?: string;
-
   @OneToOne('Imagen', 'usuario', {
     owner: true, 
     cascade: [Cascade.PERSIST, Cascade.MERGE],

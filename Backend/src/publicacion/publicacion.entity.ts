@@ -19,7 +19,7 @@ export class Publicacion {
 
   @Property({ nullable: true, unique: false })
   exotico!: boolean;           
-  
+
   @ManyToOne(() => Cuidador, { nullable: true })
   idCuidador!: Rel<Cuidador>;
 

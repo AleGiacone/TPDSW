@@ -117,10 +117,16 @@ app.use((_, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-await syncSchema(); // Never in production
+// Envolver en una función async
+async function startServer() {
+  await syncSchema(); // Never in production
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+// Llamar la función
+startServer();
 
 export default app;

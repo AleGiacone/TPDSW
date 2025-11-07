@@ -6,14 +6,14 @@
   "type": "module",
   "scripts": {
     "testing": "node --watch --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test": "jest",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "build": "tsc -p ./tsconfig.json",
     "start:dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess  \"node ./dist/app.js\"  "
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.18.1",
+  "packageManager": "pnpm@10.20.0",
   "dependencies": {
     "@mikro-orm/core": "6.4.16",
     "@mikro-orm/mysql": "6.4.16",
