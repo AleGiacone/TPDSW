@@ -16,23 +16,33 @@ declare global {
   }
 }
 
+
+
 const em = orm.em
 
 async function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
+  console.log('req.body.session usuario:', req.cookies.access_token);
   req.body.sanitizeInput = {
     email: sanitizeHTML(req.body.email),
     password: sanitizeHTML(req.body.password),
     nombre: sanitizeHTML(req.body.nombre),
     tipoUsuario: 'usuario'
   };
-  
+   
   Object.keys(req.body.sanitizeInput).forEach((key) => {
     if (req.body.sanitizeInput[key] === undefined) {
       delete req.body.sanitizeInput[key];
     }
     
   });
-  
+
+
+  if (req.session?.usuario == null) {
+    console.log("No session usuario found");
+  }
+
+  console.log("Sanitized input:", req.body.sanitizeInput);
+
   next();
 }
 

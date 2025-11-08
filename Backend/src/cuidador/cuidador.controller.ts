@@ -8,28 +8,30 @@ import fs from 'fs';
 import path from 'path';
 
 const sanitizeCuidador = (req: Request, res: Response, next: NextFunction) => {
-  const sanitizedData: any = {};
 
-  const campos = [
-    'email', 'password', 'nombre', 'nroDocumento', 'tipoDocumento',
-    'telefono', 'telefonoEmergencia', 'sexoCuidador', 'descripcion'
-  ];
+ 
 
-  if (req.params.idUsuario) {
-    sanitizedData.idUsuario = Number(req.params.idUsuario);
-  }
+  req.body.sanitizeInput = {
+    idUsuario: sanitizeHTML(req.body.idUsuario),
+    nombre: sanitizeHTML(req.body.nombre),
+    email: sanitizeHTML(req.body.email),
+    password: sanitizeHTML(req.body.password),
+    nroDocumento: sanitizeHTML(req.body.nroDocumento),
+    tipoDocumento: sanitizeHTML(req.body.tipoDocumento),
+    telefono: sanitizeHTML(req.body.telefono),
+    sexoCuidador: sanitizeHTML(req.body.sexoCuidador),
+    descripcion: sanitizeHTML(req.body.descripcion),
+    tipoUsuario: 'cuidador'
+  };
 
-  campos.forEach(campo => {
-    if (req.body[campo] !== undefined && req.body[campo] !== '') {
-      sanitizedData[campo] = sanitizeHTML(String(req.body[campo]));
+  Object.keys(req.body.sanitizeInput).forEach((key) => {
+    if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
+      delete req.body.sanitizeInput[key];
     }
   });
 
-  if (req.method === 'POST' && !req.params.idUsuario) {
-    sanitizedData.tipoUsuario = 'cuidador';
-  }
+  console.log("Sanitized input:", req.body.sanitizeInput);
 
-  req.body.sanitizeInput = sanitizedData;
   next();
 };
 

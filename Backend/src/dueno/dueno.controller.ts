@@ -10,26 +10,27 @@ import path from 'path';
 const em = orm.em;
 
 function sanitizeDueno(req: Request, res: Response, next: NextFunction) {
-  const sanitizedData: any = {};
-
-  if (req.params.idUsuario) {
-    sanitizedData.idUsuario = Number(req.params.idUsuario);
+    
+  req.body.sanitizeInput = {
+    idUsuario: sanitizeHTML(req.body.idUsuario),
+    nombre: sanitizeHTML(req.body.nombre),
+    email: sanitizeHTML(req.body.email),
+    password: sanitizeHTML(req.body.password),
+    tipoUsuario: 'dueno',
+    nroDocumento: sanitizeHTML(req.body.nroDocumento),
+    tipoDocumento: sanitizeHTML(req.body.tipoDocumento),
+    telefono: sanitizeHTML(req.body.telefono),
+    telefonoEmergencia: sanitizeHTML(req.body.telefonoEmergencia)
   }
 
-  const campos = [
-    'nombre', 'email', 'password', 'nroDocumento', 'tipoDocumento',
-    'telefono', 'telefonoEmergencia'
-  ];
-
-  campos.forEach(campo => {
-    if (req.body[campo] !== undefined && req.body[campo] !== '') {
-      sanitizedData[campo] = sanitizeHTML(String(req.body[campo]));
+  Object.keys(req.body.sanitizeInput).forEach((key) => {
+    if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
+      delete req.body.sanitizeInput[key];
     }
   });
 
+  console.log("Sanitized input:", req.body.sanitizeInput);
 
-
-  req.body.sanitizeInput = sanitizedData;
   next();
 }
 
