@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 const ImageCarousel = ({ imagenes, titulo }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const totalImages = imagenes?.length || 0;
-    
+
     console.log(' ImageCarousel recibió:', { imagenes, totalImages });
-    
+
     if (!imagenes || imagenes.length === 0) {
         return (
             <div className="carousel-placeholder">
@@ -15,7 +15,7 @@ const ImageCarousel = ({ imagenes, titulo }) => {
             </div>
         );
     }
-    
+
     const nextImage = () => {
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % totalImages);
     };
@@ -26,12 +26,12 @@ const ImageCarousel = ({ imagenes, titulo }) => {
 
     const currentImage = imagenes[currentImageIndex];
     const imageUrl = currentImage.url || `http://localhost:3000${currentImage.path}`;
-    
+
     console.log(' Renderizando imagen:', imageUrl);
 
     return (
         <div className="carousel-container">
-            <img 
+            <img
                 src={imageUrl}
                 alt={`Foto de ${titulo || 'publicación'}`}
                 className="carousel-image"
@@ -50,7 +50,7 @@ const ImageCarousel = ({ imagenes, titulo }) => {
                     </button>
                     <div className="carousel-dots">
                         {imagenes.map((_, index) => (
-                            <span 
+                            <span
                                 key={index}
                                 className={`dot ${index === currentImageIndex ? 'active' : ''}`}
                                 onClick={() => setCurrentImageIndex(index)}

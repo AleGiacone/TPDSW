@@ -563,6 +563,47 @@ const DuenoDashboard = () => {
         setPerfilForm({ ...perfilForm, [e.target.name]: e.target.value });
     };
 
+    const handleDeleteUser = async () => {
+        if (!window.confirm('🚨 ADVERTENCIA: Esta acción es IRREVERSIBLE. ¿Estás absolutamente seguro de que quieres ELIMINAR tu cuenta? Se eliminarán TODAS tus mascotas y reservas.')) {
+            return;
+        }
+
+        setLoading(true);
+        setError('');
+
+        try {
+            const userId = user.idUsuario;
+            if (!userId) {
+                throw new Error('ID de usuario no encontrado.');
+            }
+
+            const response = await fetch(
+                `${API_BASE_URL}/duenos/${userId}`, 
+                {
+                    method: 'DELETE',
+                    credentials: 'include'
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Error ${response.status} al eliminar la cuenta.`);
+            }
+
+           
+            await logout();
+            alert('✅ Cuenta eliminada exitosamente. Serás redirigido.');
+            navigate('/'); 
+        } catch (error) {
+            console.error('❌ Error al eliminar la cuenta:', error);
+            setError(error.message || 'Error al eliminar la cuenta. Inténtalo de nuevo.');
+            alert('Error: ' + (error.message || 'No se pudo eliminar la cuenta.'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     const handlePerfilSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -837,7 +878,6 @@ const DuenoDashboard = () => {
                 </h2>
                 
                 <form onSubmit={handleMascotaSubmit} className="form-card">
-                    {/* 🆕 CAMPO DE IMAGEN DE MASCOTA */}
                     <div className="form-group" style={{ textAlign: 'center', marginBottom: '30px' }}>
                         <label className="form-label">Foto de la mascota:</label>
                         <div style={{ margin: '15px 0' }}>
@@ -1246,6 +1286,16 @@ const DuenoDashboard = () => {
                             <p><strong>Teléfono:</strong> {user?.telefono || 'N/A'}</p>
                             <p><strong>Documento:</strong> {user?.tipoDocumento} {user?.nroDocumento || 'N/A'}</p>
                         </div>
+                            <div className="delete-user-section">
+                                <button
+                                    onClick={handleDeleteUser}
+                                    className="btn-delete"
+                                    disabled={loading}
+                                    style={{ width: '100%', padding: '10px', marginTop: '20px' }}
+                                >
+                                    {loading ? 'Eliminando Cuenta...' : '🗑️ Eliminar Cuenta Definitivamente'}
+                                </button>
+                            </div>
                     </div>
                 )}
             </div>

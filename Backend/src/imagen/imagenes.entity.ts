@@ -11,7 +11,6 @@ export class Imagen {
   @Property()
   path!: string;
   
-  // Usando string references para evitar imports circulares
   @ManyToOne(() => Publicacion,  
 { nullable: true })
   publicacion?: Rel<Publicacion>;

@@ -10,28 +10,27 @@ import path from 'path';
 const em = orm.em;
 
 function sanitizeDueno(req: Request, res: Response, next: NextFunction) {
-  const sanitizedData: any = {};
-
-  if (req.params.idUsuario) {
-    sanitizedData.idUsuario = Number(req.params.idUsuario);
+    
+  req.body.sanitizeInput = {
+    idUsuario: sanitizeHTML(req.body.idUsuario),
+    nombre: sanitizeHTML(req.body.nombre),
+    email: sanitizeHTML(req.body.email),
+    password: sanitizeHTML(req.body.password),
+    tipoUsuario: 'dueno',
+    nroDocumento: sanitizeHTML(req.body.nroDocumento),
+    tipoDocumento: sanitizeHTML(req.body.tipoDocumento),
+    telefono: sanitizeHTML(req.body.telefono),
+    telefonoEmergencia: sanitizeHTML(req.body.telefonoEmergencia)
   }
 
-  const campos = [
-    'nombre', 'email', 'password', 'nroDocumento', 'tipoDocumento',
-    'telefono', 'telefonoEmergencia'
-  ];
-
-  campos.forEach(campo => {
-    if (req.body[campo] !== undefined && req.body[campo] !== '') {
-      sanitizedData[campo] = sanitizeHTML(String(req.body[campo]));
+  Object.keys(req.body.sanitizeInput).forEach((key) => {
+    if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
+      delete req.body.sanitizeInput[key];
     }
   });
 
-  if (req.method === 'POST' && !req.params.idUsuario) {
-    sanitizedData.tipoUsuario = 'dueno';
-  }
+  console.log("Sanitized input:", req.body.sanitizeInput);
 
-  req.body.sanitizeInput = sanitizedData;
   next();
 }
 
@@ -189,51 +188,99 @@ async function updateDueno(req: Request, res: Response): Promise<void> {
 }
 
 async function remove(req: Request, res: Response) {
+  const emFork = em.fork();
   try {
     const idUsuario = Number.parseInt(req.params.idUsuario);
-    const dueno = await em.findOneOrFail(Dueno, { idUsuario });
-    await em.removeAndFlush(dueno);
-    res.status(200).json({ message: 'Dueno removed', data: dueno });
+
+    
+    const dueno = await emFork.findOneOrFail(Dueno, { idUsuario }, {
+      populate: ['mascotas.imagen', 'reservas'] 
+    });
+
+    if (dueno.mascotas?.isInitialized()) {
+      for (const mascota of dueno.mascotas.getItems()) {
+        if (mascota.imagen) {
+         
+          const imagePath = path.join('public', mascota.imagen.path);
+          if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+          }
+
+          await emFork.remove(mascota.imagen);
+        }
+      }
+ 
+      await emFork.remove(dueno.mascotas);
+    }
+
+    if (dueno.reservas?.isInitialized()) {
+      await emFork.remove(dueno.reservas);
+    }
+
+    if (dueno.perfilImage) {
+      const imagePath = path.join('public', dueno.perfilImage);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+    await emFork.remove(dueno);
+    await emFork.flush(); 
+
+    res.status(200).json({ message: 'Dueno eliminado (Cascada limpia exitosa)', data: dueno });
   } catch (error: any) {
-    res.status(500).json({ message: "Error removing dueno", error: error.message });
+    console.error("🚨 CRITICAL DB ERROR during Dueno removal:", error);
+    res.status(500).json({ message: "Error removing dueno (Fallo en cascada forzada)", error: error.message });
   }
 }
 
 async function updateProfileImageDueno(req: Request, res: Response): Promise<void> {
+  const emFork = em.fork(); 
   try {
     const idUsuario = Number(req.params.idUsuario);
-    
+
     if (!req.file) {
-      res.status(400).json({ message: 'No file uploaded' });
+    
+      res.status(400).json({ message: 'No se recibió ningún archivo de imagen.' });
       return;
     }
 
-    const dueno = await em.findOneOrFail(Dueno, { idUsuario });
+    const dueno = await emFork.findOneOrFail(Dueno, { idUsuario });
+
     
     if (dueno.perfilImage) {
       const oldImagePath = path.join('public', dueno.perfilImage);
       if (fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
+        console.log(`✅ Imagen anterior eliminada: ${oldImagePath}`);
       }
     }
 
+   
     dueno.perfilImage = `/img/perfilImages/${req.file.filename}`;
-    await em.flush();
+    await emFork.flush(); 
 
-    res.status(200).json({ 
-      message: 'Profile image updated successfully', 
+    res.status(200).json({
+      message: 'Profile image updated successfully',
       data: {
         idUsuario: dueno.idUsuario,
         perfilImage: dueno.perfilImage
       }
     });
   } catch (error: any) {
+    console.error("🚨 CRITICAL ERROR in updateProfileImageDueno:", error);
+
+    
     if (req.file) {
       fs.unlink(req.file.path, (err) => {
-        if (err) console.error("Error deleting uploaded file:", err);
+        if (err) console.error("Error al eliminar el archivo subido temporalmente:", err);
       });
     }
-    res.status(500).json({ message: "Error updating dueno profile image", error: error.message });
+
+   
+    res.status(500).json({
+      message: "Error al actualizar la imagen de perfil del dueño",
+      error: error.message || String(error)
+    });
   }
 }
 

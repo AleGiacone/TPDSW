@@ -1,8 +1,7 @@
-### Obtener todos los especies
 
 GET http://localhost:3000/api/publicacion/
 
-### Crear un especie 
+
 # @name createEspecie
 POST http://localhost:3000/api/especies/
 Content-Type: application/json

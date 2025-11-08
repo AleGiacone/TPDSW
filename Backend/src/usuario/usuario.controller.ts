@@ -16,23 +16,33 @@ declare global {
   }
 }
 
+
+
 const em = orm.em
 
 async function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
+  console.log('req.body.session usuario:', req.cookies.access_token);
   req.body.sanitizeInput = {
     email: sanitizeHTML(req.body.email),
     password: sanitizeHTML(req.body.password),
     nombre: sanitizeHTML(req.body.nombre),
     tipoUsuario: 'usuario'
   };
-  
+   
   Object.keys(req.body.sanitizeInput).forEach((key) => {
     if (req.body.sanitizeInput[key] === undefined) {
       delete req.body.sanitizeInput[key];
     }
     
   });
-  
+
+
+  if (req.session?.usuario == null) {
+    console.log("No session usuario found");
+  }
+
+  console.log("Sanitized input:", req.body.sanitizeInput);
+
   next();
 }
 
@@ -120,12 +130,10 @@ async function loginCtrl(req: Request, res: Response) {
     }
 
     await authenticate(req.body.sanitizeInput);
-    
     const usuario = await em.findOne(Usuario, { email });
     
     if (!usuario) {
-
-      res.status(404).json({ 
+       res.status(404).json({ 
         success: false,
         message: 'Credenciales incorrectas' 
       });
@@ -135,34 +143,13 @@ async function loginCtrl(req: Request, res: Response) {
     const isValid = await bcrypt.compare(password, usuario.password);
     
     if (!isValid) {
-  
       res.status(401).json({ 
-        success: false,
-        message: 'Credenciales incorrectas' 
-      });
+      success: false,
+      message: 'Credenciales incorrectas' 
+    });
       return;
     }
 
-    let userData: any = {
-      idUsuario: usuario.idUsuario,
-      nombre: usuario.nombre,
-      email: usuario.email,
-      tipoUsuario: usuario.tipoUsuario,
-      perfilImage: usuario.perfilImage || null
-    };
-    if (usuario.tipoUsuario === 'dueno' || usuario.tipoUsuario === 'cuidador') {
-      userData.nroDocumento = (usuario as any).nroDocumento || null;
-      userData.tipoDocumento = (usuario as any).tipoDocumento || null;
-      userData.telefono = (usuario as any).telefono || null;
-    }
-
-    if (usuario.tipoUsuario === 'dueno') {
-      userData.telefonoEmergencia = (usuario as any).telefonoEmergencia || null;
-    }
-    if (usuario.tipoUsuario === 'cuidador') {
-      userData.sexoCuidador = (usuario as any).sexoCuidador || null;
-      userData.descripcion = (usuario as any).descripcion || null;
-    }
     const token = jwt.sign(
       { 
         idUsuario: usuario.idUsuario, 
@@ -182,7 +169,13 @@ async function loginCtrl(req: Request, res: Response) {
     res.status(200).json({ 
       success: true,
       message: 'Login exitoso',
-      user: userData, 
+      user: {
+        idUsuario: usuario.idUsuario,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        tipoUsuario: usuario.tipoUsuario,
+        perfilImage: usuario.perfilImage || null
+      }, 
       token: token
     });
     return;
@@ -215,7 +208,7 @@ async function authenticate(usuario: Usuario) {
     throw new Error('Invalid input data');
   }
 }
-
+// Preguntar por funcion que no se usa xd
 async function getMe(req: Request, res: Response) {
   try {
     if (!req.usuario) {

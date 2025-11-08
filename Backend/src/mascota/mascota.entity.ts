@@ -46,7 +46,7 @@
 
     @OneToOne('Imagen', 'mascota', {
       owner: true, 
-      cascade: [Cascade.PERSIST, Cascade.MERGE],
+      cascade: [Cascade.ALL],
       nullable: true 
     })
     imagen?: Rel<any>;

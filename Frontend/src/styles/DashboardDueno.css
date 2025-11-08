@@ -149,18 +149,22 @@ body {
   width: 100%;
   margin: 0 auto;
   padding: 2rem 1.5rem;
-  background-image: url('/fondo.png');
   background-size: 500px;
   box-shadow: var(--shadow-sm);
 }
 
 .dashboard-main .mascotas-header .section-title {
-  font-size: 2rem;  
-  margin-top: 1rem;
-  margin-left: 4rem;
-  background: #fff;
-  color: #f97840;
-  padding: 10px 10px;
+  width: 30%;
+    margin-left: 3rem;
+      margin-right: 2rem;
+      margin-top: 1rem;
+      background: linear-gradient(145deg, #FFAD66, #FA8351);
+      color: #fff;
+      padding: 10px 10px;
+      border-radius: 15px;
+      text-align: center;
+      border: 2px solid #f97840;
+      font-size: 1.5rem;
 }
 
 /* ============================================
