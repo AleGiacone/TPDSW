@@ -9,22 +9,21 @@ const PublicacionesView = () => {
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
     
-
-    const [publicaciones, setPublicaciones] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     
 
-    const [filtros, setFiltros] = useState({
+    const [formValues, setFormValues] = useState({
         ubicacion: '',
         tipoAlojamiento: '',
         tarifaMax: '',
         exotico: false,
         cantAnimales: ''
     });
-
+    const [filterParams, setFilterParams] = useState(formValues);
     const API_BASE_URL = 'http://localhost:3000/api';
-
+    const [publicaciones, setPublicaciones] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [isFilterBarOpen, setIsFilterBarOpen] = useState(false);
 
     const fetchPublicaciones = useCallback(async () => {
         setLoading(true);
@@ -32,11 +31,13 @@ const PublicacionesView = () => {
         try {
             
             const params = new URLSearchParams();
-            if (filtros.ubicacion) params.append('ubicacion', filtros.ubicacion);
-            if (filtros.tipoAlojamiento) params.append('tipoAlojamiento', filtros.tipoAlojamiento);
-            if (filtros.tarifaMax && !isNaN(parseFloat(filtros.tarifaMax))) params.append('tarifaMax', filtros.tarifaMax);
-            if (filtros.exotico) params.append('exotico', filtros.exotico);
-            if (filtros.cantAnimales && !isNaN(parseInt(filtros.cantAnimales))) params.append('cantAnimales', filtros.cantAnimales);
+            if (filterParams.ubicacion) params.append('ubicacion', filterParams.ubicacion);
+            if (filterParams.tipoAlojamiento) params.append('tipoAlojamiento', filterParams.tipoAlojamiento);
+            if (filterParams.tarifaMax && !isNaN(parseFloat(filterParams.tarifaMax))) params.append('tarifaMax', filterParams.tarifaMax);
+            if (filterParams.exotico === true) params.append('exotico', 'true');
+            if (filterParams.cantAnimales && !isNaN(parseInt(filterParams.cantAnimales))) {
+                
+                params.append('cantAnimales', filterParams.cantAnimales);}
 
             const url = `${API_BASE_URL}/publicacion${params.toString() ? `?${params.toString()}` : ''}`;
             
@@ -59,7 +60,7 @@ const PublicacionesView = () => {
         } finally {
             setLoading(false);
         }
-    }, [filtros]); 
+    }, [filterParams]); 
 
 
     useEffect(() => {
@@ -88,12 +89,53 @@ const PublicacionesView = () => {
         navigate(`/reservar/${publicacionId}`);
     };
 
+
+    const handleInputChange = (event) => {
+        const { name, value, type, checked } = event.target;
+        setFormValues(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+      
+        const queryParams = new URLSearchParams();
+
+        if (filterParams.ubicacion) queryParams.append('ubicacion', filterParams.ubicacion);
+        if (filterParams.tipoAlojamiento) queryParams.append('tipoAlojamiento', filterParams.tipoAlojamiento);
+        if (filterParams.tarifaMax) queryParams.append('tarifaMax', filterParams.tarifaMax);
+        if (filterParams.exotico === true) queryParams.append('exotico', 'true');
+
+        try {
+            const response = await fetch(`/api/publicacion?${queryParams.toString()}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            setPublicaciones(data.data || []);
+        } catch (error) {
+            console.error(error);
+          
+        } finally {
+            setLoading(false);
+        }
+    }, [filterParams]); 
+   
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    const handleSearch = () => {
+        
+        setFilterParams(formValues);
+    };
+
+
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="search-container">
-                <div className="search-filters">
-                    
-
+            
+                <div className="search-filters ">
                     <div className="filter-group">
                         <label className="filter-label">Lugar</label>
                         <input
@@ -101,8 +143,8 @@ const PublicacionesView = () => {
                             placeholder="Explorar destinos"
                             className="filter-input-field"
                             name="ubicacion"
-                            value={filtros.ubicacion}
-                            onChange={handleFilterChange}
+                            value={formValues.ubicacion}
+                            onChange={handleInputChange}
                         />
                     </div>
                     
@@ -110,8 +152,8 @@ const PublicacionesView = () => {
                         <label className="filter-label">Tipo de alojamiento</label>
                         <select
                             name="tipoAlojamiento"
-                            value={filtros.tipoAlojamiento}
-                            onChange={handleFilterChange}
+                            value={formValues.tipoAlojamiento}
+                            onChange={handleInputChange}
                             className="filter-select-field"
                         >
                             <option value="">Seleccionar</option>
@@ -128,8 +170,8 @@ const PublicacionesView = () => {
                             placeholder="Precio máximo"
                             name="tarifaMax"
                             className="filter-input-field"
-                            value={filtros.tarifaMax}
-                            onChange={handleFilterChange}
+                            value={formValues.tarifaMax}
+                            onChange={handleInputChange}
                         />
                     </div>
 
@@ -140,8 +182,8 @@ const PublicacionesView = () => {
                             placeholder="¿Cuántos?"
                             name="cantAnimales"
                             className="filter-input-field"
-                            value={filtros.cantAnimales}
-                            onChange={handleFilterChange}
+                            value={formValues.cantAnimales}
+                            onChange={handleInputChange}
                         />
                     </div>
 
@@ -151,8 +193,8 @@ const PublicacionesView = () => {
                             <input
                                 type="checkbox"
                                 name="exotico"
-                                checked={filtros.exotico}
-                                onChange={handleFilterChange}
+                                checked={formValues.exotico}
+                                onChange={handleInputChange}
                                 className="checkbox-input"
                             />
                             <span className="checkbox-text">🦎 Exóticos</span>
@@ -160,7 +202,7 @@ const PublicacionesView = () => {
                     </div>
                    
  
-        <button className="search-btn" onClick={fetchPublicaciones}>
+        <button className="search-btn" onClick={handleSearch}>
             🔍
         </button>
                 </div>
@@ -168,7 +210,7 @@ const PublicacionesView = () => {
             
             <main className="homepage-main">
                 <div className="hero-section">
-                    <h2 className="hero-title">
+                    <h2 className="hero-title hide-on-mobile">
                         Encontrá el cuidador perfecto para tu mascota
                     </h2>
                 </div>

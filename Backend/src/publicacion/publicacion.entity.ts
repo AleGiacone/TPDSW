@@ -20,7 +20,7 @@ export class Publicacion {
   @Property({ nullable: true, unique: false })
   exotico!: boolean;           
   
-  @ManyToOne(() => Cuidador, { nullable: true })
+  @ManyToOne(() => Cuidador, { nullable: true, cascade:[Cascade.REMOVE] })
   idCuidador!: Rel<Cuidador>;
 
   @OneToMany(() => Reserva, reserva => reserva.publicacion, { nullable: true})

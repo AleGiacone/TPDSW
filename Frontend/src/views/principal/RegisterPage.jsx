@@ -18,7 +18,7 @@ const RegisterPage = () => {
     nroDocumento: '',
     telefono: '',
     telefonoEmergencia: '',
-    sexo: '',
+    sexoCuidador: '',
     edad: ''
   });
 
@@ -191,8 +191,8 @@ const RegisterPage = () => {
               <>
                 <label>Sexo:</label>
                 <select
-                  name="sexo"
-                  value={formData.sexo}
+                  name="sexoCuidador"
+                  value={formData.sexoCuidador}
                   onChange={handleChange}
                 >
                   <option value="masculino">Masculino</option>
@@ -200,16 +200,7 @@ const RegisterPage = () => {
                   <option value="otro">Otro</option>
                 </select>
 
-                <label>Edad:</label>
-                <input
-                  type="number"
-                  name="edad"
-                  placeholder="Edad"
-                  value={formData.edad}
-                  onChange={handleChange}
-                  min="18"
-                  max="100"
-                />
+          
               </>
             )}
           </>
