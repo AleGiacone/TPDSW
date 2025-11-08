@@ -19,10 +19,10 @@
     @Property({ nullable: false, unique: false })
     sexo!: string;
     
-    @ManyToOne( () => Especie, { nullable: false, cascade: [Cascade.ALL] })
+    @ManyToOne( () => Especie, { nullable: false })
     especie!: Rel<Especie>;
 
-    @ManyToOne(() => Raza, { nullable: true, cascade: [Cascade.ALL] })
+    @ManyToOne(() => Raza, { nullable: true })
     raza?: Rel<Raza>;
   
     @Property({ type: 'boolean', default: false })
@@ -46,7 +46,7 @@
 
     @OneToOne('Imagen', 'mascota', {
       owner: true, 
-      cascade: [Cascade.PERSIST, Cascade.MERGE],
+      cascade: [Cascade.ALL],
       nullable: true 
     })
     imagen?: Rel<any>;

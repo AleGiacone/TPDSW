@@ -166,45 +166,37 @@ const handleUpdateProfile = async (e) => {
         exotico: false
     });
     
-  const handleFileChange = (e) => {
-    const selectedFiles = e.target.files;
-    
-    console.log("🔍 DIAGNÓSTICO DETALLADO DE ARCHIVOS:");
-    console.log("  Archivos seleccionados:", selectedFiles.length);
-    const arrayFiles = Array.from(selectedFiles);
-    console.log("  Array creado con length:", arrayFiles.length);
-    
-  
-    arrayFiles.forEach((file, i) => {
-        console.log(`  ${i + 1}. Nombre: ${file.name}`);
-        console.log(`      Tamaño: ${(file.size / 1024).toFixed(2)} KB`);
-        console.log(`      Tipo: ${file.type}`);
-        console.log(`      lastModified: ${file.lastModified}`);
-        console.log(`      Instancia única: ${file.name}-${file.size}-${file.lastModified}`);
-    });
-    
-    const uniqueFiles = new Map();
-    arrayFiles.forEach((file, i) => {
-        const key = `${file.name}-${file.size}-${file.lastModified}`;
-        if (uniqueFiles.has(key)) {
-            console.warn(`⚠️ ADVERTENCIA: Archivo duplicado detectado en índice ${i}: ${file.name}`);
-        } else {
-            uniqueFiles.set(key, file);
-        }
-    });
-    
-    console.log(`  Archivos únicos: ${uniqueFiles.size} de ${arrayFiles.length}`);
-    
+    const handleFileChange = (e) => {
+       
+        const newlySelectedFiles = Array.from(e.target.files);
 
-    const limitedFiles = arrayFiles.slice(0, 5);
-    
-    if (arrayFiles.length > 5) {
-        alert(`Solo puedes subir un máximo de 5 imágenes. Se han seleccionado las primeras 5.`);
-    }
-    
-    console.log("  Archivos finales a guardar:", limitedFiles.length);
-    setFiles(limitedFiles);
-};
+       
+        const existingFiles = files; 
+        const allFiles = [...existingFiles, ...newlySelectedFiles];
+
+       
+        const uniqueFilesMap = new Map();
+        allFiles.forEach(file => {
+            const key = `${file.name}-${file.size}-${file.lastModified}`;
+            if (!uniqueFilesMap.has(key)) {
+                uniqueFilesMap.set(key, file);
+            }
+        });
+
+        const arrayUniqueFiles = Array.from(uniqueFilesMap.values());
+
+        
+        const limitedFiles = arrayUniqueFiles.slice(0, 5);
+
+        if (arrayUniqueFiles.length > 5) {
+            alert(`Solo puedes subir un máximo de 5 imágenes. Se han mantenido los últimos 5 archivos únicos.`);
+        }
+
+        setFiles(limitedFiles);
+
+       o
+        e.target.value = null; 
+    };
 
 const removeFile = (indexToRemove) => {
     console.log(`   Archivo a remover: ${files[indexToRemove]?.name}`);
@@ -233,6 +225,7 @@ const removeFile = (indexToRemove) => {
             }
 
             const data = await response.json();
+            console.log('DB Response:', data.publicaciones);
             setPublicaciones(Array.isArray(data.publicaciones) ? data.publicaciones : []);
         } catch (err) {
             setError('Error al cargar publicaciones: ' + err.message);
@@ -386,6 +379,47 @@ const removeFile = (indexToRemove) => {
     }
 };
 
+    const handleDeleteUser = async () => {
+        if (!window.confirm('🚨 ADVERTENCIA: Esta acción es irreversible. ¿Estás absolutamente seguro de que quieres ELIMINAR tu cuenta? Se eliminarán todas tus publicaciones y reservas.')) {
+            return;
+        }
+
+        setLoading(true);
+        setError('');
+
+        try {
+            const userId = user.idUsuario;
+            if (!userId) {
+                throw new Error('ID de usuario no encontrado.');
+            }
+
+            const response = await fetch(
+                `${API_BASE_URL}/cuidador/${userId}`,
+                {
+                    method: 'DELETE',
+                    credentials: 'include'
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Error ${response.status} al eliminar la cuenta.`);
+            }
+
+            
+            await logout();
+            alert('✅ Cuenta eliminada exitosamente. Serás redirigido.');
+            navigate('/'); 
+
+        } catch (error) {
+            console.error('❌ Error al eliminar la cuenta:', error);
+            setError(error.message || 'Error al eliminar la cuenta. Inténtalo de nuevo.');
+            alert('Error: ' + (error.message || 'No se pudo eliminar la cuenta.'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
 useEffect(() => {
     files.forEach((file, i) => {
         console.log(`  ${i + 1}. ${file.name}`);
@@ -431,8 +465,8 @@ useEffect(() => {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.message || `Error ${response.status}: No se pudo eliminar la publicación.`); 
             }
-            setPublicaciones(prev => prev.filter(pub => pub.id !== id));
-            
+           
+            await fetchPublicaciones();
 
         } catch (err) { 
             console.error('Error al eliminar:', err);
@@ -1118,6 +1152,14 @@ useEffect(() => {
                             className="btn-primary"
                         >
                             ✏️ Editar Perfil
+                        </button>
+                        \<button
+                            onClick={handleDeleteUser}
+                            className="btn-delete"
+                            disabled={loading} // Deshabilitar si está cargando
+                            style={{ width: '100%', padding: '10px', marginTop: '10px' }} // Estilo para destacarlo
+                        >
+                            {loading ? 'Eliminando...' : '🗑️ Eliminar Cuenta'}
                         </button>
                     </div>
                 ) : (

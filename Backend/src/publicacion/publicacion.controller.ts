@@ -72,7 +72,57 @@ async function authenticatePublicacion(req: Request, res: Response): Promise<boo
 async function findAll(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-    const publicaciones = await em.find(Publicacion, {}, { populate: ['reservas', 'imagenes', 'idCuidador'] });
+
+    // 1. Extraer los parámetros de la URL
+    const {
+      ubicacion,
+      tipoAlojamiento,
+      tarifaMax,
+      exotico,
+      cantAnimales
+    } = req.query;
+
+    // 2. Construir el objeto de condiciones (Where Condition)
+    const where: any = {};
+
+    // Filtro de Ubicación (búsqueda parcial insensible a mayúsculas/minúsculas)
+    if (typeof ubicacion === 'string' && ubicacion) {
+      where.ubicacion = { $like: `%${ubicacion}%` };
+    }
+
+    // Filtro Tipo de Alojamiento
+    if (typeof tipoAlojamiento === 'string' && tipoAlojamiento) {
+      where.tipoAlojamiento = tipoAlojamiento;
+    }
+
+    // Filtro Tarifa Máxima (tarifaPorDia debe ser menor o igual a tarifaMax)
+    if (typeof tarifaMax === 'string' && !isNaN(parseFloat(tarifaMax))) {
+      where.tarifaPorDia = { $lte: parseFloat(tarifaMax) };
+    }
+
+    // Filtro Cantidad de Animales (cantAnimales debe ser mayor o igual a lo solicitado)
+    // Nota: Asumo que el cliente busca publicaciones que acepten al menos la cantidad indicada.
+    if (typeof cantAnimales === 'string' && !isNaN(parseInt(cantAnimales))) {
+      where.cantAnimales = { $gte: parseInt(cantAnimales) };
+    }
+
+    // 🔑 Filtro EXÓTICO (La clave de tu pregunta)
+    // Recordatorio: El frontend envía 'true' como string si está marcado.
+    if (exotico === 'true') {
+      where.exotico = true;
+    }
+    // Opcional: Si quieres permitir que se envíe 'false' o '0' para *excluir* exóticos
+    // else if (exotico === 'false' || exotico === false) {
+    //   where.exotico = false;
+    // }
+
+    // 3. Ejecutar la consulta con las condiciones
+    const publicaciones = await em.find(
+      Publicacion,
+      where, // Aquí se pasan las condiciones de filtrado
+      { populate: ['reservas', 'imagenes', 'idCuidador'] }
+    );
+
     await em.populate(publicaciones, ['idCuidador']);
     res.status(200).json({ message: 'Found all publicaciones', data: publicaciones });
   } catch (error: any) {

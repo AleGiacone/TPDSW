@@ -167,7 +167,6 @@ body {
   width: 100%;
   margin: 0 auto;
   padding: 2rem 1.5rem;
-    background-image: url('/fondo.png');
       background-size: 500px;
   box-shadow: var(--shadow-sm);
 }
@@ -740,11 +739,16 @@ form-container {
 }
 
 .dashboard-main .publicaciones-header .section-title{
-  margin-top: 1rem;
-  margin-left: 4rem;
-  background: #fff;
-  color: #f97840;
-  padding: 10px 10px;
+    width: 25%;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #fbfbfb;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(145deg, #FFAD66, #FA8351);
+    margin: 1.5rem 0 1.5rem 3rem;
+    text-align: center;
+    border-radius: 15px;
+    margin-right: 3rem;
 }
 
 .dashboard-main .perfil-container .section-title {
@@ -758,6 +762,10 @@ form-container {
   border: 2px solid #f97840;
 }
 
+
+.dashboard-main  {
+  box-shadow: 0 4px 12px rgba(255, 56, 92, 0.2);
+}
 /* ============================================
   SUBIDA DE ARCHIVOS
   ============================================ */

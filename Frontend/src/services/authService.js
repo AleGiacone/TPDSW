@@ -15,7 +15,7 @@ export async function loginCtrl(email, password) {
 
 export async function registerCtrl(formData) {
   const endpoint = formData.tipoUsuario === 'cuidador' 
-    ? `${API_URL}/cuidadores`
+    ? `${API_URL}/cuidador`
     : `${API_URL}/duenos`;
 
   return fetch(endpoint, {
