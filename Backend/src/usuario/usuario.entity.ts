@@ -21,8 +21,7 @@ export abstract class Usuario {
   @Property({ nullable: false, unique: false })
   tipoUsuario!: string;  
 
-  @Property({ nullable: true, unique: false })
-  perfilImage?: string;
+  // Corregido: relación bidireccional con Imagen
 
   @OneToOne('Imagen', 'usuario', {
     owner: true, 
