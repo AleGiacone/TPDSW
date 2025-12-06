@@ -9,8 +9,8 @@ POST http://localhost:3000/api/razas/
 Content-Type: application/json
 
 {
-  "nomRaza": "bebe",
-  "idEspecie": 4
+  "nomRaza": "callejero",
+  "idEspecie": 6
 }
 
 

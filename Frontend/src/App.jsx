@@ -12,7 +12,7 @@ import PublicacionesView from './views/homePrivado/PrivateHomePage';
 import DuenoDashboard from './views/dashboards/DuenoDashboard';
 import CuidadorDashboard from './views/dashboards/CuidadorDashboard';
 
-// ✅ SOLUCIÓN: DEFINICIÓN DEL COMPONENTE FALTANTE
+
 const UnauthorizedPage = () => (
 <div style={{ textAlign: 'center', padding: '2rem' }}>
  <h2>No autorizado</h2>
@@ -27,18 +27,14 @@ return (
  <Router>
   <div className="App">
   <Routes>
-  
-  {/* 1. RUTA RAÍZ: Muestra Publicaciones (Mantiene Navbar pública) */}
+ 
   <Route path="/" element={<><Navbar /><PublicacionesView /></>} />
-  {/* 2. NUEVA RUTA: Muestra la página estática "Nosotros" */}
   <Route path="/nosotros" element={<><Navbar /><HomePage /></>} />
-  {/* 3. Rutas de Autenticación (Mantiene Navbar pública) */}
-  <Route path="/login" element={<><Navbar /><LoginPage /></>} />
-  <Route path="/register" element={<><Navbar /><RegisterPage /></>} />
-  {/* Esta línea ahora funciona porque el componente está definido arriba */}
+  <Route path="/login" element={<><LoginPage /></>} />
+  <Route path="/register" element={<><RegisterPage /></>} />
+
   <Route path="/unauthorized" element={<><Navbar /><UnauthorizedPage /></>} /> 
   
-  {/* 4. Rutas de DASHBOARD (protegidas) */}
   <Route
    path="/dashboards/cuidador/*"
    element={<ProtectedRoute requiredUserType="cuidador"><CuidadorDashboard /></ProtectedRoute>} 
@@ -47,8 +43,7 @@ return (
    path="/dashboards/dueno/*"
    element={<ProtectedRoute requiredUserType="dueno"><DuenoDashboard /></ProtectedRoute>} 
   />
-  
-  {/* 5. Ruta catch-all */}
+ 
   <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
   </div>

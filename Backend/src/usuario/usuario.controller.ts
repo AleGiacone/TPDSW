@@ -8,7 +8,6 @@ import multer from 'multer';
 import path from 'path';
 import sanitizeHTML from 'sanitize-html';
 
-// Extiende la interfaz Request para incluir 'usuario'
 declare global {
   namespace Express {
     interface Request {
@@ -19,29 +18,35 @@ declare global {
 
 
 
-
 const em = orm.em
 
 async function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
+  console.log('req.body.session usuario:', req.cookies.access_token);
   req.body.sanitizeInput = {
     email: sanitizeHTML(req.body.email),
     password: sanitizeHTML(req.body.password),
     nombre: sanitizeHTML(req.body.nombre),
     tipoUsuario: 'usuario'
   };
-  
+   
   Object.keys(req.body.sanitizeInput).forEach((key) => {
     if (req.body.sanitizeInput[key] === undefined) {
       delete req.body.sanitizeInput[key];
     }
     
   });
-  
+
+
+  if (req.session?.usuario == null) {
+    console.log("No session usuario found");
+  }
+
+  console.log("Sanitized input:", req.body.sanitizeInput);
+
   next();
 }
 
 
-// Probar usar zod en vez de sanitizeInput
 
 async function findAll(req: Request, res: Response) {
   console.log("Finding all usuarios");
@@ -112,61 +117,79 @@ async function remove(req: Request, res: Response) {
 }   
 
 async function loginCtrl(req: Request, res: Response) {
-  console.log('Body completo:', req.body);
 
-  console.log("Login controller called with body:", req.body.sanitizeInput);
-  // Resolver problema de que no encuentra el mail y tira otro error
   try {
     const { email, password } = req.body.sanitizeInput;
+    
     if (!email || !password) {
-      res.status(400).json({ message: 'Email and password are required' });
-      return;
-    }
-    await authenticate(req.body.sanitizeInput);
-    console.log("Login controller called with body:", email, password);
-    const usuario = await em.findOne(Usuario, { email });
-    console.log("Found usuario:", usuario);
-    if (!usuario) {
-      console.log("Email not found:", email);
-      res.status(404).json({ message: 'Email not found' });
-      return;
-    }
-    const isValid = await bcrypt.compare(password, usuario.password);
-    console.log(isValid)
-    if (!isValid) {
-      console.log("Invalid password for email:", email);
-      res.status(401).json({ message: 'Invalid password' });
-      return;
-    }
-    if (usuario && isValid) {
-      console.log("Valid usuario found:", usuario);
-      const { password, idUsuario, ...publicUser } = usuario;
-      const token = jwt.sign(
-        { idUsuario: idUsuario, email: email, perfilImage: usuario.perfilImage, nombre: usuario.nombre, tipoUsuario: usuario.tipoUsuario }, 
-        SECRET_JWT_KEY, 
-        { expiresIn: '1h' });
-      res.cookie('access_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 1000 * 60 * 60 // 1 hour
+      res.status(400).json({ 
+        success: false,
+        message: 'Email y contraseña son requeridos' 
       });
-      
-      console.log("Generated JWT:", token);
-      res.status(200).json({ message: 'Login successful', data: { idUsuario: usuario.idUsuario, email: usuario.email, perfilImage: usuario.perfilImage }, token:
-        token });
       return;
-      
-    } else {
-      res.status(401).json({ message: 'Invalid credentials' });
-      return
     }
+
+    await authenticate(req.body.sanitizeInput);
+    const usuario = await em.findOne(Usuario, { email });
+    
+    if (!usuario) {
+       res.status(404).json({ 
+        success: false,
+        message: 'Credenciales incorrectas' 
+      });
+      return;
+    }
+
+    const isValid = await bcrypt.compare(password, usuario.password);
+    
+    if (!isValid) {
+      res.status(401).json({ 
+      success: false,
+      message: 'Credenciales incorrectas' 
+    });
+      return;
+    }
+
+    const token = jwt.sign(
+      { 
+        idUsuario: usuario.idUsuario, 
+        email: usuario.email,
+        tipoUsuario: usuario.tipoUsuario
+      }, 
+      SECRET_JWT_KEY, 
+      { expiresIn: '1h' }
+    );
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 // 1 hora
+    });
+
+    res.status(200).json({ 
+      success: true,
+      message: 'Login exitoso',
+      user: {
+        idUsuario: usuario.idUsuario,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        tipoUsuario: usuario.tipoUsuario,
+        perfilImage: usuario.perfilImage || null
+      }, 
+      token: token
+    });
+    return;
+
   } catch (error: any) {
-    res.status(401).json({ message: "Error during login", error: error.message });
+    res.status(500).json({ 
+      success: false,
+      message: "Error durante el login", 
+      error: error.message 
+    });
     return;
   }
 }
-// Arreglar admin, cuidador y dueno
+
 
 async function authenticate(usuario: Usuario) {
   console.log("Authenticating usuario with body:", usuario);
@@ -183,6 +206,67 @@ async function authenticate(usuario: Usuario) {
   catch (error) {
     console.log("Error during authentication:", error);
     throw new Error('Invalid input data');
+  }
+}
+// Preguntar por funcion que no se usa xd
+async function getMe(req: Request, res: Response) {
+  try {
+    if (!req.usuario) {
+      res.status(401).json({ 
+        success: false,
+        message: 'No autenticado',
+        usuario: null 
+      });
+      return;
+    }
+
+    const usuario = await em.findOne(Usuario, { idUsuario: req.usuario.idUsuario });
+    
+    if (!usuario) {
+      res.status(404).json({ 
+        success: false,
+        message: 'Usuario no encontrado',
+        usuario: null 
+      });
+      return;
+    }
+
+    let userData: any = {
+      idUsuario: usuario.idUsuario,
+      nombre: usuario.nombre,
+      email: usuario.email,
+      tipoUsuario: usuario.tipoUsuario,
+      perfilImage: usuario.perfilImage || null
+    };
+
+    if (usuario.tipoUsuario === 'dueno' || usuario.tipoUsuario === 'cuidador') {
+      userData.nroDocumento = (usuario as any).nroDocumento || null;
+      userData.tipoDocumento = (usuario as any).tipoDocumento || null;
+      userData.telefono = (usuario as any).telefono || null;
+    }
+
+    if (usuario.tipoUsuario === 'dueno') {
+      userData.telefonoEmergencia = (usuario as any).telefonoEmergencia || null;
+    }
+
+    if (usuario.tipoUsuario === 'cuidador') {
+      userData.sexoCuidador = (usuario as any).sexoCuidador || null;
+      userData.descripcion = (usuario as any).descripcion || null;
+    }
+
+    res.status(200).json({ 
+      success: true,
+      usuario: userData 
+    });
+    return;
+
+  } catch (error: any) {
+    res.status(500).json({ 
+      success: false,
+      message: "Error verificando sesión", 
+      error: error.message 
+    });
+    return;
   }
 }
 
@@ -241,24 +325,32 @@ async function findOne(req: Request, res: Response) {
 }
 
 async function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  console.log("Auth middleware called", req.cookies);
-  const token = req.cookies.token;
-  req.usuario as any; // Inicializa el usuario como null
+  console.log("🔒 Auth middleware - Cookies:", req.cookies);
+  
+  const token = req.cookies.access_token; 
+  
   if (!token) {
-    console.log("No token found in cookies");
+    res.status(401).json({ 
+      success: false,
+      error: 'No autenticado',
+      usuario: null   
+    });
+    return;
   }
 
   try {
-    const decoded = jwt.verify(token, SECRET_JWT_KEY!);
-    req.usuario = decoded; // Guarda los datos del usuario en el request
-    res.status(200).json({ message: 'Token válido', usuario: req.session?.usuario || null });
-    next();
-    return;
+    const decoded = jwt.verify(token, SECRET_JWT_KEY!) as any;
+    req.usuario = decoded;
+    next(); 
   } catch (err) {
-    res.status(403).json({ error: 'Token inválido' });
+    res.status(403).json({ 
+      success: false,
+      error: 'Token inválido',
+      usuario: null 
+    });
     return;
   }
 }
 
 
-export { sanitizeUsuario, authMiddleware, findAll, findOne, add, update, remove, loginCtrl, authenticate, uploadFiles };
+export { sanitizeUsuario, authMiddleware, findAll, findOne, add, update, remove, loginCtrl, authenticate, uploadFiles, getMe };

@@ -3,7 +3,10 @@ import { useAuth } from '../../hooks/useAuth';
 import { Navigate, useNavigate } from 'react-router-dom'; 
 import ImageCarousel from '../../components/ImageCarousel'; 
 import '../../styles/DashboardCuidador.css';
-import { Home, User } from 'lucide-react'; 
+import { Home, CalendarCheck, User, LogOut } from 'lucide-react';
+
+
+// mi pequenio dashboard de cuidador
 
 
 const CuidadorDashboard = () => {
@@ -17,7 +20,7 @@ const CuidadorDashboard = () => {
     const [imagesToDelete, setImagesToDelete] = useState([]);
     const [editingPublicacion, setEditingPublicacion] = useState(null);
     const [editingProfile, setEditingProfile] = useState(false);
-    const { user, logout, updateUser } = useAuth(); 
+    const { user, logout, updateUser} = useAuth(); 
     const [profileFormData, setProfileFormData] = useState({
         nombre: '',
         email: '',
@@ -29,102 +32,126 @@ const CuidadorDashboard = () => {
     });
     const [profileImage, setProfileImage] = useState(null);
 
-   
-    // --------------------------------------------------
-    // FUNCIONES PERFIL
-    // --------------------------------------------------
 
-    const handleProfileChange = (e) => {
-        const { name, value } = e.target;
-        setProfileFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+const startEditProfile = () => {
+    if (user) {
+        setProfileFormData({
+            nombre: user.nombre || '',
+            email: user.email || '',
+            telefono: user.telefono || '',
+            tipoDocumento: user.tipoDocumento || 'DNI',
+            nroDocumento: user.nroDocumento || '',
+            sexoCuidador: user.sexoCuidador || '',
+            descripcion: user.descripcion || '',
+        });
+        setProfileImage(null);
+        setError('');
+        setEditingProfile(true);
+    }
+};
 
-    const handleProfileImageChange = (e) => {
+const cancelEditProfile = () => {
+    setEditingProfile(false);
+    setProfileImage(null);
+    setError('');
+};
+
+const handleProfileChange = (e) => {
+    const { name, value } = e.target;
+    setProfileFormData(prev => ({
+        ...prev,
+        [name]: value
+    }));
+};
+
+const handleProfileImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
         setProfileImage(e.target.files[0]);
-    };
+    }
+};
 
-    const startEditProfile = () => {
-        if (user) {
-            setProfileFormData({
-                nombre: user.nombre || '',
-                email: user.email || '',
-                telefono: user.telefono || '',
-                tipoDocumento: user.tipoDocumento || 'DNI',
-                nroDocumento: user.nroDocumento || '',
-                sexoCuidador: user.sexoCuidador || '',
-                descripcion: user.descripcion || '',
-            });
-            setProfileImage(null); // Limpiar la previsualización de la nueva imagen
-            setError('');
-            setEditingProfile(true);
+const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    
+    try {
+        let updatedImagePath = user?.perfilImage;
+        
+        if (profileImage) {
+            console.log('📸 Subiendo nueva imagen de perfil...');
+            const imageFormData = new FormData();
+            imageFormData.append('profileImage', profileImage);
+            
+            const imageResponse = await fetch(
+                `${API_BASE_URL}/cuidador/${user.idUsuario}/profile-image`, 
+                {
+                    method: 'POST',
+                    body: imageFormData,
+                    credentials: 'include'
+                }
+            );
+            
+            if (!imageResponse.ok) {
+                const imgError = await imageResponse.json();
+                throw new Error(imgError.message || 'Error al actualizar la imagen');
+            }
+            
+            const imageData = await imageResponse.json();
+            updatedImagePath = imageData.data.perfilImage;
         }
-    };
 
-    const cancelEditProfile = () => {
+        const response = await fetch(
+            `${API_BASE_URL}/cuidador/${user.idUsuario}/profile`, 
+            {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nombre: profileFormData.nombre,
+                    email: profileFormData.email,
+                    telefono: profileFormData.telefono,
+                    descripcion: profileFormData.descripcion,
+                    sexoCuidador: profileFormData.sexoCuidador
+                }),
+                credentials: 'include'
+            }
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al actualizar perfil');
+        }
+
+        const data = await response.json();
+        console.log(' Respuesta del servidor:', data);
+        
+        const updatedUserData = {
+            ...user,
+            nombre: profileFormData.nombre,
+            email: profileFormData.email,
+            telefono: profileFormData.telefono,
+            descripcion: profileFormData.descripcion,
+            sexoCuidador: profileFormData.sexoCuidador,
+            perfilImage: updatedImagePath
+        };
+        
+        
+        updateUser(updatedUserData);
+        
         setEditingProfile(false);
         setProfileImage(null);
-    };
+        setError('')
 
-    const handleUpdateProfile = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-
-        const userId = user.idUsuario;
-        if (!userId) {
-            setError('Error: No se pudo obtener el ID del usuario para actualizar el perfil.');
-            setLoading(false);
-            return;
-        }
-
-        const formDataPayload = new FormData();
-        Object.keys(profileFormData).forEach(key => {
-            formDataPayload.append(key, profileFormData[key]);
-        });
-
-        if (profileImage) {
-            formDataPayload.append('perfilImage', profileImage);
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/cuidador/${userId}`, {
-                method: 'PUT', 
-                credentials: 'include',
-                body: formDataPayload
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `Error ${response.status} al actualizar perfil`);
-            }
-            
-            const updatedUser = await response.json();
-            if (updateUser) { 
-                updateUser(updatedUser); 
-            } else {
-                 console.warn("Advertencia: La función 'updateUser' no está disponible en useAuth. Es posible que los datos de 'user' no se actualicen de inmediato.");
-            }
-            
-            alert('Perfil actualizado exitosamente!');
-            cancelEditProfile();
-
-        } catch (err) {
-            console.error('Error al actualizar perfil:', err);
-            setError('Error al actualizar perfil: ' + err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-
-
-    // --------------------------------------------------
-    // iNICIO FUNCIONES NUEVA PUBLICACIÓN
-    // --------------------------------------------------
-
+    } catch (error) {
+        console.error(' Error al actualizar perfil:', error);
+        setError(error.message || 'Error al actualizar el perfil');
+        alert(' ' + error.message);
+    } finally {
+        setLoading(false);
+    }
+};
     const [files, setFiles] = useState([]); 
     
     const API_BASE_URL = 'http://localhost:3000/api';
@@ -140,26 +167,46 @@ const CuidadorDashboard = () => {
     });
     
     const handleFileChange = (e) => {
-    const newFiles = Array.from(e.target.files);
+       
+        const newlySelectedFiles = Array.from(e.target.files);
+
+       
+        const existingFiles = files; 
+        const allFiles = [...existingFiles, ...newlySelectedFiles];
+
+       
+        const uniqueFilesMap = new Map();
+        allFiles.forEach(file => {
+            const key = `${file.name}-${file.size}-${file.lastModified}`;
+            if (!uniqueFilesMap.has(key)) {
+                uniqueFilesMap.set(key, file);
+            }
+        });
+
+        const arrayUniqueFiles = Array.from(uniqueFilesMap.values());
+
+        
+        const limitedFiles = arrayUniqueFiles.slice(0, 5);
+
+        if (arrayUniqueFiles.length > 5) {
+            alert(`Solo puedes subir un máximo de 5 imágenes. Se han mantenido los últimos 5 archivos únicos.`);
+        }
+
+        setFiles(limitedFiles);
+
+       o
+        e.target.value = null; 
+    };
+
+const removeFile = (indexToRemove) => {
+    console.log(`   Archivo a remover: ${files[indexToRemove]?.name}`);
     
-    const totalFiles = [...files, ...newFiles].slice(0, 5);
+    const newFiles = files.filter((_, index) => index !== indexToRemove);
     
-    setFiles(totalFiles);
-    
-    if (files.length + newFiles.length > 5) {
-        alert(`Solo puedes subir un máximo de 5 imágenes. Se han seleccionado las primeras 5.`);
-    }
+    console.log(`   Archivos restantes: ${newFiles.length}`);
+    setFiles(newFiles);
 };
-
-   const removeFile = (indexToRemove) => {
-    setFiles(files.filter((_, index) => index !== indexToRemove));
-};
-
-
-    // --------------------------------------------------
-    // MALDITAS FETCH
-    // --------------------------------------------------
-
+   
     const fetchPublicaciones = useCallback(async () => {
         if (!user?.idUsuario) return;
         setLoading(true);
@@ -178,6 +225,7 @@ const CuidadorDashboard = () => {
             }
 
             const data = await response.json();
+            console.log('DB Response:', data.publicaciones);
             setPublicaciones(Array.isArray(data.publicaciones) ? data.publicaciones : []);
         } catch (err) {
             setError('Error al cargar publicaciones: ' + err.message);
@@ -190,7 +238,9 @@ const CuidadorDashboard = () => {
         if (!user?.id) return;
         try {
             const response = await fetch(`${API_BASE_URL}/reserva/cuidador/${user.id}`, {
-                method: 'GET', credentials: 'include', headers: { 'Content-Type': 'application/json' }
+                method: 'GET', 
+                credentials: 'include', 
+                headers: { 'Content-Type': 'application/json' }
             });
             if (response.ok) {
                 const data = await response.json();
@@ -202,12 +252,6 @@ const CuidadorDashboard = () => {
     }, [user?.id]); 
 
 
-    
-
-    // --------------------------------------------------
-    // USE EFFECTES PARA LA DATIHNA
-    // --------------------------------------------------
-    
 
     useEffect(() => {
         if (user?.idUsuario) {
@@ -223,69 +267,164 @@ const CuidadorDashboard = () => {
     }, [user?.id, fetchReservas]); 
 
 
-    // --------------------------------------------------
-    // SUBMIT CON FORMDATA
-    // --------------------------------------------------
-
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-        const userId = user.id || user.idUsuario || user.userId;
-        
-        if (!userId) {
-            setError('Error: No se pudo obtener el ID del usuario');
-            setLoading(false);
+    const userId = user.id || user.idUsuario || user.userId;
+    
+    if (!userId) {
+        setError('Error: No se pudo obtener el ID del usuario');
+        setLoading(false);
+        return;
+    }
+
+    console.log("\n=== 🔍 VERIFICACIÓN PRE-ENVÍO ===");
+    console.log("📁 Total de archivos en state:", files.length);
+    
+
+    const fileSignatures = files.map(f => `${f.name}-${f.size}-${f.lastModified}`);
+    const uniqueSignatures = new Set(fileSignatures);
+    
+    if (fileSignatures.length !== uniqueSignatures.size) {
+        fileSignatures.forEach((sig, i) => {
+            const count = fileSignatures.filter(s => s === sig).length;
+            if (count > 1) {
+                console.error(`  Duplicado: ${files[i].name} (aparece ${count} veces)`);
+            }
+        });
+    } else {
+        console.log("✅ Todos los archivos en state son únicos");
+    }
+    
+    files.forEach((file, i) => {
+        console.log(`  ${i + 1}. ${file.name} (${(file.size / 1024).toFixed(2)} KB) [${file.lastModified}]`);
+    });
+
+    const formDataPayload = new FormData();
+    formDataPayload.append('idUsuario', userId);
+    formDataPayload.append('titulo', formData.titulo);
+    formDataPayload.append('descripcion', formData.descripcion);
+    formDataPayload.append('tarifaPorDia', formData.tarifaPorDia);
+    formDataPayload.append('ubicacion', formData.ubicacion);
+    formDataPayload.append('tipoAlojamiento', formData.tipoAlojamiento);
+    formDataPayload.append('cantAnimales', formData.cantAnimales);
+    formDataPayload.append('exotico', formData.exotico);
+
+    console.log("\n📎 Agregando archivos al FormData:");
+    files.forEach((file, index) => {
+        console.log(`  Agregando ${index + 1}/${files.length}: ${file.name} (${file.size} bytes)`);
+        formDataPayload.append('images', file, file.name);
+    });
+
+    let imageCount = 0;
+    const imagesInFormData = [];
+    for (let [key, value] of formDataPayload.entries()) {
+        if (key === 'images') {
+            imageCount++;
+            imagesInFormData.push({
+                index: imageCount,
+                name: value.name,
+                size: value.size,
+                type: value.type
+            });
+            console.log(`  images[${imageCount}]:`, {
+                name: value.name,
+                size: value.size,
+                type: value.type
+            });
+        }
+    }
+
+    const formDataNames = imagesInFormData.map(img => img.name);
+    const uniqueFormDataNames = new Set(formDataNames);
+    if (formDataNames.length !== uniqueFormDataNames.size) {
+        setError('Hay archivos duplicados en las imágenes seleccionadas');
+        setLoading(false);
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/publicacion`, {
+            method: 'POST',
+            credentials: 'include',
+            body: formDataPayload
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Error ${response.status}`);
+        }
+
+        await fetchPublicaciones();
+        setFiles([]);
+        setFormData({
+            titulo: '',
+            descripcion: '',
+            tarifaPorDia: '',
+            ubicacion: '',
+            tipoAlojamiento: '',
+            cantAnimales: '',
+            exotico: false
+        });
+        setCurrentView('publicaciones');
+        alert('Publicación creada exitosamente');
+    } catch (err) {
+        console.error('Error al crear publicación:', err);
+        setError('Error al crear publicación: ' + err.message);
+        alert('Error al crear publicación: ' + err.message);
+    } finally {
+        setLoading(false);
+    }
+};
+
+    const handleDeleteUser = async () => {
+        if (!window.confirm('🚨 ADVERTENCIA: Esta acción es irreversible. ¿Estás absolutamente seguro de que quieres ELIMINAR tu cuenta? Se eliminarán todas tus publicaciones y reservas.')) {
             return;
         }
 
-        // CREAR FORMDATA
-        const formDataPayload = new FormData();
-        formDataPayload.append('idUsuario', userId);
-        formDataPayload.append('titulo', formData.titulo);
-        formDataPayload.append('descripcion', formData.descripcion);
-        formDataPayload.append('tarifaPorDia', formData.tarifaPorDia);
-        formDataPayload.append('ubicacion', formData.ubicacion);
-        formDataPayload.append('tipoAlojamiento', formData.tipoAlojamiento);
-        formDataPayload.append('cantAnimales', formData.cantAnimales);
-        formDataPayload.append('exotico', formData.exotico);
-
-        // Añadir las imágenes
-        files.forEach((file) => {
-            formDataPayload.append('images', file); 
-        });
+        setLoading(true);
+        setError('');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/publicacion`, {
-                method: 'POST',
-                credentials: 'include',
-                body: formDataPayload
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `Error ${response.status}`);
+            const userId = user.idUsuario;
+            if (!userId) {
+                throw new Error('ID de usuario no encontrado.');
             }
 
-            await fetchPublicaciones();
+            const response = await fetch(
+                `${API_BASE_URL}/cuidador/${userId}`,
+                {
+                    method: 'DELETE',
+                    credentials: 'include'
+                }
+            );
 
-            setFormData({
-                titulo: '', descripcion: '', tarifaPorDia: '', ubicacion: '',
-                tipoAlojamiento: '', cantAnimales: '', exotico: false
-            });
-            setFiles([]); 
-            setCurrentView('publicaciones');
-            alert('Publicación creada exitosamente!');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Error ${response.status} al eliminar la cuenta.`);
+            }
 
-        } catch (err) {
-            console.error('Error completo:', err);
-            setError('Error al crear publicación: ' + err.message);
+            
+            await logout();
+            alert('✅ Cuenta eliminada exitosamente. Serás redirigido.');
+            navigate('/'); 
+
+        } catch (error) {
+            console.error('❌ Error al eliminar la cuenta:', error);
+            setError(error.message || 'Error al eliminar la cuenta. Inténtalo de nuevo.');
+            alert('Error: ' + (error.message || 'No se pudo eliminar la cuenta.'));
         } finally {
             setLoading(false);
         }
     };
-    
+
+useEffect(() => {
+    files.forEach((file, i) => {
+        console.log(`  ${i + 1}. ${file.name}`);
+    });
+}, [files]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -298,157 +437,155 @@ const CuidadorDashboard = () => {
    
     const handleLogout = async () => {
         try {
-          await logout();
-          alert('Sesión cerrada');
+            await logout();
+            alert('Sesión cerrada');
         } catch (err) {
-          console.error('Error al cerrar sesión:', err);
+            console.error('Error al cerrar sesión:', err);
         }
-      };
+    };
 
 
 
-const deletePublicacion = async (id) => {
-    if (!window.confirm('¿Estás seguro de eliminar esta publicación? Esta acción es irreversible y eliminará todas las imágenes asociadas.')) { 
-        return; 
-    }
-    
-    setLoading(true);
-    setError('');
+    const deletePublicacion = async (id) => {
+        if (!window.confirm('¿Estás seguro de eliminar esta publicación? Esta acción es irreversible y eliminará todas las imágenes asociadas.')) { 
+            return; 
+        }
+        
+        setLoading(true);
+        setError('');
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/publicacion/${id}`, { 
-            method: 'DELETE', 
-            credentials: 'include', 
-            headers: { 'Content-Type': 'application/json' } 
+        try {
+            const response = await fetch(`${API_BASE_URL}/publicacion/${id}`, { 
+                method: 'DELETE', 
+                credentials: 'include', 
+                headers: { 'Content-Type': 'application/json' } 
+            });
+
+            if (!response.ok) { 
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Error ${response.status}: No se pudo eliminar la publicación.`); 
+            }
+           
+            await fetchPublicaciones();
+
+        } catch (err) { 
+            console.error('Error al eliminar:', err);
+            setError('Error al eliminar publicación: ' + err.message);
+            alert(' Error al eliminar publicación: ' + err.message); 
+        } finally {
+            setLoading(false);
+        }
+    };
+    const startEditPublicacion = (pub) => {
+        console.log('Editando publicación:', pub);
+        
+        setEditingPublicacion(pub);
+        setFormData({
+            titulo: pub.titulo,
+            descripcion: pub.descripcion,
+            tarifaPorDia: pub.tarifaPorDia,
+            ubicacion: pub.ubicacion,
+            tipoAlojamiento: pub.tipoAlojamiento,
+            cantAnimales: pub.cantAnimales,
+            exotico: pub.exotico
         });
+        setExistingImages(pub.imagenes || []);
+        setFiles([]);
+        setImagesToDelete([]);
+        setCurrentView('editar-publicacion');
+    };
 
-        if (!response.ok) { 
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Error ${response.status}: No se pudo eliminar la publicación.`); 
-        }
-        setPublicaciones(prev => prev.filter(pub => pub.id !== id));
-        
-        alert('✅ Publicación eliminada exitosamente');
-
-    } catch (err) { 
-        console.error('Error al eliminar:', err);
-        setError('Error al eliminar publicación: ' + err.message);
-        alert('❌ Error al eliminar publicación: ' + err.message); 
-    } finally {
-        setLoading(false);
-    }
-};
-
-    // --------------------------------------------------
-    // EDITAR PUBLICACIÓN
-    // --------------------------------------------------
-
-  const startEditPublicacion = (pub) => {
-    console.log('Editando publicación:', pub);
-    
-    setEditingPublicacion(pub);
-    setFormData({
-        titulo: pub.titulo,
-        descripcion: pub.descripcion,
-        tarifaPorDia: pub.tarifaPorDia,
-        ubicacion: pub.ubicacion,
-        tipoAlojamiento: pub.tipoAlojamiento,
-        cantAnimales: pub.cantAnimales,
-        exotico: pub.exotico
-    });
-    setExistingImages(pub.imagenes || []);
-    setFiles([]);
-    setImagesToDelete([]);
-    setCurrentView('editar-publicacion');
-};
-
-const markImageForDeletion = (imageId) => {
-    setImagesToDelete(prev => [...prev, imageId]);
-    setExistingImages(prev => prev.filter(img => img.id !== imageId));
-};
+    const markImageForDeletion = (imageId) => {
+        setImagesToDelete(prev => [...prev, imageId]);
+        setExistingImages(prev => prev.filter(img => img.id !== imageId));
+    };
 
 
-const cancelEdit = () => {
-    setEditingPublicacion(null);
-    setFormData({
-        titulo: '',
-        descripcion: '',
-        tarifaPorDia: '',
-        ubicacion: '',
-        tipoAlojamiento: '',
-        cantAnimales: '',
-        exotico: false
-    });
-    setExistingImages([]);
-    setFiles([]);
-    setImagesToDelete([]);
-    setCurrentView('publicaciones');
-};
-
-
-const handleUpdate = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-        const formDataPayload = new FormData();
-        
-        formDataPayload.append('titulo', formData.titulo);
-        formDataPayload.append('descripcion', formData.descripcion);
-        formDataPayload.append('tarifaPorDia', formData.tarifaPorDia);
-        formDataPayload.append('ubicacion', formData.ubicacion);
-        formDataPayload.append('tipoAlojamiento', formData.tipoAlojamiento);
-        formDataPayload.append('cantAnimales', formData.cantAnimales);
-        formDataPayload.append('exotico', formData.exotico);
-    
-        if (imagesToDelete.length > 0) {
-            formDataPayload.append('imagesToDelete', JSON.stringify(imagesToDelete));
-        }
-        
-        files.forEach((file) => {
-            formDataPayload.append('images', file);
+    const cancelEdit = () => {
+        setEditingPublicacion(null);
+        setFormData({
+            titulo: '',
+            descripcion: '',
+            tarifaPorDia: '',
+            ubicacion: '',
+            tipoAlojamiento: '',
+            cantAnimales: '',
+            exotico: false
         });
+        setExistingImages([]);
+        setFiles([]);
+        setImagesToDelete([]);
+        setCurrentView('publicaciones');
+    };
 
-        const response = await fetch(`${API_BASE_URL}/publicacion/${editingPublicacion.id}`, {
-            method: 'PUT',
-            credentials: 'include',
-            body: formDataPayload
-        });
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+
+        try {
+            const formDataPayload = new FormData();
+            
+            formDataPayload.append('titulo', formData.titulo);
+            formDataPayload.append('descripcion', formData.descripcion);
+            formDataPayload.append('tarifaPorDia', formData.tarifaPorDia);
+            formDataPayload.append('ubicacion', formData.ubicacion);
+            formDataPayload.append('tipoAlojamiento', formData.tipoAlojamiento);
+            formDataPayload.append('cantAnimales', formData.cantAnimales);
+            formDataPayload.append('exotico', formData.exotico);
         
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Error ${response.status}`);
+            if (imagesToDelete.length > 0) {
+                formDataPayload.append('imagesToDelete', JSON.stringify(imagesToDelete));
+            }
+            
+            files.forEach((file) => {
+                formDataPayload.append('images', file);
+            });
+
+            const response = await fetch(`${API_BASE_URL}/publicacion/${editingPublicacion.id}`, {
+                method: 'PUT',
+                credentials: 'include',
+                body: formDataPayload
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Error ${response.status}`);
+            }
+
+            await fetchPublicaciones();
+            cancelEdit();
+            alert('Publicación actualizada exitosamente!');
+
+        } catch (err) {
+            console.error('Error al actualizar:', err);
+            setError('Error al actualizar publicación: ' + err.message);
+        } finally {
+            setLoading(false);
         }
-
-        await fetchPublicaciones();
-        cancelEdit();
-        alert('Publicación actualizada exitosamente!');
-
-    } catch (err) {
-        console.error('Error al actualizar:', err);
-        setError('Error al actualizar publicación: ' + err.message);
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
 
     const updateReservaEstado = async (reservaId, nuevoEstado) => {
         try {
             const response = await fetch(`${API_BASE_URL}/reserva/${reservaId}/estado`, { 
-                method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+                method: 'PUT', 
+                credentials: 'include', 
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ estado: nuevoEstado })
             });
-            if (!response.ok) { throw new Error(`Error ${response.status}`); }
-            setReservas(prev => prev.map(reserva => reserva.id === reservaId ? { ...reserva, estado: nuevoEstado } : reserva));
+            if (!response.ok) { 
+                throw new Error(`Error ${response.status}`); 
+            }
+            setReservas(prev => prev.map(reserva => 
+                reserva.id === reservaId ? { ...reserva, estado: nuevoEstado } : reserva
+            ));
             alert(`Reserva ${nuevoEstado === 'confirmada' ? 'aceptada' : 'rechazada'} exitosamente`);
-        } catch (err) { alert('Error al actualizar reserva: ' + err.message); }
+        } catch (err) { 
+            alert('Error al actualizar reserva: ' + err.message); 
+        }
     };
-
-    // --------------------------------------------------
-    // MIS PUBLICACIONES
-    // --------------------------------------------------
 
     const renderPublicaciones = () => (
         <div className="dashboard-main">
@@ -474,8 +611,6 @@ const handleUpdate = async (e) => {
                 <div className="publicaciones-grid">
                     {publicaciones.map((pub) => (
                         <div key={pub.id} className="publicacion-card">
-                            
-                          
                             <div className="card-image-wrapper">
                                 <ImageCarousel 
                                     imagenes={pub.imagenes || []} 
@@ -500,7 +635,9 @@ const handleUpdate = async (e) => {
                             </div>
 
                             <div className="card-buttons">
-                               <button onClick={() => startEditPublicacion(pub)} className="btn-edit">Editar</button>
+                                <button onClick={() => startEditPublicacion(pub)} className="btn-edit">
+                                    Editar
+                                </button>
                                 <button 
                                     onClick={() => deletePublicacion(pub.id)}
                                     className="btn-delete"
@@ -518,348 +655,387 @@ const handleUpdate = async (e) => {
         </div>
     );
 
-    // --------------------------------------------------
-    // NUEVA PUBLICACION
-    // --------------------------------------------------
-    
-   const renderNuevaPublicacion = () => (
-    <div className="dashboard-main">
-        <div className="form-container">
-            <h2 className="section-title">Nueva Publicación</h2>
-            
-            <form onSubmit={handleSubmit} className="form-card" encType="multipart/form-data">
-                <div className="form-group">
-                    <label className="form-label">Título:</label>
-                    <input type="text" name="titulo" value={formData.titulo} onChange={handleChange} required className="form-input" />
-                </div>
+    const renderNuevaPublicacion = () => (
+        <div className="dashboard-main">
+            <div className="form-container">
+                <h2 className="section-title">Nueva Publicación</h2>
                 
-                <div className="form-group">
-                    <label className="form-label">Descripción:</label>
-                    <textarea name="descripcion" value={formData.descripcion} onChange={handleChange} rows={4} required className="form-textarea" />
-                </div>
-
-                <div className="form-grid">
+                <form onSubmit={handleSubmit} className="form-card" encType="multipart/form-data">
                     <div className="form-group">
-                        <label className="form-label">Tarifa por día ($):</label>
-                        <input type="number" name="tarifaPorDia" value={formData.tarifaPorDia} onChange={handleChange} min="0" step="0.01" required className="form-input" />
-                    </div>
-                    <div className="form-group">
-                        <label className="form-label">Cantidad de animales:</label>
-                        <input type="number" name="cantAnimales" value={formData.cantAnimales} onChange={handleChange} min="1" required className="form-input" />
-                    </div>
-                </div>
-
-                <div className="form-group">
-                    <label className="form-label">Ubicación:</label>
-                    <input type="text" name="ubicacion" value={formData.ubicacion} onChange={handleChange} required className="form-input" />
-                </div>
-
-                <div className="form-group">
-                    <label className="form-label">Tipo de alojamiento:</label>
-                    <select name="tipoAlojamiento" value={formData.tipoAlojamiento} onChange={handleChange} required className="form-select">
-                        <option value="">Seleccionar...</option>
-                        <option value="casa">En mi casa</option>
-                        <option value="domicilio">En casa del dueño</option>
-                        <option value="ambos">Ambos</option>
-                    </select>
-                </div>
-
-                <div className="form-group">
-                    <label className="checkbox-group">
-                        <input type="checkbox" name="exotico" checked={formData.exotico} onChange={handleChange} className="checkbox-input" />
-                        <span>Acepto mascotas exóticas</span>
-                    </label>
-                </div>
-
-                <div className="form-group file-upload-group">
-                    <label className="form-label">
-                        Fotos de la Publicación (Máx. 5):
-                    </label>
-                    
-                    <div className="file-input-wrapper">
-                        <input
-                            type="file"
-                            name="images" 
-                            onChange={handleFileChange}
-                            multiple 
-                            accept="image/*" 
-                            className="form-input file-input"
-                            id="file-input"
-                        />
-                        <label htmlFor="file-input" className="file-input-label">
-                            📁 Seleccionar imágenes (mantén Ctrl/Cmd para seleccionar varias)
-                        </label>
-                    </div>
-
-                    {files.length > 0 && (
-                        <div className="image-preview-container">
-                            <p className="file-count">
-                                {files.length} imagen{files.length !== 1 ? 'es' : ''} seleccionada{files.length !== 1 ? 's' : ''} ({5 - files.length} restante{5 - files.length !== 1 ? 's' : ''})
-                            </p>
-                            <div className="image-preview-grid">
-                                {files.map((file, index) => (
-                                    <div key={index} className="image-preview-item">
-                                        <img 
-                                            src={URL.createObjectURL(file)} 
-                                            alt={`Preview ${index + 1}`}
-                                            className="preview-thumbnail"
-                                        />
-                                        <button 
-                                            type="button"
-                                            onClick={() => removeFile(index)}
-                                            className="remove-image-btn"
-                                            title="Eliminar imagen"
-                                        >
-                                        </button>
-                                        <span className="image-name">{file.name}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {error && (<div className="error-message">{error}</div>)}
-
-                <div className="form-buttons">
-                    <button 
-                        type="button" 
-                        onClick={() => {
-                            setCurrentView('publicaciones');
-                            setFiles([]); 
-                        }}
-                        className="btn-secondary"
-                    >
-                        Cancelar
-                    </button>
-                    <button 
-                        type="submit" 
-                        disabled={loading}
-                        className="btn-primary"
-                    >
-                        {loading ? 'Creando...' : 'Crear Publicación'}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-);
-
-const renderEditarPublicacion = () => (
-    <div className="dashboard-main">
-        <div className="form-container">
-            <h2 className="section-title">Editar Publicación</h2>
-            
-            <form onSubmit={handleUpdate} className="form-card" encType="multipart/form-data">
-                <div className="form-group">
-                    <label className="form-label">Título:</label>
-                    <input 
-                        type="text" 
-                        name="titulo" 
-                        value={formData.titulo} 
-                        onChange={handleChange} 
-                        required 
-                        className="form-input" 
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label className="form-label">Descripción:</label>
-                    <textarea 
-                        name="descripcion" 
-                        value={formData.descripcion} 
-                        onChange={handleChange} 
-                        rows={4} 
-                        required 
-                        className="form-textarea" 
-                    />
-                </div>
-
-                <div className="form-grid">
-                    <div className="form-group">
-                        <label className="form-label">Tarifa por día ($):</label>
+                        <label className="form-label">Título:</label>
                         <input 
-                            type="number" 
-                            name="tarifaPorDia" 
-                            value={formData.tarifaPorDia} 
+                            type="text" 
+                            name="titulo" 
+                            value={formData.titulo} 
                             onChange={handleChange} 
-                            min="0" 
-                            step="0.01" 
                             required 
                             className="form-input" 
                         />
                     </div>
+                    
                     <div className="form-group">
-                        <label className="form-label">Cantidad de animales:</label>
-                        <input 
-                            type="number" 
-                            name="cantAnimales" 
-                            value={formData.cantAnimales} 
+                        <label className="form-label">Descripción:</label>
+                        <textarea 
+                            name="descripcion" 
+                            value={formData.descripcion} 
                             onChange={handleChange} 
-                            min="1" 
+                            rows={4} 
+                            required 
+                            className="form-textarea" 
+                        />
+                    </div>
+
+                    <div className="form-grid">
+                        <div className="form-group">
+                            <label className="form-label">Tarifa por día ($):</label>
+                            <input 
+                                type="number" 
+                                name="tarifaPorDia" 
+                                value={formData.tarifaPorDia} 
+                                onChange={handleChange} 
+                                min="0" 
+                                step="0.01" 
+                                required 
+                                className="form-input" 
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Cantidad de animales:</label>
+                            <input 
+                                type="number" 
+                                name="cantAnimales" 
+                                value={formData.cantAnimales} 
+                                onChange={handleChange} 
+                                min="1" 
+                                required 
+                                className="form-input" 
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Ubicación:</label>
+                        <input 
+                            type="text" 
+                            name="ubicacion" 
+                            value={formData.ubicacion} 
+                            onChange={handleChange} 
                             required 
                             className="form-input" 
                         />
                     </div>
-                </div>
 
-                <div className="form-group">
-                    <label className="form-label">Ubicación:</label>
-                    <input 
-                        type="text" 
-                        name="ubicacion" 
-                        value={formData.ubicacion} 
-                        onChange={handleChange} 
-                        required 
-                        className="form-input" 
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label className="form-label">Tipo de alojamiento:</label>
-                    <select 
-                        name="tipoAlojamiento" 
-                        value={formData.tipoAlojamiento} 
-                        onChange={handleChange} 
-                        required 
-                        className="form-select"
-                    >
-                        <option value="">Seleccionar...</option>
-                        <option value="casa">En mi casa</option>
-                        <option value="domicilio">En casa del dueño</option>
-                        <option value="ambos">Ambos</option>
-                    </select>
-                </div>
-
-                <div className="form-group">
-                    <label className="checkbox-group">
-                        <input 
-                            type="checkbox" 
-                            name="exotico" 
-                            checked={formData.exotico} 
-                            onChange={handleChange} 
-                            className="checkbox-input" 
-                        />
-                        <span>Acepto mascotas exóticas</span>
-                    </label>
-                </div>
-
-                {/* IMÁGENES EXISTENTES */}
-                {existingImages.length > 0 && (
                     <div className="form-group">
-                        <label className="form-label">Imágenes actuales:</label>
-                        <div className="existing-images-container">
-                            <div className="image-preview-grid">
-                                {existingImages.map((img) => (
-                                    <div key={img.id} className="image-preview-item existing-image">
-                                        <img 
-                                            src={img.url || `http://localhost:3000${img.path}`}
-                                            alt="Imagen existente"
-                                            className="preview-thumbnail"
-                                        />
-                                        <button 
-                                            type="button"
-                                            onClick={() => markImageForDeletion(img.id)}
-                                            className="remove-image-btn"
-                                            title="Eliminar imagen"
-                                        >
-                                            ✕
-                                        </button>
-                                        <span className="image-label">Existente</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* NUEVAS IMÁGENES */}
-                <div className="form-group file-upload-group">
-                    <label className="form-label">
-                        Agregar nuevas fotos (Máx. 5 en total):
-                    </label>
-                    
-                    <div className="file-input-wrapper">
-                        <input
-                            type="file"
-                            name="images" 
-                            onChange={handleFileChange}
-                            multiple 
-                            accept="image/*" 
-                            className="form-input file-input"
-                            id="file-input-edit"
-                            disabled={existingImages.length + files.length >= 5}
-                        />
-                        <label 
-                            htmlFor="file-input-edit" 
-                            className={`file-input-label ${existingImages.length + files.length >= 5 ? 'disabled' : ''}`}
+                        <label className="form-label">Tipo de alojamiento:</label>
+                        <select 
+                            name="tipoAlojamiento" 
+                            value={formData.tipoAlojamiento} 
+                            onChange={handleChange} 
+                            required 
+                            className="form-select"
                         >
-                            {existingImages.length + files.length >= 5 
-                                ? '🚫 Máximo de imágenes alcanzado' 
-                                : '📁 Agregar más imágenes'
-                            }
+                            <option value="">Seleccionar...</option>
+                            <option value="casa">En mi casa</option>
+                            <option value="domicilio">En casa del dueño</option>
+                            <option value="ambos">Ambos</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="checkbox-group">
+                            <input 
+                                type="checkbox" 
+                                name="exotico" 
+                                checked={formData.exotico} 
+                                onChange={handleChange} 
+                                className="checkbox-input" 
+                            />
+                            <span>Acepto mascotas exóticas</span>
                         </label>
                     </div>
 
-                    <p className="file-count">
-                        Total: {existingImages.length + files.length} imagen(es) 
-                        ({5 - (existingImages.length + files.length)} restante(s))
-                    </p>
+                    <div className="form-group file-upload-group">
+                        <label className="form-label">
+                            Fotos de la Publicación (Máx. 5):
+                        </label>
+                        
+                        <div className="file-input-wrapper">
+                            <input
+                                type="file"
+                                name="images" 
+                                onChange={handleFileChange}
+                                multiple 
+                                accept="image/*" 
+                                className="form-input file-input"
+                                id="file-input"
+                            />
+                            <label htmlFor="file-input" className="file-input-label">
+                                📁 Seleccionar imágenes (mantenga Ctrl/Cmd para seleccionar varias)
+                            </label>
+                        </div>
 
-                    {/* Previsualización de nuevas imágenes */}
-                    {files.length > 0 && (
-                        <div className="image-preview-container">
-                            <p className="file-count-label">Nuevas imágenes a subir:</p>
-                            <div className="image-preview-grid">
-                                {files.map((file, index) => (
-                                    <div key={index} className="image-preview-item new-image">
-                                        <img 
-                                            src={URL.createObjectURL(file)} 
-                                            alt={`Preview ${index + 1}`}
-                                            className="preview-thumbnail"
-                                        />
-                                        <button 
-                                            type="button"
-                                            onClick={() => removeFile(index)}
-                                            className="remove-image-btn"
-                                            title="Eliminar imagen"
-                                        >
-                                            ✕
-                                        </button>
-                                        <span className="image-label new-label">Nueva</span>
-                                    </div>
-                                ))}
+                        {files.length > 0 && (
+                            <div className="image-preview-container">
+                                <p className="file-count">
+                                    {files.length} imagen{files.length !== 1 ? 'es' : ''} seleccionada{files.length !== 1 ? 's' : ''} ({5 - files.length} restante{5 - files.length !== 1 ? 's' : ''})
+                                </p>
+                                <div className="image-preview-grid">
+                                    {files.map((file, index) => (
+                                        <div key={index} className="image-preview-item">
+                                            <img 
+                                                src={URL.createObjectURL(file)} 
+                                                alt={`Preview ${index + 1}`}
+                                                className="preview-thumbnail"
+                                            />
+                                            <button 
+                                                type="button"
+                                                onClick={() => removeFile(index)}
+                                                className="remove-image-btn"
+                                                title="Eliminar imagen"
+                                            >
+                                                ✕
+                                            </button>
+                                            <span className="image-name">{file.name}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {error && (<div className="error-message">{error}</div>)}
+
+                    <div className="form-buttons">
+                        <button 
+                            type="button" 
+                            onClick={() => {
+                                setCurrentView('publicaciones');
+                                setFiles([]); 
+                            }}
+                            className="btn-secondary"
+                        >
+                            Cancelar
+                        </button>
+                        <button 
+                            type="submit" 
+                            disabled={loading}
+                            className="btn-primary"
+                        >
+                            {loading ? 'Creando...' : 'Crear Publicación'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+    const renderEditarPublicacion = () => (
+        <div className="dashboard-main">
+            <div className="form-container">
+                <h2 className="section-title">Editar Publicación</h2>
+                
+                <form onSubmit={handleUpdate} className="form-card" encType="multipart/form-data">
+                    <div className="form-group">
+                        <label className="form-label">Título:</label>
+                        <input 
+                            type="text" 
+                            name="titulo" 
+                            value={formData.titulo} 
+                            onChange={handleChange} 
+                            required 
+                            className="form-input" 
+                        />
+                    </div>
+                    
+                    <div className="form-group">
+                        <label className="form-label">Descripción:</label>
+                        <textarea 
+                            name="descripcion" 
+                            value={formData.descripcion} 
+                            onChange={handleChange} 
+                            rows={4} 
+                            required 
+                            className="form-textarea" 
+                        />
+                    </div>
+
+                    <div className="form-grid">
+                        <div className="form-group">
+                            <label className="form-label">Tarifa por día ($):</label>
+                            <input 
+                                type="number" 
+                                name="tarifaPorDia" 
+                                value={formData.tarifaPorDia} 
+                                onChange={handleChange} 
+                                min="0" 
+                                step="0.01" 
+                                required 
+                                className="form-input" 
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Cantidad de animales:</label>
+                            <input 
+                                type="number" 
+                                name="cantAnimales" 
+                                value={formData.cantAnimales} 
+                                onChange={handleChange} 
+                                min="1" 
+                                required 
+                                className="form-input" 
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Ubicación:</label>
+                        <input 
+                            type="text" 
+                            name="ubicacion" 
+                            value={formData.ubicacion} 
+                            onChange={handleChange} 
+                            required 
+                            className="form-input" 
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Tipo de alojamiento:</label>
+                        <select 
+                            name="tipoAlojamiento" 
+                            value={formData.tipoAlojamiento} 
+                            onChange={handleChange} 
+                            required 
+                            className="form-select"
+                        >
+                            <option value="">Seleccionar...</option>
+                            <option value="casa">En mi casa</option>
+                            <option value="domicilio">En casa del dueño</option>
+                            <option value="ambos">Ambos</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="checkbox-group">
+                            <input 
+                                type="checkbox" 
+                                name="exotico" 
+                                checked={formData.exotico} 
+                                onChange={handleChange} 
+                                className="checkbox-input" 
+                            />
+                            <span>Acepto mascotas exóticas</span>
+                        </label>
+                    </div>
+
+                    {existingImages.length > 0 && (
+                        <div className="form-group">
+                            <label className="form-label">Imágenes actuales:</label>
+                            <div className="existing-images-container">
+                                <div className="image-preview-grid">
+                                    {existingImages.map((img) => (
+                                        <div key={img.id} className="image-preview-item existing-image">
+                                            <img 
+                                                src={img.url || `http://localhost:3000${img.path}`}
+                                                alt="Imagen existente"
+                                                className="preview-thumbnail"
+                                            />
+                                            <button 
+                                                type="button"
+                                                onClick={() => markImageForDeletion(img.id)}
+                                                className="remove-image-btn"
+                                                title="Eliminar imagen"
+                                            >
+                                                ✕
+                                            </button>
+                                            <span className="image-label">Existente</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     )}
-                </div>
 
-                {error && (<div className="error-message">{error}</div>)}
+                    <div className="form-group file-upload-group">
+                        <label className="form-label">
+                            Agregar nuevas fotos (Máx. 5 en total):
+                        </label>
+                        
+                        <div className="file-input-wrapper">
+                            <input
+                                type="file"
+                                name="images" 
+                                onChange={handleFileChange}
+                                multiple 
+                                accept="image/*" 
+                                className="form-input file-input"
+                                id="file-input-edit"
+                                disabled={existingImages.length + files.length >= 5}
+                            />
+                            <label 
+                                htmlFor="file-input-edit" 
+                                className={`file-input-label ${existingImages.length + files.length >= 5 ? 'disabled' : ''}`}
+                            >
+                                {existingImages.length + files.length >= 5 
+                                    ? '🚫 Máximo de imágenes alcanzado' 
+                                    : '📁 Agregar más imágenes'
+                                }
+                            </label>
+                        </div>
 
-                <div className="form-buttons">
-                    <button 
-                        type="button" 
-                        onClick={cancelEdit}
-                        className="btn-secondary"
-                    >
-                        Cancelar
-                    </button>
-                    <button 
-                        type="submit" 
-                        disabled={loading}
-                        className="btn-primary"
-                    >
-                        {loading ? 'Actualizando...' : 'Actualizar Publicación'}
-                    </button>
-                </div>
-            </form>
+                        <p className="file-count">
+                            Total: {existingImages.length + files.length} imagen(es) 
+                            ({5 - (existingImages.length + files.length)} restante(s))
+                        </p>
+
+                        {files.length > 0 && (
+                            <div className="image-preview-container">
+                                <p className="file-count-label">Nuevas imágenes a subir:</p>
+                                <div className="image-preview-grid">
+                                    {files.map((file, index) => (
+                                        <div key={index} className="image-preview-item new-image">
+                                            <img 
+                                                src={URL.createObjectURL(file)} 
+                                                alt={`Preview ${index + 1}`}
+                                                className="preview-thumbnail"
+                                            />
+                                            <button 
+                                                type="button"
+                                                onClick={() => removeFile(index)}
+                                                className="remove-image-btn"
+                                                title="Eliminar imagen"
+                                            >
+                                                ✕
+                                            </button>
+                                            <span className="image-label new-label">Nueva</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {error && (<div className="error-message">{error}</div>)}
+
+                    <div className="form-buttons">
+                        <button 
+                            type="button" 
+                            onClick={cancelEdit}
+                            className="btn-secondary"
+                        >
+                            Cancelar
+                        </button>
+                        <button 
+                            type="submit" 
+                            disabled={loading}
+                            className="btn-primary"
+                        >
+                            {loading ? 'Actualizando...' : 'Actualizar Publicación'}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
-);
-    
-    // --------------------------------------------------
-    // RESERVAS Y PERFIL IN THE MAKING
-    // --------------------------------------------------
+    );
     
     const renderReservas = () => (
         <div className="dashboard-main">
@@ -906,8 +1082,7 @@ const renderEditarPublicacion = () => (
             )}
         </div>
     );
-
-  const renderPerfil = () => (
+    const renderPerfil = () => (
         <div className="dashboard-main">
             <div className="perfil-container">
                 <h2 className="section-title">Mi Perfil</h2>
@@ -924,7 +1099,7 @@ const renderEditarPublicacion = () => (
                                         height: '150px',
                                         borderRadius: '50%',
                                         objectFit: 'cover',
-                                        border: '3px solid #3b82f6'
+                                        border: '3px solid #f97840'
                                     }}
                                 />
                             ) : (
@@ -978,9 +1153,16 @@ const renderEditarPublicacion = () => (
                         >
                             ✏️ Editar Perfil
                         </button>
+                        \<button
+                            onClick={handleDeleteUser}
+                            className="btn-delete"
+                            disabled={loading} // Deshabilitar si está cargando
+                            style={{ width: '100%', padding: '10px', marginTop: '10px' }} // Estilo para destacarlo
+                        >
+                            {loading ? 'Eliminando...' : '🗑️ Eliminar Cuenta'}
+                        </button>
                     </div>
                 ) : (
-
                     <form onSubmit={handleUpdateProfile} className="form-card">
                         <div className="form-group" style={{ textAlign: 'center' }}>
                             <label className="form-label">Foto de perfil:</label>
@@ -1143,10 +1325,7 @@ const renderEditarPublicacion = () => (
             </div>
         </div>
     );     
-
-    // --------------------------------------------------
-    //  PRINCIPAL 
-    // --------------------------------------------------
+    
 
     return (
         <div className="dashboard-container">
@@ -1157,6 +1336,7 @@ const renderEditarPublicacion = () => (
                 </div>
                 
                 <div className="navbar-buttons">
+                    <div className="up-buttons">
                     <button
                         onClick={() => navigate('/')} 
                         className="nav-button btn-publicaciones-extra"
@@ -1173,26 +1353,26 @@ const renderEditarPublicacion = () => (
                     <button
                         onClick={() => setCurrentView('reservas')}
                         className={`nav-button ${currentView === 'reservas' ? 'active' : ''}`}
-                    >
+                    >  <CalendarCheck size={18} style={{marginRight: '5px'}}/>
                         Reservas
                     </button>
+                    </div>
+                    <div className="down-buttons">
                     <button
                         onClick={() => setCurrentView('perfil')}
                         className={`nav-button ${currentView === 'perfil' ? 'active' : ''}`}
                     >
                         <User size={18} style={{marginRight: '5px'}}/>
-                        Mi Perfil
                     </button>
                     <button 
                         onClick={handleLogout}
                         className="logout-button"
-                    >
-                        Cerrar Sesión
+                    >   <LogOut size={18} style={{marginRight: '5px'}}/>
                     </button>
+                    </div>
                 </div>
             </nav>
 
-            {/* Contenido principal */}
             <main>
                 {currentView === 'publicaciones' && renderPublicaciones()}
                 {currentView === 'reservas' && renderReservas()}

@@ -20,7 +20,7 @@ export class Publicacion {
   @Property({ nullable: true, unique: false })
   exotico!: boolean;           
   
-  @ManyToOne(() => Cuidador, { nullable: true })
+  @ManyToOne(() => Cuidador, { nullable: true, cascade:[Cascade.REMOVE] })
   idCuidador!: Rel<Cuidador>;
 
   @OneToMany(() => Reserva, reserva => reserva.publicacion, { nullable: true})
@@ -29,7 +29,7 @@ export class Publicacion {
   @Property({ nullable: false, unique: false })
   tarifaPorDia!: number;
 
-  @OneToMany(() => Imagen, imagen => imagen.publicacion, { nullable: true, cascade: [Cascade.ALL] })
+  @OneToMany(() => Imagen, imagen => imagen.publicacion, { nullable: true, cascade: [Cascade.ALL],  orphanRemoval: true })
   imagenes = new Collection<Imagen>(this);
   
   @Property({ nullable: true, unique: false })

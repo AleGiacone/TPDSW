@@ -9,7 +9,6 @@ import fs from 'fs';
 
 
 function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
-
   const precioValue = req.body.tarifaPorDia || req.body.precio;
   const precioNumerico = Number(precioValue);
 
@@ -24,10 +23,8 @@ function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
     cantAnimales: req.body.cantAnimales ? parseInt(req.body.cantAnimales) : 1,
     exotico: req.body.exotico === true || req.body.exotico === 'true'
   };
- 
 
   Object.keys(req.body.sanitizeInput).forEach((key) => {
-    console.log(`${key}:`, req.body.sanitizeInput[key]);
     if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
       delete req.body.sanitizeInput[key];
     }
@@ -38,9 +35,6 @@ function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
 
 async function authenticatePublicacion(req: Request, res: Response): Promise<boolean> {
   const { titulo, descripcion, tarifaPorDia, ubicacion, tipoAlojamiento, cantAnimales } = req.body.sanitizeInput;
-
-  console.log("=== VALIDACIÓN ===");
-  console.log("Precio recibido:", tarifaPorDia, "Tipo:", typeof tarifaPorDia);
 
   if (!titulo || titulo.length <= 3) {
     res.status(400).json({ message: "El título debe tener más de 3 caracteres" });
@@ -78,8 +72,57 @@ async function authenticatePublicacion(req: Request, res: Response): Promise<boo
 async function findAll(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-    
-    const publicaciones = await em.find(Publicacion, {}, { populate: ['reservas', 'imagenes', 'idCuidador'] });
+
+    // 1. Extraer los parámetros de la URL
+    const {
+      ubicacion,
+      tipoAlojamiento,
+      tarifaMax,
+      exotico,
+      cantAnimales
+    } = req.query;
+
+    // 2. Construir el objeto de condiciones (Where Condition)
+    const where: any = {};
+
+    // Filtro de Ubicación (búsqueda parcial insensible a mayúsculas/minúsculas)
+    if (typeof ubicacion === 'string' && ubicacion) {
+      where.ubicacion = { $like: `%${ubicacion}%` };
+    }
+
+    // Filtro Tipo de Alojamiento
+    if (typeof tipoAlojamiento === 'string' && tipoAlojamiento) {
+      where.tipoAlojamiento = tipoAlojamiento;
+    }
+
+    // Filtro Tarifa Máxima (tarifaPorDia debe ser menor o igual a tarifaMax)
+    if (typeof tarifaMax === 'string' && !isNaN(parseFloat(tarifaMax))) {
+      where.tarifaPorDia = { $lte: parseFloat(tarifaMax) };
+    }
+
+    // Filtro Cantidad de Animales (cantAnimales debe ser mayor o igual a lo solicitado)
+    // Nota: Asumo que el cliente busca publicaciones que acepten al menos la cantidad indicada.
+    if (typeof cantAnimales === 'string' && !isNaN(parseInt(cantAnimales))) {
+      where.cantAnimales = { $gte: parseInt(cantAnimales) };
+    }
+
+    // 🔑 Filtro EXÓTICO (La clave de tu pregunta)
+    // Recordatorio: El frontend envía 'true' como string si está marcado.
+    if (exotico === 'true') {
+      where.exotico = true;
+    }
+    // Opcional: Si quieres permitir que se envíe 'false' o '0' para *excluir* exóticos
+    // else if (exotico === 'false' || exotico === false) {
+    //   where.exotico = false;
+    // }
+
+    // 3. Ejecutar la consulta con las condiciones
+    const publicaciones = await em.find(
+      Publicacion,
+      where, // Aquí se pasan las condiciones de filtrado
+      { populate: ['reservas', 'imagenes', 'idCuidador'] }
+    );
+
     await em.populate(publicaciones, ['idCuidador']);
     res.status(200).json({ message: 'Found all publicaciones', data: publicaciones });
   } catch (error: any) {
@@ -89,9 +132,7 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
-
     const em = orm.em.fork();
-    
     const idPublicacion = Number(req.params.idPublicacion);
     const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas', 'imagenes','idCuidador'] });
     res.status(200).json({ message: 'Publicacion found', data: publicacion });
@@ -103,34 +144,28 @@ async function findOne(req: Request, res: Response) {
 async function findByCuidador(req: Request, res: Response): Promise<void> {
   try {
     const em = orm.em.fork();
-    
     const idUsuario = Number(req.params.idUsuario);
 
-   
     const cuidador = await em.findOne(Cuidador, { idUsuario: idUsuario });
     if (!cuidador) {
       res.status(404).json({ message: "Cuidador no encontrado" });
       return;
     }
-   
+    
     const publicaciones = await em.find(
       Publicacion,
       { idCuidador: cuidador },
-      { populate: ['reservas', 'imagenes'] }
+      { populate: ['imagenes'] }
     );
-    
-    console.log(`Encontradas ${publicaciones.length} publicaciones`);
    
-    const publicacionesFormateadas = publicaciones.map(pub => {
+    const publicacionesFormateadas = publicaciones.map((pub) => {
       const imagenesArray = pub.imagenes?.getItems() || [];
-      const imagenesFormateadas = imagenesArray.map(img => ({
+      
+      const imagenesFormateadas = imagenesArray.map((img: Imagen) => ({
         id: img.idImagen,
         path: img.path,
         url: `http://localhost:3000${img.path}`
       }));
-      
-      console.log('📸 Publicación:', pub.titulo);
-      console.log('📸 Imágenes formateadas:', imagenesFormateadas);
       
       return {
         id: pub.idPublicacion,
@@ -147,15 +182,12 @@ async function findByCuidador(req: Request, res: Response): Promise<void> {
       };
     });
    
-    console.log('Publicaciones formateadas:', publicacionesFormateadas);
-   
     res.status(200).json({
       message: 'Publicaciones encontradas',
       publicaciones: publicacionesFormateadas,
       data: publicacionesFormateadas
     });
   } catch (error: any) {
-    console.error('Error en findByCuidador:', error);
     res.status(500).json({ 
       message: "Error retrieving publicaciones del cuidador", 
       error: error.message 
@@ -173,14 +205,12 @@ async function add(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        console.log("sanitizeInput completo:", req.body.sanitizeInput);
-
         const isValid = await authenticatePublicacion(req, res);
         if (!isValid) {
              if (files.length > 0) {
                  files.forEach(file => {
                      fs.unlink(file.path, (unlinkErr) => {
-                         if (unlinkErr) console.error("Error al eliminar archivo tras validación fallida:", unlinkErr);
+                         if (unlinkErr) console.error("Error al eliminar archivo tras validación:", unlinkErr);
                      });
                  });
              }
@@ -197,17 +227,6 @@ async function add(req: Request, res: Response): Promise<void> {
             cantAnimales,
             exotico
         } = req.body.sanitizeInput;
-
-        console.log("Datos extraídos:", {
-            idUsuario,
-            titulo,
-            descripcion,
-            tarifaPorDia,
-            ubicacion,
-            tipoAlojamiento,
-            cantAnimales,
-            exotico
-        });
 
         const numericId = Number(idUsuario);
         const cuidador = await em.findOne(Cuidador, { idUsuario: numericId });
@@ -228,25 +247,22 @@ async function add(req: Request, res: Response): Promise<void> {
         publicacion.cantAnimales = Number(cantAnimales);
         publicacion.exotico = Boolean(exotico);
 
-        em.persist(publicacion);
-        await em.flush();
+        await em.persistAndFlush(publicacion);
 
         if (files.length > 0) {
-            const imageEntities = files.map(file => {
+            const imagenesCreadas = files.map(file => {
                 const imagen = new Imagen();
-                imagen.path = `/img/publicacionImages/${file.filename}`; 
+                imagen.path = `/img/publicacionImages/${file.filename}`;
                 imagen.publicacion = publicacion;
                 return imagen;
             });
-
-            em.persist(imageEntities);
-            await em.flush();
+            
+            await em.persistAndFlush(imagenesCreadas);
         }
         
-
         await em.refresh(publicacion, { populate: ['imagenes'] });
         
-        const imagenesFormateadas = publicacion.imagenes.getItems().map(img => ({
+        const imagenesFormateadas = publicacion.imagenes.getItems().map((img) => ({
             id: img.idImagen,
             path: img.path,
             url: `http://localhost:3000${img.path}`
@@ -271,23 +287,20 @@ async function add(req: Request, res: Response): Promise<void> {
         if (files.length > 0) {
             files.forEach(file => {
                 fs.unlink(file.path, (unlinkErr) => {
-                    if (unlinkErr) console.error("Error al eliminar archivo subido:", unlinkErr);
+                    if (unlinkErr) console.error("Error al eliminar archivo:", unlinkErr);
                 });
             });
         }
         
-        console.error('=== ERROR EN ADD PUBLICACION ===', error);
         res.status(500).json({ 
             message: "Error creating publicacion", 
-            error: error.message,
-            type: error.constructor.name,
+            error: error.message
         });
     }
 }
 
 async function update(req: Request, res: Response): Promise<void> {
   const files = req.files as Express.Multer.File[] || [];
-  
   const em = orm.em.fork();
   
   try {
@@ -307,7 +320,6 @@ async function update(req: Request, res: Response): Promise<void> {
       });
 
       for (const img of imagenesAEliminar) {
-   
         const filePath = `public${img.path}`;
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
@@ -328,7 +340,6 @@ async function update(req: Request, res: Response): Promise<void> {
     }
 
     await em.flush();
-
     await em.refresh(publicacion, { populate: ['imagenes'] });
     
     const imagenesFormateadas = publicacion.imagenes.getItems().map(img => ({
@@ -363,7 +374,6 @@ async function update(req: Request, res: Response): Promise<void> {
 async function remove(req: Request, res: Response) { 
   try {
     const em = orm.em.fork();
-    
     const idPublicacion = Number.parseInt(req.params.idPublicacion);
     const publicacion = await em.findOneOrFail(
       Publicacion, 

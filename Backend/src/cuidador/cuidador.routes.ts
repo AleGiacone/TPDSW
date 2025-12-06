@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { sanitizeCuidador, findAll, findOne, add, update, remove, updateProfileImage, deleteProfileImage } from './cuidador.controller.js';
+import { sanitizeCuidador, findAll, findOne, add, update, remove, updateProfile, updateProfileImage, deleteProfileImage } from './cuidador.controller.js';
 import multer from 'multer';
 import path from 'path';
 
@@ -31,11 +31,15 @@ const upload = multer({
 });
 
 
+cuidadorRouter.post("/:idUsuario/profile-image", upload.single('profileImage'), updateProfileImage);
+cuidadorRouter.delete("/:idUsuario/profile-image", deleteProfileImage);
+
+cuidadorRouter.put("/:idUsuario/profile", sanitizeCuidador, updateProfile);
+cuidadorRouter.patch("/:idUsuario/profile", sanitizeCuidador, updateProfile);
+
 cuidadorRouter.get("/", findAll);
 cuidadorRouter.get("/:idUsuario", findOne);
 cuidadorRouter.post("/", sanitizeCuidador, add);
-cuidadorRouter.put("/:idUsuario", sanitizeCuidador, update);
-cuidadorRouter.patch("/:idUsuario", sanitizeCuidador, update);
 cuidadorRouter.delete("/:idUsuario", remove);
-cuidadorRouter.post("/:idUsuario/profile-image", upload.single('profileImage'), updateProfileImage);
-cuidadorRouter.delete("/:idUsuario/profile-image", deleteProfileImage);
+
+cuidadorRouter.put("/:idUsuario", sanitizeCuidador, update);
