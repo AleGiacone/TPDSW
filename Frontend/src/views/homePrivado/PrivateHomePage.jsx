@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import ImageCarousel from '../../components/ImageCarousel'; 
+import PublicacionesGrid from '../../components/PublicacionesGrid';
 import '../../styles/PrivateHomePage.css';
 
 
@@ -74,7 +74,41 @@ const PublicacionesView = () => {
             [name]: type === 'checkbox' ? checked : value
         }));
     };
+    const renderActionButtons = (pub) => {
+        const pubId = pub.idPublicacion || pub.id;
 
+        if (!isAuthenticated) {
+            return (
+                <button
+                    onClick={() => navigate('/login')}
+                    className="reserve-btn"
+                >
+                    Iniciar sesión para reservar
+                </button>
+            );
+        }
+
+        if (user?.tipoUsuario?.toLowerCase() === 'cuidador') {
+            return (
+                <button
+                    className="reserve-btn disabled"
+                    title="Los cuidadores no pueden hacer reservas"
+                    disabled
+                >
+                    Solo para dueños
+                </button>
+            );
+        }
+
+        return (
+            <button
+                onClick={() => handleReservar(pubId)}
+                className="reserve-btn"
+            >
+                🎯 Reservar
+            </button>
+        );
+    };
    
     const handleReservar = (publicacionId) => {
         if (!isAuthenticated) {
@@ -214,106 +248,15 @@ const PublicacionesView = () => {
                         Encontrá el cuidador perfecto para tu mascota
                     </h2>
                 </div>
-                
-                {loading && (
-                    <div className="loading-section">
-                        <div className="loading-spinner">🔄</div>
-                        <p>Cargando publicaciones...</p>
-                    </div>
-                )}
-                
-                {error && (
-                    <div className="error-section">
-                        <p>⚠️ {error}</p>
-                        <button onClick={fetchPublicaciones} className="retry-btn">
-                            Reintentar
-                        </button>
-                    </div>
-                )}
-                
-                {!loading && publicaciones.length === 0 ? (
-                    <div className="empty-state">
-                        <h3>No se encontraron publicaciones</h3>
-                        <p>Intenta ajustar los filtros de búsqueda</p>
-                    </div>
-                ) : (
-                    <div className="publicaciones-grid">
-                        { Array.isArray(publicaciones) && publicaciones.map((pub) => (
-                            <div key={pub.idPublicacion} className="publicacion-card">
-                                
-                                <div className="card-image-wrapper">
-                                    <ImageCarousel 
-                                        imagenes={pub.imagenes || []} 
-                                        titulo={pub.titulo}
-                                    />
-                                </div>
-                                <div className="card-content">
-                                <div className="card-header">
-                                    <h3 className="card-title">{pub.titulo}</h3>
-                                    <div className="cuidador-info">
-                                        <span className="cuidador-name">
-                                            Por: {pub.idCuidador?.nombre || 'Cuidador'}
-                                        </span>
-                                    </div>
-                                </div>
-                                
-                                <p className="card-description">{pub.descripcion}</p>
-                                
-                                <div className="card-details">
-                                    <div className="detail-item">
-                                        <span className="detail-label">📍 Ubicación:</span>
-                                        <span>{pub.ubicacion}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <span className="detail-label">🏠 Tipo:</span>
-                                        <span>{pub.tipoAlojamiento}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <span className="detail-label">🐕 Max animales:</span>
-                                        <span>{pub.cantAnimales}</span>
-                                    </div>
-                                    {pub.exotico && (
-                                        <div className="exotic-badge">
-                                            🦎 Acepta mascotas exóticas
-                                        </div>
-                                    )}
-                                </div>
-                                </div>
-                                <div className="card-footer">
-                                    <div className="price-section">
-                                        <span className="price">${pub.tarifaPorDia}</span>
-                                        <span className="price-period">/ día</span>
-                                    </div>
-                                    <div className="card-actions">
-                                        {!isAuthenticated ? (
-                                            <button 
-                                                onClick={() => navigate('/login')}
-                                                className="reserve-btn"
-                                            >
-                                                Iniciar sesión para reservar
-                                            </button>
-                                        ) : user?.tipoUsuario?.toLowerCase() === 'cuidador' ? (
-                                            <button 
-                                                className="reserve-btn disabled"
-                                                title="Los cuidadores no pueden hacer reservas"
-                                                disabled
-                                            >
-                                                Solo para dueños
-                                            </button>
-                                        ) : (
-                                            <button 
-                                                onClick={() => handleReservar(pub.idPublicacion)}
-                                                className="reserve-btn"
-                                            >
-                                                🎯 Reservar
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                <PublicacionesGrid
+                    publicaciones={publicaciones}
+                    loading={loading}
+                    error={error}
+                    onRetry={fetchPublicaciones}
+                    renderCardActions={renderActionButtons}
+                    emptyMessage="No se encontraron publicaciones"
+                    showCuidadorInfo={true}
+                />
             </main>
         </div>
     );
