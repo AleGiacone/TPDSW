@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'; 
 import { useAuth } from '../../hooks/useAuth';
 import { Navigate, useNavigate } from 'react-router-dom'; 
-import ImageCarousel from '../../components/ImageCarousel'; 
+import PublicacionesGrid from '../../components/PublicacionesGrid';
 import '../../styles/DashboardCuidador.css';
 import { Home, CalendarCheck, User, LogOut } from 'lucide-react';
 
@@ -447,31 +447,57 @@ useEffect(() => {
 
 
     const deletePublicacion = async (id) => {
-        if (!window.confirm('¿Estás seguro de eliminar esta publicación? Esta acción es irreversible y eliminará todas las imágenes asociadas.')) { 
-            return; 
+     
+        if (!id || id === undefined || id === null) {
+            alert('❌ Error: No se puede eliminar - ID inválido');
+            console.error('🚨 ID inválido:', id);
+            return;
         }
-        
+
+        console.log('🗑️ Intentando eliminar publicación con ID:', id);
+        console.log('📊 Tipo de ID:', typeof id);
+        console.log('🔗 URL que se enviará:', `${API_BASE_URL}/publicacion/${id}`);
+
+        if (!window.confirm(`⚠️ ¿Estás seguro de eliminar esta publicación?\n\nID: ${id}\n\nEsta acción es irreversible.`)) {
+            console.log('❌ Usuario canceló la eliminación');
+            return;
+        }
+
         setLoading(true);
         setError('');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/publicacion/${id}`, { 
-                method: 'DELETE', 
-                credentials: 'include', 
-                headers: { 'Content-Type': 'application/json' } 
+            const url = `${API_BASE_URL}/publicacion/${id}`;
+            console.log('🌐 Enviando DELETE a:', url);
+
+            const response = await fetch(url, {
+                method: 'DELETE',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' }
             });
 
-            if (!response.ok) { 
+            console.log('📥 Response status:', response.status);
+            console.log('📥 Response ok:', response.ok);
+
+            if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `Error ${response.status}: No se pudo eliminar la publicación.`); 
+                console.error('❌ Error data:', errorData);
+                throw new Error(errorData.message || `Error ${response.status}: No se pudo eliminar la publicación.`);
             }
+
+            const responseData = await response.json().catch(() => null);
+            console.log('✅ Respuesta del servidor:', responseData);
+
            
             await fetchPublicaciones();
 
-        } catch (err) { 
-            console.error('Error al eliminar:', err);
+            alert('✅ Publicación eliminada exitosamente');
+            console.log('✅ Publicación eliminada correctamente');
+
+        } catch (err) {
+            console.error('❌ Error al eliminar:', err);
             setError('Error al eliminar publicación: ' + err.message);
-            alert(' Error al eliminar publicación: ' + err.message); 
+            alert('❌ Error al eliminar publicación: ' + err.message);
         } finally {
             setLoading(false);
         }
@@ -587,73 +613,53 @@ useEffect(() => {
         }
     };
 
-    const renderPublicaciones = () => (
-        <div className="dashboard-main">
-            <div className="publicaciones-header">
-                <h2 className="section-title">Mis Publicaciones</h2>
-                <button
-                    onClick={() => setCurrentView('nueva-publicacion')}
-                    className="btn-primary"
-                >
-                    + Nueva Publicación
-                </button>
+    const renderPublicaciones = () => {
+        const renderDashboardActions = (pub) => {
+            return (
+                <>
+                    <button
+                        onClick={() => startEditPublicacion(pub)}
+                        className="btn-edit"
+                    >
+                        Editar
+                    </button>
+                    <button
+                        onClick={() => deletePublicacion(pub.id)}
+                        className="btn-delete"
+                    >
+                        Eliminar
+                    </button>
+                    <button className="btn-reservas">
+                        Ver Reservas
+                    </button>
+                </>
+            );
+        };
+
+        return (
+            <div className="dashboard-main">
+                <div className="publicaciones-header">
+                    <h2 className="section-title">Mis Publicaciones</h2>
+                    <button
+                        onClick={() => setCurrentView('nueva-publicacion')}
+                        className="btn-primary"
+                    >
+                        + Nueva Publicación
+                    </button>
+                </div>
+
+                <PublicacionesGrid
+                    publicaciones={publicaciones}
+                    loading={loading}
+                    error={error}
+                    onRetry={fetchPublicaciones}
+                    renderCardActions={renderDashboardActions}
+                    emptyMessage="Aún no tienes publicaciones"
+                    showCuidadorInfo={false}
+                />
             </div>
-
-            {loading && <div className="loading-message">Cargando publicaciones...</div>}
-            
-            {error && <div className="error-message">{error}</div>}
-
-            {publicaciones.length === 0 && !loading ? (
-                <div className="empty-state">
-                    <p>Aún no tienes publicaciones</p>
-                </div>
-            ) : (
-                <div className="publicaciones-grid">
-                    {publicaciones.map((pub) => (
-                        <div key={pub.id} className="publicacion-card">
-                            <div className="card-image-wrapper">
-                                <ImageCarousel 
-                                    imagenes={pub.imagenes || []} 
-                                    titulo={pub.titulo}
-                                />
-                            </div>
-                            
-                            <h3 className="card-title">{pub.titulo}</h3>
-                            <p className="card-description">{pub.descripcion}</p>
-                            
-                            <div className="card-info">
-                                <div className="price-location">
-                                    <span className="price">
-                                        ${pub.tarifaPorDia}/día
-                                    </span>
-                                    <span className="location">📍 {pub.ubicacion}</span>
-                                </div>
-                                <div className="card-details">
-                                    <span>Tipo: {pub.tipoAlojamiento} | Max animales: {pub.cantAnimales}</span>
-                                    {pub.exotico && <span className="exotic-badge"> | Acepta exóticos</span>}
-                                </div>
-                            </div>
-
-                            <div className="card-buttons">
-                                <button onClick={() => startEditPublicacion(pub)} className="btn-edit">
-                                    Editar
-                                </button>
-                                <button 
-                                    onClick={() => deletePublicacion(pub.id)}
-                                    className="btn-delete"
-                                >
-                                    Eliminar
-                                </button>
-                                <button className="btn-reservas">
-                                    Ver Reservas
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
+        );
+    };
 
     const renderNuevaPublicacion = () => (
         <div className="dashboard-main">
