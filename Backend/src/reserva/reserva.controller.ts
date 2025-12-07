@@ -8,14 +8,16 @@ import { nextTick } from "process";
 import { Mascota } from "../mascota/mascota.entity.js"
 import { Usuario } from "../usuario/usuario.entity.js";
 import { publicDecrypt } from "crypto";
+import { Temporal } from 'temporal-polyfill'
+
 
 
 function sanitizeReserva(req: Request, res: Response, next: NextFunction) {
-  req.body.sanitizeInput = {
+    req.body.sanitizeInput = {
     idReserva: req.body.idReserva,
     fechaReserva: new Date(req.body.fechaReserva),
-    fechaDesde: new Date(req.body.fechaDesde),
-    fechaHasta: new Date(req.body.fechaHasta),
+    fechaDesde: Temporal.PlainDate.from(req.body.fechaDesde.toString()), //
+    fechaHasta: Temporal.PlainDate.from(req.body.fechaHasta.toString()), //
     descripcion: req.body.descripcion,
     horaReserva: req.body.horaReserva,
     idDueno: req.body.idDueno,
@@ -23,7 +25,6 @@ function sanitizeReserva(req: Request, res: Response, next: NextFunction) {
     idPublicacion: req.body.idPublicacion,
   };
   Object.keys(req.body.sanitizeInput).forEach((key) => {
-    console.log(`${key}: ${req.body.sanitizeInput[key]}`);
     if (req.body.sanitizeInput[key] === undefined) {
       delete req.body.sanitizeInput[key];
     }
@@ -133,4 +134,22 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeReserva, findAll, findOne, add, update, remove, authenticateAdd };
+
+async function testDate(req: Request, res: Response) {
+  console.log("Testing date with data:", req.body.sanitizeInput);
+  try {
+    if (req.body.sanitizeInput.fechaDesde.toString() >= req.body.sanitizeInput.fechaHasta.toString()) {
+      res.status(400).json({ message: "Fechas invalidas"})
+    }
+    console.log("Fechas validas");
+    console.log("req.body.sanitizeInput.fechaDesde:", req.body.sanitizeInput.fechaDesde);
+    console.log("req.body.sanitizeInput.fechaHasta:", req.body.sanitizeInput.fechaHasta);
+    console.log(req.body.sanitizeInput.fechaDesde.until(req.body.sanitizeInput.fechaHasta).toString())
+
+    await em.flush();
+  } catch (error: any) {
+    res.status(500).json({ message: "Error creating reserva", error: error.message });
+  }
+}
+
+export { sanitizeReserva, findAll, findOne, add, update, remove, authenticateAdd, testDate };
