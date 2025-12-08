@@ -6,9 +6,11 @@ import { Imagen }  from '../imagen/imagenes.entity.js';
 import sanitizeHTML from 'sanitize-html'
 import { authToken } from '../auth.js';
 import fs from 'fs';
+import { Reserva } from '../reserva/reserva.entity.js';
 
 
 function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
+  console.log("Sanitizing publicacion input", req.body);
   const precioValue = req.body.tarifaPorDia || req.body.precio;
   const precioNumerico = Number(precioValue);
 
@@ -25,13 +27,21 @@ function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
   };
 
   Object.keys(req.body.sanitizeInput).forEach((key) => {
+    console.log("Checking field:", key, "Value:", req.body.sanitizeInput[key]);
     if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
+      console.log("Removing undefined field:", key);
       delete req.body.sanitizeInput[key];
     }
   });
+  console.log("Sanitized input:", req.body.sanitizeInput);
   
   next();
 }
+
+
+const em = orm.em.fork();
+
+// Función para validar los datos de la publicación
 
 async function authenticatePublicacion(req: Request, res: Response): Promise<boolean> {
   const { titulo, descripcion, tarifaPorDia, ubicacion, tipoAlojamiento, cantAnimales } = req.body.sanitizeInput;
@@ -69,9 +79,10 @@ async function authenticatePublicacion(req: Request, res: Response): Promise<boo
   return true;
 }
 
+// Función para validar los datos de la publicación
+
 async function findAll(req: Request, res: Response) {
   try {
-    const em = orm.em.fork();
 
     // 1. Extraer los parámetros de la URL
     const {
@@ -141,9 +152,32 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
+// Funcion para devolver los días reservados en una publicación
+
+async function getDiasReservados(req: Request, res: Response) {
+  try {
+    console.log("Obteniendo días reservados para la publicación:", req.params.idPublicacion);
+    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion: parseInt(req.params.idPublicacion) }, { populate: ['reservas'] });
+      
+    const reservasDeLaPublicacion = await em.find(Reserva, { publicacion:  publicacion }, { populate: ['diasReservados'] });
+          
+    const diasReservados = reservasDeLaPublicacion.map(r => r.diasReservados.getItems().map(d => d.fechaReservada)).flat();
+      
+    res.status(200).json({ message: "Días reservados obtenidos", data: diasReservados });
+  } catch (error: any) {
+    res.status(500).json({ message: "Error retrieving reserved days", error: error.message });
+    return;
+  }
+
+
+}
+
+
+
+// Función para obtener publicaciones por cuidador
+
 async function findByCuidador(req: Request, res: Response): Promise<void> {
   try {
-    const em = orm.em.fork();
     const idUsuario = Number(req.params.idUsuario);
 
     const cuidador = await em.findOne(Cuidador, { idUsuario: idUsuario });
@@ -197,7 +231,6 @@ async function findByCuidador(req: Request, res: Response): Promise<void> {
 
 async function add(req: Request, res: Response): Promise<void> {
     const files = req.files as Express.Multer.File[] || [];
-    const em = orm.em.fork();
 
     try {
         if (!req.body.sanitizeInput) {
@@ -301,7 +334,6 @@ async function add(req: Request, res: Response): Promise<void> {
 
 async function update(req: Request, res: Response): Promise<void> {
   const files = req.files as Express.Multer.File[] || [];
-  const em = orm.em.fork();
   
   try {
     const idPublicacion = Number.parseInt(req.params.idPublicacion);
@@ -373,7 +405,6 @@ async function update(req: Request, res: Response): Promise<void> {
 
 async function remove(req: Request, res: Response) { 
   try {
-    const em = orm.em.fork();
     const idPublicacion = Number.parseInt(req.params.idPublicacion);
     const publicacion = await em.findOneOrFail(
       Publicacion, 
@@ -396,4 +427,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizePublicacion, findAll, findOne, findByCuidador, add, update, remove };
+export { sanitizePublicacion, findAll, findOne, findByCuidador, add, update, remove, getDiasReservados};

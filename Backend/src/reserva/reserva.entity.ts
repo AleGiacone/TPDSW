@@ -3,27 +3,14 @@ import { Publicacion } from "../publicacion/publicacion.entity.js";
 import { Cuidador } from "../cuidador/cuidador.entity.js";
 import { Dueno } from "../dueno/dueno.entity.js";
 import { Mascota } from "../mascota/mascota.entity.js";
+import { DateType } from "@mikro-orm/core/types/DateType.js";
+import { DiaReservado } from "./diaReservado.entity.js";
+import { TemporalDateType } from "./diaReservado.entity.js";
 
 // Testeo de propiedad Date
 
 import { Temporal } from 'temporal-polyfill';
-export class TemporalDateType extends Type<Temporal.PlainDate, string> {
-  // Convierte de JS a Database
-  convertToDatabaseValue(value: Temporal.PlainDate | string): string {
-    if (typeof value === 'string') return value;
-    return value.toString(); // Formato: YYYY-MM-DD
-  }
 
-  // Convierte de Database a JS
-  convertToJSValue(value: string): Temporal.PlainDate {
-    return Temporal.PlainDate.from(value);
-  }
-
-  // Define el tipo de columna en la DB
-  getColumnType(): string  {
-    return 'date';
-  }
-}
 
 @Entity()
 export class Reserva {
@@ -33,11 +20,11 @@ export class Reserva {
   @Property({ nullable: false, unique: false })
   fechaReserva!: Date;
 
-  @Property({ nullable: false, unique: false })
-  fechaDesde!: Date;
+  @Property({ nullable: true, unique: false })
+  fechaDesde?: Date;
 
-  @Property({ nullable: false, unique: false })
-  fechaHasta!: Date;
+  @Property({ nullable: true, unique: false })
+  fechaHasta?: Date;
 
   @Property({ nullable: false, unique: false })
   descripcion!: string;
@@ -52,9 +39,12 @@ export class Reserva {
   mascotas = new Collection<Mascota>(this);
   // Falta agregar pago
 
-  //Testeo de propiedad Date
+  //Testeo de propiedad Dates
 
-  @Property({ type: TemporalDateType, nullable: true, unique: false})
-  fechasReservadas?: Temporal.PlainDate[];
+  // @Property({ type: TemporalDateType, nullable: true, unique: false})
+  // fechasReservadas?: Temporal.PlainDate[];
+
+  @OneToMany(() => DiaReservado, diasReservados => diasReservados.reserva, { nullable: true})
+  diasReservados = new Collection<DiaReservado>(this);
 
 }

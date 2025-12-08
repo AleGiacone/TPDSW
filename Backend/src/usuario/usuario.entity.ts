@@ -29,4 +29,9 @@ export abstract class Usuario {
     nullable: true 
   })
   imagen?: Rel<any>;
+
+  // Preguntar si es necesario
+
+  @Property({ nullable: true, unique: false })
+  perfilImage?: string;
 }
