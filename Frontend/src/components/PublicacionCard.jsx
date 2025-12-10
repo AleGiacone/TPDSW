@@ -2,10 +2,6 @@ import React from 'react';
 import ImageCarousel from './ImageCarousel';
 import '../styles/PrivateHomePage.css';
 
-/**
- * Componente de tarjeta individual de publicación
- * Reutilizable en diferentes contextos (público, dashboard, selección)
- */
 const PublicacionCard = ({
   publicacion,
   showActions = true,
@@ -67,7 +63,7 @@ const PublicacionCard = ({
           </div>
           {publicacion.exotico && (
             <div className="exotic-badge">
-              🦎 Acepta mascotas exóticas
+              🦎 Acepta exóticas
             </div>
           )}
         </div>

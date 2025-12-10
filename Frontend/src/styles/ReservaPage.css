@@ -1,0 +1,513 @@
+/* Contenedor principal */
+.reserva-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: grid;
+  grid-template-columns: 1fr 450px;
+  gap: 40px;
+  align-items: start;
+}
+
+/* Sección de la publicación */
+.reserva-publicacion-section {
+  width: 100%;
+}
+
+.reserva-publicacion-section h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Card de reserva */
+.reserva-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  padding: 24px;
+  position: sticky;
+  top: 20px;
+}
+
+.price-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #ebebeb;
+  margin-bottom: 24px;
+}
+
+.price {
+  font-size: 22px;
+  font-weight: 600;
+  color: #222;
+}
+
+.price span {
+  font-size: 16px;
+  font-weight: 400;
+  color: #717171;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #222;
+}
+
+/* Inputs de fecha */
+.date-inputs {
+  border: 1px solid #b0b0b0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 24px;
+}
+
+.date-inputs:hover {
+  border-color: #222;
+}
+
+.date-input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.date-input {
+  padding: 12px;
+  border-right: 1px solid #ebebeb;
+}
+
+.date-input:last-child {
+  border-right: none;
+}
+
+.date-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #222;
+  margin-bottom: 4px;
+}
+
+.date-value {
+  font-size: 14px;
+  color: #717171;
+}
+
+/* Sección de mascotas */
+.mascotas-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #222;
+}
+
+.mascotas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mascota-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mascota-item:hover {
+  border-color: #222;
+  background-color: #f7f7f7;
+}
+
+.mascota-item.selected {
+  border-color: #f97840;
+  background-color: #fff5f0;
+}
+
+.mascota-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #f97840;
+}
+
+/* Imagen de la mascota en miniatura */
+.mascota-image-thumb {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.mascota-image-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mascota-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.mascota-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mascota-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 2px;
+}
+
+.mascota-details {
+  font-size: 12px;
+  color: #717171;
+}
+
+/* Sin mascotas */
+.no-mascotas {
+  text-align: center;
+  padding: 32px 16px;
+  border: 2px dashed #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.no-mascotas p {
+  margin-bottom: 16px;
+  color: #717171;
+}
+
+.add-mascota-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #f97840;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-mascota-button:hover {
+  background-color: #e86730;
+}
+
+/* Notas */
+.notes-section {
+  margin-bottom: 24px;
+}
+
+.notes-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px;
+  border: 1px solid #b0b0b0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.notes-textarea:focus {
+  outline: none;
+  border-color: #222;
+}
+
+/* Botón de reservar */
+.reserve-button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(to right, #f97840, #ff6b35);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 16px;
+}
+
+.reserve-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(249, 120, 64, 0.4);
+}
+
+.reserve-button:disabled {
+  background: #e0e0e0;
+  cursor: not-allowed;
+}
+
+/* Desglose de precio */
+.price-breakdown {
+  padding-top: 16px;
+  border-top: 1px solid #ebebeb;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #222;
+}
+
+.price-row.total {
+  font-size: 16px;
+  font-weight: 600;
+  padding-top: 12px;
+  border-top: 1px solid #ebebeb;
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
+/* Modal del calendario */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-header h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #222;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: #f7f7f7;
+}
+
+/* Calendario */
+.date-picker-container {
+  width: 100%;
+}
+
+.calendar-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 0 12px;
+}
+
+.calendar-navigation button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.calendar-navigation button:hover {
+  background-color: #f7f7f7;
+}
+
+.calendar-navigation span {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+}
+
+.calendars-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.calendar-grid {
+  width: 100%;
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.calendar-header div {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #717171;
+  padding: 8px 0;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.calendar-day:not(.empty):not(.disabled):hover {
+  background-color: #f7f7f7;
+}
+
+.calendar-day.empty {
+  cursor: default;
+}
+
+.calendar-day.disabled {
+  color: #d0d0d0;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.calendar-day.start,
+.calendar-day.end {
+  background-color: #f97840;
+  color: white;
+  font-weight: 600;
+}
+
+.calendar-day.in-range {
+  background-color: #ffe8e0;
+  color: #222;
+}
+
+.calendar-day.hover-range {
+  background-color: #fff5f0;
+}
+
+.calendar-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #f7f7f7;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #717171;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .reserva-container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .reserva-card {
+    position: static;
+  }
+
+  .calendars-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .reserva-container {
+    padding: 20px 12px;
+  }
+
+  .reserva-card {
+    padding: 20px;
+  }
+
+  .modal-content {
+    padding: 24px 16px;
+  }
+
+  .price {
+    font-size: 18px;
+  }
+
+  .rating {
+    font-size: 12px;
+  }
+}
+
+/* Estados de carga y error */
+.loading,
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  font-size: 18px;
+  color: #717171;
+}

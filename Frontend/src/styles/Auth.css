@@ -5,7 +5,6 @@ body {
      padding: 0;
      height: 100%;
      overflow-x: hidden;
-   
 }
 
 * {
@@ -42,7 +41,6 @@ body {
 /* LOGIN */
 .auth-container {
      width: 100%;
-     max-width: 1400px;
      margin: 0 auto;
      padding: 20px;
      border-radius: 20px;
@@ -70,6 +68,7 @@ body {
 }
 
 .auth-form input {
+     height: 100%;
      width: 100%;
      padding: 20px;
      margin-bottom: 30px;
@@ -80,6 +79,7 @@ body {
      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
      outline: none;
      box-sizing: border-box;
+    
 
 }
 
@@ -87,7 +87,7 @@ body {
      display:flex;
      flex-direction: column;
      width: 1400px;
-     max-width: 90%;
+     max-width: 100%;
      margin: 0 auto;
      align-items: center;
 }
@@ -121,7 +121,7 @@ body {
 h3,
 h4 {
      width: 700px;
-     max-width: 90%;
+     max-width: 100%;
      background-color: #fff;
      color: #f97316;
      text-align: center;
@@ -129,26 +129,46 @@ h4 {
      font-size: 4rem;
      line-height: 1.1;
      padding: 1rem;
-     margin: 0 auto 30px;
+     margin: 0 auto 60px;
      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
      border-radius: 30px;
      box-sizing: border-box;
+     margin-top: 6rem;
 
 }
 
 /* MISMO PARA AMBOS (Labels y otros ) */
-label {
+.auth-form .form-group label {
      font-weight: bold;
-     margin-bottom: 10px;
+     margin-bottom: 20px;
      text-align: center;
      padding: 10px;
-     width:30%;
+     width:15%;
      display: block;
      flex-direction: column;
-     background-color: #ffff;
+     background-color: #FA8C5C;
      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
      border-radius: 20px;
-     color: #222222;
+     color: #fff;
+     border-color: #222;
+     align-self: flex-start;
+     margin-left: 25rem;
+}
+
+.auth-container-register label {
+     font-weight: bold;
+     margin-bottom: 20px;
+     text-align: center;
+     padding: 10px;
+     width: 50%;
+     display: block;
+     flex-direction: column;
+     background-color: #FA8C5C;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+     border-radius: 20px;
+     color: #fff;
+     border-color: #222;
+     ;
 }
 
 .error-message {
@@ -277,6 +297,59 @@ select {
      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
      outline: none;
      box-sizing: border-box;
+}
+
+.mensaje-exito-redireccion {
+     /* Layout */
+     padding: 15px 20px;
+     margin-bottom: 20px;
+     border-radius: 8px;
+
+     /* Colores y Fondo */
+     background-color: #e6ffed;
+     /* Fondo verde claro */
+     color: #008000;
+     /* Texto verde oscuro */
+     border: 1px solid #b7eb8f;
+     /* Borde verde */
+
+     /* Tipografía y Énfasis */
+     font-weight: 600;
+     text-align: center;
+     font-size: 16px;
+
+     /* Efecto Visual (opcional, imitando una alerta) */
+     box-shadow: 0 2px 4px rgba(0, 128, 0, 0.1);
+
+     /* Animación (opcional): para que destaque al aparecer */
+     animation: fadeInOut 0.5s ease-in-out;
+}
+
+
+.mensaje-error {
+     padding: 15px 20px;
+     margin-bottom: 20px;
+     border-radius: 8px;
+     background-color: #fff0f6;
+     /* Fondo rojo claro */
+     color: #cf1322;
+     /* Texto rojo oscuro */
+     border: 1px solid #ffa39e;
+     font-weight: 500;
+     text-align: center;
+     font-size: 16px;
+}
+
+@keyframes fadeInOut {
+     from {
+          opacity: 0;
+          transform: translateY(-10px);
+     }
+
+     to {
+          opacity: 1;
+          transform: translateY(0);
+     }
 }
 
 /* ========================================= */

@@ -346,28 +346,17 @@ const DuenoDashboard = () => {
 
 
     const fetchReservas = useCallback(async () => {
-        if (!user?.idUsuario) {
-            return;
-        }
-        
+        if (!user?.idUsuario) return;
         try {
-            const url = `${API_BASE_URL}/reservas/duenos/${user.idUsuario}`;
-            
-            const response = await fetch(url, {
-                method: 'GET',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' }
+            const response = await fetch(`${API_BASE_URL}/reservas`, {
+                credentials: 'include'
             });
-
-            if (response.ok) {
-                const data = await response.json();
-                let reservasArray = data.data || data.reservas || data || [];
-                setReservas(reservasArray);
-            } else {
-                setReservas([]); 
-            }
-        } catch  {
-            setReservas([]); 
+            const data = await response.json();
+            // Filtrar solo las reservas del dueño actual
+            const misReservas = data.data.filter(r => r.dueno?.idUsuario === user.idUsuario || r.dueno === user.idUsuario);
+            setReservas(misReservas);
+        } catch (err) {
+            console.error('Error:', err);
         }
     }, [user?.idUsuario]);
 
@@ -1090,54 +1079,218 @@ const DuenoDashboard = () => {
         </div>
     );
 
-    const renderReservas = () => (
-        <div className="dashboard-main">
-            <h2 className="section-title">Mis Reservas</h2>
-            {!Array.isArray(reservas) ? (
-                <div className="error-message">
-                    Error: Datos de reservas inválidos. Por favor, recarga la página.
-                </div>
-            ) : reservas.length === 0 ? (
-                <div className="empty-state">
-                    <p>No tienes reservas aún</p>
-                </div>
-            ) : (
-                <div className="reservas-grid">
-                    {reservas.map((reserva) => (
-                        <div key={reserva.id || reserva.idReserva} className="reserva-card">
-                            <div className="reserva-header">
-                                <h3>{reserva.publicacion?.titulo || 'Sin título'}</h3>
-                                <span className={`status-badge status-${reserva.estado}`}>
-                                    {reserva.estado.toUpperCase()}
-                                </span>
-                            </div>
-                            
-                            <div className="reserva-info">
-                                <p><strong>Cuidador:</strong> {reserva.cuidador?.nombre || 'N/A'}</p>
-                                <p><strong>Mascota:</strong> {reserva.mascota?.nomMascota || reserva.mascota?.nombre || 'N/A'}</p>
-                                <p><strong>Fechas:</strong> {reserva.fechaInicio} - {reserva.fechaFin}</p>
-                                <p><strong>Total:</strong> ${reserva.total}</p>
-                                {reserva.descripcion && (
-                                    <p><strong>Notas:</strong> {reserva.descripcion}</p>
-                                )}
-                            </div>
+    const renderReservas = () => {
+        const [expandedReserva, setExpandedReserva] = useState(null);
 
-                            {reserva.estado === 'pendiente' && (
-                                <div className="reserva-actions">
-                                    <button 
-                                        onClick={() => cancelarReserva(reserva.id || reserva.idReserva)}
-                                        className="btn-cancel"
+        const toggleExpand = (reservaId) => {
+            setExpandedReserva(expandedReserva === reservaId ? null : reservaId);
+        };
+
+        return (
+            <div className="dashboard-main">
+                <h2 className="section-title">Mis Reservas</h2>
+
+                {loading && <div className="loading-message">Cargando reservas...</div>}
+
+                {error && <div className="error-message">{error}</div>}
+
+                {!Array.isArray(reservas) ? (
+                    <div className="error-message">
+                        Error: Datos de reservas inválidos. Por favor, recarga la página.
+                    </div>
+                ) : reservas.length === 0 && !loading ? (
+                    <div className="empty-state">
+                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>📅</div>
+                        <h3>No tienes reservas aún</h3>
+                        <p>Explora las publicaciones disponibles y haz tu primera reserva</p>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="btn-primary"
+                            style={{ marginTop: '16px' }}
+                        >
+                            Ver Publicaciones
+                        </button>
+                    </div>
+                ) : (
+                    <div className="reservas-grid">
+                        {reservas.map((reserva) => {
+                            const reservaId = reserva.id || reserva.idReserva;
+                            const isExpanded = expandedReserva === reservaId;
+                            const publicacion = reserva.publicacion;
+                            const primeraImagen = publicacion?.imagenes?.[0];
+
+                            return (
+                                <div key={reservaId} className="reserva-card-expanded">
+                                    {/* Header con imagen de publicación */}
+                                    <div className="reserva-header-with-image">
+                                        {primeraImagen ? (
+                                            <div className="reserva-publicacion-image">
+                                                <img
+                                                    src={primeraImagen.url || `http://localhost:3000${primeraImagen.path}`}
+                                                    alt={publicacion?.titulo || 'Publicación'}
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                        e.target.nextSibling.style.display = 'flex';
+                                                    }}
+                                                />
+                                                <div className="reserva-image-placeholder" style={{ display: 'none' }}>
+                                                    🏠
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="reserva-publicacion-image">
+                                                <div className="reserva-image-placeholder">🏠</div>
+                                            </div>
+                                        )}
+
+                                        <div className="reserva-header-info">
+                                            <h3>{publicacion?.titulo || 'Sin título'}</h3>
+                                            <p className="reserva-cuidador">
+                                                <strong>Cuidador:</strong> {publicacion?.cuidador?.nombre || reserva.cuidador?.nombre || 'N/A'}
+                                            </p>
+                                            <span className={`status-badge status-${reserva.estado || 'pendiente'}`}>
+                                                {(reserva.estado || 'pendiente').toUpperCase()}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Info básica de la reserva */}
+                                    <div className="reserva-info">
+                                        <div className="reserva-date-range">
+                                            <div className="date-item">
+                                                <span className="date-label">Check-in</span>
+                                                <span className="date-value">
+                                                    {reserva.fechaDesde ? new Date(reserva.fechaDesde).toLocaleDateString('es-AR') : reserva.fechaInicio || 'N/A'}
+                                                </span>
+                                            </div>
+                                            <div className="date-separator">→</div>
+                                            <div className="date-item">
+                                                <span className="date-label">Check-out</span>
+                                                <span className="date-value">
+                                                    {reserva.fechaHasta ? new Date(reserva.fechaHasta).toLocaleDateString('es-AR') : reserva.fechaFin || 'N/A'}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="reserva-price">
+                                            <span className="price-label">Total</span>
+                                            <span className="price-value">
+                                                ${reserva.total || (publicacion?.tarifaPorDia ? publicacion.tarifaPorDia * Math.ceil((new Date(reserva.fechaHasta) - new Date(reserva.fechaDesde)) / (1000 * 60 * 60 * 24)) : 'N/A')}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Mascotas de la reserva */}
+                                    <div className="reserva-mascotas-preview">
+                                        <strong>Mascotas:</strong>
+                                        <div className="mascotas-thumbnails">
+                                            {reserva.mascotas && reserva.mascotas.length > 0 ? (
+                                                reserva.mascotas.map((mascota, idx) => (
+                                                    <div key={idx} className="mascota-thumb" title={mascota.nombre || mascota.nomMascota}>
+                                                        {mascota.imagen ? (
+                                                            <img
+                                                                src={mascota.imagen}
+                                                                alt={mascota.nombre || mascota.nomMascota}
+                                                                onError={(e) => {
+                                                                    e.target.style.display = 'none';
+                                                                    e.target.nextSibling.style.display = 'flex';
+                                                                }}
+                                                            />
+                                                        ) : null}
+                                                        <div className="mascota-thumb-placeholder" style={{ display: mascota.imagen ? 'none' : 'flex' }}>
+                                                            🐕
+                                                        </div>
+                                                        <span className="mascota-thumb-name">{mascota.nombre || mascota.nomMascota}</span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <span className="no-data">N/A</span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Botón para expandir detalles */}
+                                    <button
+                                        onClick={() => toggleExpand(reservaId)}
+                                        className="btn-expand"
                                     >
-                                        Cancelar Reserva
+                                        {isExpanded ? '▲ Ver menos' : '▼ Ver más detalles'}
                                     </button>
+
+                                    {/* Detalles expandidos */}
+                                    {isExpanded && (
+                                        <div className="reserva-expanded-details">
+                                            <div className="detail-section">
+                                                <h4>Información de la Publicación</h4>
+                                                <p><strong>Ubicación:</strong> {publicacion?.ubicacion || 'N/A'}</p>
+                                                <p><strong>Descripción:</strong> {publicacion?.descripcion || 'N/A'}</p>
+                                                <p><strong>Tarifa por día:</strong> ${publicacion?.tarifaPorDia || 'N/A'}</p>
+                                            </div>
+
+                                            <div className="detail-section">
+                                                <h4>Información del Cuidador</h4>
+                                                <p><strong>Nombre:</strong> {publicacion?.cuidador?.nombre || 'N/A'}</p>
+                                                <p><strong>Email:</strong> {publicacion?.cuidador?.email || 'N/A'}</p>
+                                            </div>
+
+                                            {reserva.descripcion && (
+                                                <div className="detail-section">
+                                                    <h4>Notas de la Reserva</h4>
+                                                    <p>{reserva.descripcion}</p>
+                                                </div>
+                                            )}
+
+                                            <div className="detail-section">
+                                                <h4>Detalles de las Mascotas</h4>
+                                                <div className="mascotas-detail-list">
+                                                    {reserva.mascotas && reserva.mascotas.map((mascota, idx) => (
+                                                        <div key={idx} className="mascota-detail-item">
+                                                            <div className="mascota-detail-image">
+                                                                {mascota.imagen ? (
+                                                                    <img
+                                                                        src={mascota.imagen}
+                                                                        alt={mascota.nombre || mascota.nomMascota}
+                                                                        onError={(e) => {
+                                                                            e.target.style.display = 'none';
+                                                                            e.target.nextSibling.style.display = 'flex';
+                                                                        }}
+                                                                    />
+                                                                ) : null}
+                                                                <div className="mascota-detail-placeholder" style={{ display: mascota.imagen ? 'none' : 'flex' }}>
+                                                                    🐕
+                                                                </div>
+                                                            </div>
+                                                            <div className="mascota-detail-info">
+                                                                <h5>{mascota.nombre || mascota.nomMascota}</h5>
+                                                                <p>{mascota.especie} - {mascota.raza}</p>
+                                                                <p>{mascota.edad} años</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Acciones */}
+                                    {(reserva.estado === 'pendiente' || !reserva.estado) && (
+                                        <div className="reserva-actions">
+                                            <button
+                                                onClick={() => cancelarReserva(reservaId)}
+                                                className="btn-cancel"
+                                            >
+                                                Cancelar Reserva
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     const renderPerfil = () => (
         <div className="dashboard-main">
