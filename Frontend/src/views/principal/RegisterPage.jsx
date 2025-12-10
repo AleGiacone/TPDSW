@@ -210,8 +210,18 @@ const RegisterPage = () => {
           {loading ? 'Registrando...' : 'Registrarse'}
         </button>
 
-        {error && <p className="error">{error}</p>}
-        {success && <p className="success">{success}</p>}
+            {error && (
+              // Puedes usar la clase 'mensaje-error' que definimos
+              <div className="mensaje-error">
+                {error}
+              </div>
+            )}
+            {success && (
+              // 🚨 AÑADE AQUÍ LA CLASE CSS 🚨
+              <div className="mensaje-exito-redireccion">
+                {success}
+              </div>
+            )}
       </form>
       </div>
     </div>

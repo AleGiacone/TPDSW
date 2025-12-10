@@ -1,7 +1,7 @@
-import {Request, Response, NextFunction} from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { Mascota } from './mascota.entity.js';
 import { orm } from '../shared/db/orm.js';
-import { Dueno } from '../dueno/dueno.entity.js'; 
+import { Dueno } from '../dueno/dueno.entity.js';
 import { Especie } from '../especie/especie.entity.js';
 import { Raza } from '../raza/raza.entity.js';
 import { Imagen } from '../imagen/imagenes.entity.js';
@@ -28,7 +28,7 @@ function sanitizeMascota(req: Request, res: Response, next: NextFunction) {
     dueno: sanitizeHTML(req.body.dueno),
     peso: parseFloat(sanitizeHTML(req.body.peso))
   };
-  
+
   Object.keys(req.body.sanitizeInput).forEach((key) => {
     if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
       delete req.body.sanitizeInput[key];
@@ -42,8 +42,8 @@ const em = orm.em;
 async function findAll(req: Request, res: Response) {
   try {
     const mascotas = await em.find(
-      Mascota, 
-      {}, 
+      Mascota,
+      {},
       { populate: ['dueno', 'especie', 'raza', 'imagen'] }
     );
     res.status(200).json({ message: 'finded all mascotas', data: mascotas });
@@ -56,8 +56,8 @@ async function findOne(req: Request, res: Response) {
   try {
     const idMascota = Number(req.params.idMascota);
     const mascota = await em.findOneOrFail(
-      Mascota, 
-      { idMascota }, 
+      Mascota,
+      { idMascota },
       { populate: ['dueno', 'especie', 'raza', 'imagen'] }
     );
     res.status(200).json({ message: 'Mascota found', data: mascota });
@@ -70,12 +70,15 @@ async function add(req: Request, res: Response) {
   try {
     authenticate(req.body.sanitizeInput, res);
 
-    const raza = await em.findOne(Raza, { idRaza: req.body.sanitizeInput.raza, especie: req.body.sanitizeInput.especie });
-    if (!raza) {
-      res.status(400).json({
-        message: 'Raza not found or invalid for especie',
-      });
-      return;
+    // Solo validar raza si se proporciona
+    if (req.body.sanitizeInput.raza) {
+      const raza = await em.findOne(Raza, { idRaza: req.body.sanitizeInput.raza, especie: req.body.sanitizeInput.especie });
+      if (!raza) {
+        res.status(400).json({
+          message: 'Raza not found or invalid for especie',
+        });
+        return;
+      }
     }
 
     const dueno = await em.findOneOrFail(Dueno, { idUsuario: req.body.sanitizeInput.dueno });
@@ -95,7 +98,7 @@ async function add(req: Request, res: Response) {
     especie.mascotas?.add(mascota);
     await em.persistAndFlush(mascota);
     await em.populate(mascota, ['dueno', 'especie', 'raza']);
-    
+
     res.status(201).json({ message: 'Mascota created', data: mascota });
   } catch (error: any) {
     res.status(500).json({ message: "Error creating mascota", error: error.message });
@@ -106,7 +109,7 @@ async function update(req: Request, res: Response) {
   try {
     const idMascota = Number(req.params.idMascota);
     const mascota = await em.findOneOrFail(
-      Mascota, 
+      Mascota,
       { idMascota: idMascota },
       { populate: ['dueno', 'especie', 'raza', 'imagen'] }
     );
@@ -122,21 +125,21 @@ async function update(req: Request, res: Response) {
 async function findByOwner(req: Request, res: Response) {
   try {
     const idDueno = Number(req.params.id);
-    
+
     const mascotas = await em.find(
-      Mascota, 
-      { dueno: { idUsuario: idDueno } }, 
+      Mascota,
+      { dueno: { idUsuario: idDueno } },
       { populate: ['dueno', 'especie', 'raza', 'imagen'] }
     );
-    
-    res.status(200).json({ 
-      message: 'Mascotas found for owner', 
-      data: mascotas    
+
+    res.status(200).json({
+      message: 'Mascotas found for owner',
+      data: mascotas
     });
   } catch (error: any) {
-    res.status(500).json({ 
-      message: "Error retrieving mascotas for owner", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error retrieving mascotas for owner",
+      error: error.message
     });
   }
 }
@@ -145,11 +148,11 @@ async function remove(req: Request, res: Response) {
   try {
     const idMascota = Number(req.params.idMascota);
     const mascota = await em.findOneOrFail(
-      Mascota, 
+      Mascota,
       { idMascota },
       { populate: ['imagen'] }
     );
-    
+
     if (mascota.imagen) {
       if (mascota.imagen.path) {
         const filename = path.basename(mascota.imagen.path);
@@ -160,7 +163,7 @@ async function remove(req: Request, res: Response) {
       }
       await em.removeAndFlush(mascota.imagen);
     }
-    
+
     await em.removeAndFlush(mascota);
     res.status(200).json({ message: 'Mascota removed', data: mascota });
   } catch (error: any) {
@@ -176,12 +179,12 @@ async function authenticate(sanitizeInput: any, res: Response) {
     }
 
     if (typeof sanitizeInput.exotico !== 'boolean') {
-      res.status(400).json({ 
-        message: 'Exotico must be boolean', 
-        data: { 
-          value: sanitizeInput.exotico, 
-          type: typeof sanitizeInput.exotico 
-        } 
+      res.status(400).json({
+        message: 'Exotico must be boolean',
+        data: {
+          value: sanitizeInput.exotico,
+          type: typeof sanitizeInput.exotico
+        }
       });
       return;
     }
@@ -208,28 +211,28 @@ async function uploadFiles(req: Request, res: Response): Promise<void> {
       res.status(400).json({ message: 'No file uploaded' });
       return;
     }
-    
+
     if (!req.params.idMascota) {
       res.status(400).json({ message: 'Missing idMascota parameter' });
       return;
     }
-    
+
     const idMascota = Number(req.params.idMascota);
-    
+
     if (isNaN(idMascota)) {
       res.status(400).json({ message: 'Invalid idMascota' });
       return;
     }
-    
+
     const emFork = em.fork();
-    
+
     let mascota;
     try {
       mascota = await emFork.findOne(Mascota, { idMascota });
     } catch (dbError: any) {
       throw new Error(`Database error finding mascota: ${dbError.message}`);
     }
-    
+
     if (!mascota) {
       fs.unlink(req.file.path, (err) => {
         if (err) console.error('Error deleting file:', err);
@@ -237,54 +240,54 @@ async function uploadFiles(req: Request, res: Response): Promise<void> {
       res.status(404).json({ message: 'Mascota not found' });
       return;
     }
-    
+
     let imagenExistente;
     try {
       imagenExistente = await emFork.findOne(Imagen, { mascota: { idMascota } });
     } catch (dbError: any) {
       console.error('Error finding existing image:', dbError);
     }
-    
+
     if (imagenExistente) {
       try {
         if (imagenExistente.path) {
           const filename = path.basename(imagenExistente.path);
           const filePath = path.join('public/img/perfilImages', filename);
-          
+
           try {
             await fs.promises.unlink(filePath);
           } catch (fsError: any) {
             console.error('Warning: Error deleting physical file:', fsError.message);
           }
         }
-        
+
         await emFork.removeAndFlush(imagenExistente);
       } catch (dbError: any) {
         console.error('Error deleting existing image:', dbError);
       }
     }
-    
+
     let imagen;
     try {
       imagen = new Imagen();
       imagen.path = `${req.protocol}://${req.get('host')}/img/perfilImages/${req.file.filename}`;
       imagen.mascota = mascota;
-      
+
       await emFork.persistAndFlush(imagen);
-      
+
     } catch (dbError: any) {
       throw new Error(`Error creating new image: ${dbError.message}`);
     }
-    
+
     try {
       mascota.fotoPerfil = imagen.path;
       await emFork.flush();
     } catch (dbError: any) {
       console.error('Error updating mascota:', dbError);
     }
-    
-    res.status(201).json({ 
-      message: 'Imagen uploaded successfully', 
+
+    res.status(201).json({
+      message: 'Imagen uploaded successfully',
       data: {
         imagen: {
           idImagen: imagen.idImagen,
@@ -297,16 +300,16 @@ async function uploadFiles(req: Request, res: Response): Promise<void> {
         }
       }
     });
-    
+
   } catch (error: any) {
     if (req.file) {
       fs.unlink(req.file.path, (unlinkErr) => {
         if (unlinkErr) console.error("Error deleting uploaded file:", unlinkErr);
       });
     }
-    
-    res.status(500).json({ 
-      message: "Error interno al procesar la imagen", 
+
+    res.status(500).json({
+      message: "Error interno al procesar la imagen",
       error: error.message,
       errorName: error.name
     });

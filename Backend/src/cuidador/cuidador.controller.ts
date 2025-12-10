@@ -21,7 +21,8 @@ const sanitizeCuidador = (req: Request, res: Response, next: NextFunction) => {
     telefono: sanitizeHTML(req.body.telefono),
     sexoCuidador: sanitizeHTML(req.body.sexoCuidador),
     descripcion: sanitizeHTML(req.body.descripcion),
-    tipoUsuario: 'cuidador'
+    tipoUsuario: 'cuidador',
+  
   };
 
   Object.keys(req.body.sanitizeInput).forEach((key) => {

@@ -33,11 +33,11 @@ const app = express();
 
 
 app.use(cookieParser());
-app.use(cors({ origin: 'http://localhost:3307', credentials: true }));
+app.use(cors({ origin: ['http://localhost:3307', 'http://localhost:3308'], credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/img', express.static(path.join(__dirname, '../public/img')));
+app.use(express.static(path.join(process.cwd(), 'public')));
 
 console.log('📂 Sirviendo archivos estáticos desde:', path.join(__dirname, '../public/img'));
 

@@ -8,9 +8,9 @@ import '../../styles/PrivateHomePage.css';
 const PublicacionesView = () => {
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
-    
+
     const [error, setError] = useState('');
-    
+
 
     const [formValues, setFormValues] = useState({
         ubicacion: '',
@@ -29,21 +29,22 @@ const PublicacionesView = () => {
         setLoading(true);
         setError('');
         try {
-            
+
             const params = new URLSearchParams();
             if (filterParams.ubicacion) params.append('ubicacion', filterParams.ubicacion);
             if (filterParams.tipoAlojamiento) params.append('tipoAlojamiento', filterParams.tipoAlojamiento);
             if (filterParams.tarifaMax && !isNaN(parseFloat(filterParams.tarifaMax))) params.append('tarifaMax', filterParams.tarifaMax);
             if (filterParams.exotico === true) params.append('exotico', 'true');
             if (filterParams.cantAnimales && !isNaN(parseInt(filterParams.cantAnimales))) {
-                
-                params.append('cantAnimales', filterParams.cantAnimales);}
+
+                params.append('cantAnimales', filterParams.cantAnimales);
+            }
 
             const url = `${API_BASE_URL}/publicacion${params.toString() ? `?${params.toString()}` : ''}`;
-            
+
             const response = await fetch(url, {
                 method: 'GET',
-                credentials: 'include', 
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' }
             });
 
@@ -56,25 +57,44 @@ const PublicacionesView = () => {
             setPublicaciones(Array.isArray(data.data) ? data.data : []);
         } catch (err) {
             setError('Error al cargar publicaciones: ' + err.message);
-            setPublicaciones([]); 
+            setPublicaciones([]);
         } finally {
             setLoading(false);
         }
-    }, [filterParams]); 
+    }, [filterParams]);
 
 
     useEffect(() => {
         fetchPublicaciones();
-    }, [fetchPublicaciones]); 
+    }, [fetchPublicaciones]);
 
     const handleFilterChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFiltros(prev => ({
+      
+        setFormValues(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
     };
+
+   
+    const handleReservar = (publicacionId) => {
+        if (!isAuthenticated) {
+            navigate('/login');
+            return;
+        }
+
+        if (user?.tipoUsuario?.toLowerCase() === 'cuidador') {
+            alert('Los cuidadores no pueden hacer reservas');
+            return;
+        }
+      
+        navigate(`/reservar/${publicacionId}`);
+    };
+
+
     const renderActionButtons = (pub) => {
+        
         const pubId = pub.idPublicacion || pub.id;
 
         if (!isAuthenticated) {
@@ -102,25 +122,13 @@ const PublicacionesView = () => {
 
         return (
             <button
+              
                 onClick={() => handleReservar(pubId)}
                 className="reserve-btn"
             >
                 🎯 Reservar
             </button>
         );
-    };
-   
-    const handleReservar = (publicacionId) => {
-        if (!isAuthenticated) {
-            navigate('/login');
-            return;
-        }
-
-        if (user?.tipoUsuario?.toLowerCase() === 'cuidador') { 
-            alert('Los cuidadores no pueden hacer reservas');
-            return;
-        }
-        navigate(`/reservar/${publicacionId}`);
     };
 
 
@@ -132,35 +140,7 @@ const PublicacionesView = () => {
         }));
     };
 
-    const fetchData = useCallback(async () => {
-        setLoading(true);
-      
-        const queryParams = new URLSearchParams();
-
-        if (filterParams.ubicacion) queryParams.append('ubicacion', filterParams.ubicacion);
-        if (filterParams.tipoAlojamiento) queryParams.append('tipoAlojamiento', filterParams.tipoAlojamiento);
-        if (filterParams.tarifaMax) queryParams.append('tarifaMax', filterParams.tarifaMax);
-        if (filterParams.exotico === true) queryParams.append('exotico', 'true');
-
-        try {
-            const response = await fetch(`/api/publicacion?${queryParams.toString()}`);
-            if (!response.ok) throw new Error('Network response was not ok');
-            const data = await response.json();
-            setPublicaciones(data.data || []);
-        } catch (error) {
-            console.error(error);
-          
-        } finally {
-            setLoading(false);
-        }
-    }, [filterParams]); 
-   
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
-
     const handleSearch = () => {
-        
         setFilterParams(formValues);
     };
 
@@ -168,7 +148,7 @@ const PublicacionesView = () => {
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="search-container">
-            
+
                 <div className="search-filters ">
                     <div className="filter-group">
                         <label className="filter-label">Lugar</label>
@@ -181,7 +161,7 @@ const PublicacionesView = () => {
                             onChange={handleInputChange}
                         />
                     </div>
-                    
+
                     <div className="filter-group">
                         <label className="filter-label">Tipo de alojamiento</label>
                         <select
@@ -234,14 +214,14 @@ const PublicacionesView = () => {
                             <span className="checkbox-text">🦎 Exóticos</span>
                         </label>
                     </div>
-                   
- 
-        <button className="search-btn" onClick={handleSearch}>
-            🔍
-        </button>
+
+
+                    <button className="search-btn" onClick={handleSearch}>
+                        🔍
+                    </button>
                 </div>
             </div>
-            
+
             <main className="homepage-main">
                 <div className="hero-section">
                     <h2 className="hero-title hide-on-mobile">

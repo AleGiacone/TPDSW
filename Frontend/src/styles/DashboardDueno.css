@@ -1,87 +1,45 @@
 
-:root {
-  --primary-orange: #f97136;
-  --secondary-orange: #f97840;
-  --light-peach: #FFD6C9;
-  --error-red: #ef4444;
-  --bg-light: #F7F7F7;
-  --text-dark: #484848;
-  --text-gray: #767676;
-  --border-gray: #DDDDDD;
-  --white: #FFFFFF;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
-  --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.12);
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Nunito', sans-serif;
-  background: #FFD6C9;
-  color: var(--text-dark);
-  line-height: 1.6;
-}
-
 /* ============================================
   DASHBOARD CONTAINER
   ============================================ */
 .dashboard-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: #FFD6C9;
+  background-color: white;
 }
 
 /* ============================================
   NAVBAR 
   ============================================ */
 .dashboard-navbar {
-  background: var(--white);
-  padding: 1.25rem 2rem;
-  border-bottom: 3px solid var(--primary-orange);
-  box-shadow: var(--shadow-md);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  width: 100%;
+  background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 16px 24px;
+    height: 15vh;
 }
 
 .navbar-brand {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.25rem;
-  flex-wrap: wrap;
-  gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
 }
 
 .navbar-title {
-  font-size: 1.875rem;
-  font-weight: 800;
-  color: #f97363;
-  letter-spacing: -0.5px;
+  font-size: 24px;
+    font-weight: 700;
+    color: #f97840;
+    margin: 0;
 }
 
 .navbar-welcome {
-  font-size: 1.125rem;
-  color: #f97363;
-  font-weight: 500;
+  font-size: 14px;
+    color: #666;
 }
 
 .navbar-buttons {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  width: 100%;
+  flex-direction: row;
+    justify-content: space-between;
+    gap: 16px;
 }
 
 .navbar-buttons-general {
@@ -99,21 +57,17 @@ body {
 .nav-button,
 .btn-home,
 .logout-button {
-  padding: 0.625rem 1.25rem;
+padding: 10px 20px;
   border: none;
-  border-radius: var(--radius-lg);
-  font-weight: 600;
-  font-size: 0.9rem;
+  background-color: #f0f0f0;
+  color: #333;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  display: inline-flex;
+  transition: all 0.2s;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  white-space: nowrap;
-  background-color: #f97363;
-  color: var(--white);
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
-  text-decoration: none;
 }
 
 .nav-button:hover,

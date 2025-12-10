@@ -10,6 +10,7 @@ import RegisterPage from './views/principal/RegisterPage';
 import PublicacionesView from './views/homePrivado/PrivateHomePage';
 import DuenoDashboard from './views/dashboards/DuenoDashboard';
 import CuidadorDashboard from './views/dashboards/CuidadorDashboard';
+import ReservaPageWrapper from './views/reservas/ReservaPage';
 
 const UnauthorizedPage = () => (
   <div style={{ textAlign: 'center', padding: '2rem' }}>
@@ -41,6 +42,16 @@ function App() {
             <Route
               path="/dashboards/dueno/*"
               element={<ProtectedRoute requiredUserType="dueno"><DuenoDashboard /></ProtectedRoute>}
+            />
+
+            <Route
+              path="/reservar/:publicacionId"
+              element={
+                <ProtectedRoute requiredUserType="dueno">
+                  <Navbar />
+                  <ReservaPageWrapper />
+                </ProtectedRoute>
+              }
             />
 
             <Route path="*" element={<Navigate to="/" replace />} />
