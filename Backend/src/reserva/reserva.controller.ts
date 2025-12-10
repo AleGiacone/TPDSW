@@ -76,8 +76,24 @@ async function verifyDate(req: Request, res: Response, next: NextFunction) {
     const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion: req.body.sanitizeInput.idPublicacion }, { populate: ['reservas'] });
 
     const reservasDeLaPublicacion = await em.find(Reserva, { publicacion: publicacion }, { populate: ['diasReservados'] });
-
+    //Todos los dias ya reservados en esa publicacion
     const diasReservados = reservasDeLaPublicacion.map(r => r.diasReservados.getItems().map(d => d.fechaReservada)).flat();
+
+    //Dias reservados de la mascota
+    const mascota = await em.findOneOrFail(Mascota, { idMascota: req.body.sanitizeInput.idMascotas[0] }, { populate: ['reservas', 'reservas.diasReservados'] });
+    const reservasDeLaMascota = mascota.reservas.getItems();
+    const diasReservadosDeLaMascota = reservasDeLaMascota.map(r => r.diasReservados.getItems().map(d => d.fechaReservada)).flat();
+    
+
+    //Verificar si la mascota esta reservada en esa fecha
+    console.log("Dias ya reservados de la mascota:", diasReservadosDeLaMascota);
+    for (let dia of req.body.sanitizeInput.dias) {
+      if(diasReservadosDeLaMascota.includes(Temporal.PlainDate.from(dia).toString())){
+        res.status(400).json({ message: `La fecha ${Temporal.PlainDate.from(dia).toString()} ya está reservada para la mascota.` });
+        return;
+      }
+    }
+
 
     console.log("Dias ya reservados en la publicacion:", diasReservados);
 
@@ -93,6 +109,7 @@ async function verifyDate(req: Request, res: Response, next: NextFunction) {
   }
   next();
 }
+
 
 
 
