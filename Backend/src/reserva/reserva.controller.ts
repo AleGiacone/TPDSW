@@ -253,7 +253,8 @@ async function testPagoStripe(req: Request, res: Response) {
   console.log("Iniciando test de pago con Stripe");
   console.log("Datos recibidos para el pago:", req.body.sanitizeInput.dias);
   console.log("Datos recibido del id de las mascotas", req.body.sanitizeInput.idMascotas);
-  const stripe = new Stripe('sk_test_51ScwCpCYqgnDHRhzctuMddT3Vl9tBfgHkA0IUczWj28CuBDMhzuK9dfanC8gLdG5cDoV3kbTrjQ7JWgjmF2DQaZp00PR8xkYY4')
+  // La session de stripe la pedimos con el middleware
+  const stripe = new Stripe('')
   const session = await stripe.checkout.sessions.create({
     line_items: [
       {
@@ -303,8 +304,8 @@ async function testPagoStripe(req: Request, res: Response) {
 }
 
 // Webhook de stripe
-
-const endpointSecret = 'whsec_9529993bca1c6490e146474231541660c4503087c56b12d0cb92fb5927050ec1';
+// La llave la pedimos cuando iniciamos el middleware del webhook
+const endpointSecret = '';
 
 async function stripeWebHook(req: Request, res: Response) {
   // Usamos un EntityManager forkeado para este webhook,
