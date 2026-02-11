@@ -11,6 +11,7 @@ import { publicDecrypt } from "crypto";
 import { Temporal } from 'temporal-polyfill'
 import { DiaReservado } from "./diaReservado.entity.js";
 import { Collection, now } from "mongoose";
+import 'dotenv/config';
 
 // PONER SANITIZE HTML EN TODOS LOS CAMPOS
 function sanitizeReserva(req: Request, res: Response, next: NextFunction) {
@@ -254,7 +255,7 @@ async function testPagoStripe(req: Request, res: Response) {
   console.log("Datos recibidos para el pago:", req.body.sanitizeInput.dias);
   console.log("Datos recibido del id de las mascotas", req.body.sanitizeInput.idMascotas);
   // La session de stripe la pedimos con el middleware
-  const stripe = new Stripe('')
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
   const session = await stripe.checkout.sessions.create({
     line_items: [
       {
@@ -305,7 +306,7 @@ async function testPagoStripe(req: Request, res: Response) {
 
 // Webhook de stripe
 // La llave la pedimos cuando iniciamos el middleware del webhook
-const endpointSecret = '';
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 async function stripeWebHook(req: Request, res: Response) {
   // Usamos un EntityManager forkeado para este webhook,
