@@ -73,4 +73,7 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizePago, findAll, findOne, add, update, remove };
+
+// Testeo pago Stripe
+
+export { sanitizePago, findAll, findOne, add, update, remove};

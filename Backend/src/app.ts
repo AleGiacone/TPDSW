@@ -16,7 +16,8 @@ import { imagenRouter } from './imagen/imagenes.routes.js';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import cors from 'cors';
-import { reservaRouter } from './reserva/reserva.routes.js';
+import { reservaRouter, webHookRouter } from './reserva/reserva.routes.js';
+import { pagoRouter } from './reserva/pago.routers.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,6 +33,8 @@ declare global {
 const app = express();
 
 
+
+app.use("/webhook", webHookRouter);
 app.use(cookieParser());
 app.use(cors({ origin: ['http://localhost:3307', 'http://localhost:3308'], credentials: true }));
 app.use(express.json());
@@ -41,6 +44,11 @@ app.use(express.static(path.join(process.cwd(), 'public')));
 
 console.log('📂 Sirviendo archivos estáticos desde:', path.join(__dirname, '../public/img'));
 
+
+app.use((req, res, next) => {
+  console.log(`📍 ${req.method} ${req.originalUrl}`);
+  next();
+});
 
 app.use((req, res, next) => {
   console.log('Token recibido:', req.cookies.access_token);
@@ -69,10 +77,12 @@ app.use("/api/usuario/upload-image", usuarioRouter);
 app.use("/api/publicacion", publicacionRouter);
 app.use("/api/imagenes", imagenRouter);
 app.use("/api/reservas", reservaRouter);
+app.use("/api/pagos", pagoRouter);
 
 
 app.get('/', (req, res) => {
   console.log('Session:', req.session);
+  console.log(`Endpoint llamado: ${req.method} ${req.url}`);
   const { usuario } = req.session ?? { usuario: null };
   if (!usuario) {
     res.status(401).send('Acceso no autorizado')

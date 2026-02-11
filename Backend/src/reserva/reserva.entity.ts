@@ -14,7 +14,7 @@ import { Temporal } from 'temporal-polyfill';
 
 @Entity()
 export class Reserva {
-  @PrimaryKey()
+  @PrimaryKey({ autoincrement: true })
   idReserva!: number;
 
   @Property({ nullable: false, unique: false })
