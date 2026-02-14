@@ -7,7 +7,8 @@ import sanitizeHTML from 'sanitize-html'
 import { authToken } from '../auth.js';
 import fs from 'fs';
 import { Reserva } from '../reserva/reserva.entity.js';
-
+import { Temporal } from 'temporal-polyfill'
+import { DiaReservado } from '../reserva/diaReservado.entity.js';
 
 function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
   console.log("Sanitizing publicacion input", req.body);
@@ -23,19 +24,95 @@ function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
     ubicacion: req.body.ubicacion ? sanitizeHTML(req.body.ubicacion) : undefined,
     tipoAlojamiento: req.body.tipoAlojamiento ? sanitizeHTML(req.body.tipoAlojamiento) : undefined,
     cantAnimales: req.body.cantAnimales ? parseInt(req.body.cantAnimales) : 1,
-    exotico: req.body.exotico === true || req.body.exotico === 'true'
+    exotico: req.body.exotico === true || req.body.exotico === 'true',
+    dias: req.body.dias,
+    idPublicacion: req.body.idPublicacion
   };
 
-  Object.keys(req.body.sanitizeInput).forEach((key) => {
-    console.log("Checking field:", key, "Value:", req.body.sanitizeInput[key]);
-    if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
-      console.log("Removing undefined field:", key);
-      delete req.body.sanitizeInput[key];
-    }
-  });
+  if (req.body.sanitizeInput.dias != null && req.body.sanitizeInput.dias != undefined) {
+      try {
+        for (let dias of req.body.sanitizeInput.dias) {
+          console.log("Sanitizing date:", dias);
+          Temporal.PlainDate.from(dias);
+        }
+      } catch (error) {
+        res.status(400).json({ message: "Error parsing dates", error: error });
+        return;
+      }
+  }
+  //Ver object keys borra campos
+  // Object.keys(req.body.sanitizeInput).forEach((key) => {
+  //   if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
+  //     console.log("Removing undefined field:", key);
+  //     delete req.body.sanitizeInput[key];
+  //   }
+  // });
   console.log("Sanitized input:", req.body.sanitizeInput);
   
   next();
+}
+
+async function diasReservados(req: Request, res: Response) {
+  try {
+    console.log("Obteniendo días reservados para la publicación:", req.body.sanitizeInput.idPublicacion);
+    const em = orm.em.fork();
+    const idPublicacion = Number(req.body.sanitizeInput.idPublicacion);
+    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas', 'diasOcupados'] });
+      
+    const reservasDeLaPublicacion = await em.find(Reserva, { publicacion:  publicacion }, { populate: ['diasReservados'] });
+          
+    const diasReservados = reservasDeLaPublicacion.map(r => r.diasReservados.getItems().map(d => d.fechaReservada)).flat();
+    
+    const diasOcupados = publicacion.diasOcupados.getItems().map(d => d.fechaReservada);
+    const todosLosDiasReservados = Array.from(new Set([...diasReservados, ...diasOcupados]));
+
+    res.status(200).json({ message: "Días reservados obtenidos", data: todosLosDiasReservados });
+    }
+    catch (error: any) {
+    res.status(500).json({ message: "Error retrieving reserved days", error: error.message });
+    return;
+  }
+}
+
+
+
+async function reservaCuidador(req: Request, res: Response, next: NextFunction) {
+  try {
+    console.log("Verificando reserva cuidador con data:", req.body.sanitizeInput);
+    const em = orm.em.fork();
+    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion: req.body.sanitizeInput.idPublicacion }, { populate: ['reservas'] });
+    console.log("Publicacion encontrada:", publicacion);
+    const reservasDeLaPublicacion = await em.find(Reserva, { publicacion: publicacion }, { populate: ['diasReservados'] });
+    //Todos los dias ya reservados en esa publicacion
+    const diasReservados = reservasDeLaPublicacion.map(r => r.diasReservados.getItems().map(d => d.fechaReservada)).flat();
+    for (let dia of req.body.sanitizeInput.dias) {
+      if(diasReservados.includes(Temporal.PlainDate.from(dia).toString())){
+        res.status(400).json({ message: `La fecha ${Temporal.PlainDate.from(dia).toString()} ya está reservada.` });
+        return;
+      }
+    }
+    const diasOcupados = publicacion.diasOcupados.getItems().map(d => d.fechaReservada);
+    for (let dia of req.body.sanitizeInput.dias) {
+      if(diasOcupados.includes(Temporal.PlainDate.from(dia).toString())){
+        res.status(400).json({ message: `La fecha ${Temporal.PlainDate.from(dia).toString()} ya está ocupada.` });
+        return;
+      }
+    }
+
+
+    for (const dia of req.body.sanitizeInput.dias) {
+      
+      const diaReservado = em.create(DiaReservado, { fechaReservada: dia, publicacion: publicacion });
+      publicacion.diasOcupados.add(diaReservado);
+    }
+    await em.flush();
+
+    res.status(200).json({ message: "Reserva cuidador verificada", data: diasReservados });
+  }catch (error: any) {  
+    res.status(400).json({ message: "Error verifying reserva cuidador", error: error.message });
+    return;
+  }
+
 }
 
 
@@ -432,4 +509,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizePublicacion, findAll, findOne, findByCuidador, add, update, remove, getDiasReservados};
+export { sanitizePublicacion, findAll, findOne, findByCuidador, add, update, remove, getDiasReservados, reservaCuidador, diasReservados};

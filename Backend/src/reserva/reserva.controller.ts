@@ -79,7 +79,7 @@ async function findOne(req: Request, res: Response) {
 async function verifyDate(req: Request, res: Response, next: NextFunction) {
   try {
     const em = orm.em.fork();
-
+    console.log("Verificando fechas para reserva con data:", req.body.sanitizeInput);
 
     const dias: Temporal.PlainDate[] = [];
     const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion: req.body.sanitizeInput.idPublicacion }, { populate: ['reservas'] });
@@ -103,10 +103,18 @@ async function verifyDate(req: Request, res: Response, next: NextFunction) {
       }
     }
 
+    const diasOcupados = publicacion.diasOcupados.getItems().map(d => d.fechaReservada);
+    for (let dia of req.body.sanitizeInput.dias) {
+      if(diasOcupados.includes(Temporal.PlainDate.from(dia).toString())){
+        res.status(400).json({ message: `La fecha ${Temporal.PlainDate.from(dia).toString()} ya está ocupada en la publicación.` });
+        return;
+      }
+    }
 
     console.log("Dias ya reservados en la publicacion:", diasReservados);
 
     for (let dia of req.body.sanitizeInput.dias) {
+      console.log("Fechas", req.body.sanitizeInput.dias);
       console.log("Procesando dia:", Temporal.PlainDate.from(dia).toString());
       if (diasReservados.includes(Temporal.PlainDate.from(dia).toString())) {
         res.status(400).json({ message: `La fecha ${Temporal.PlainDate.from(dia).toString()} ya está reservada en la publicación.` });
@@ -115,10 +123,10 @@ async function verifyDate(req: Request, res: Response, next: NextFunction) {
     }
   } catch (error: any) {
     res.status(500).json({ message: "Error verifying dates", error: error.message });
+    return;
   }
   next();
 }
-
 
 
 
