@@ -18,7 +18,7 @@ import path from 'path';
 import cors from 'cors';
 import { reservaRouter, webHookRouter } from './reserva/reserva.routes.js';
 import { pagoRouter } from './reserva/pago.routers.js';
-
+import rateLimit from 'express-rate-limit';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -46,11 +46,6 @@ console.log('📂 Sirviendo archivos estáticos desde:', path.join(__dirname, '.
 
 
 app.use((req, res, next) => {
-  console.log(`📍 ${req.method} ${req.originalUrl}`);
-  next();
-});
-
-app.use((req, res, next) => {
   console.log('Token recibido:', req.cookies.access_token);
   const token = req.cookies.access_token;
   req.session = { usuario: null }
@@ -66,6 +61,21 @@ app.use((req, res, next) => {
   RequestContext.create(orm.em, next)
 });
 
+
+// Rate limiter general
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100,                  // 100 requests por IP
+  standardHeaders: true,     // Devuelve info en headers `RateLimit-*`
+  legacyHeaders: false,      // Deshabilita headers `X-RateLimit-*`
+  handler: (req, res) => {
+    res.status(429).json({ error: 'Demasiadas solicitudes, intenta más tarde' });
+  }
+});
+
+
+
+app.use(generalLimiter); 
 
 app.use("/api/usuarios", usuarioRouter);
 app.use("/api/mascotas", mascotaRouter);

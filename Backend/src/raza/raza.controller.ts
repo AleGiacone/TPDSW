@@ -26,10 +26,10 @@ function sanitizeRaza(req: Request, res: Response, next: NextFunction) {
   next()
 }
 
-const em = orm.em
 
 async function findAll(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const razas = await em.find(Raza, {}, { populate: ['especie'] });
     const razasFormateadas = razas.map(raza => ({
       id: raza.idRaza,
@@ -54,6 +54,7 @@ async function findAll(req: Request, res: Response) {
 
 async function add(req: Request, res: Response): Promise<void> {
   try {
+    const em = orm.em.fork();
     console.log("IdEspecie recibido:", req.body.sanitizeInput.idEspecie);
     const especie = await em.findOne(Especie, { idEspecie: req.body.sanitizeInput.idEspecie });
     
@@ -76,6 +77,7 @@ async function add(req: Request, res: Response): Promise<void> {
 
 async function findOne(req: Request, res: Response) {
   try{
+    const em = orm.em.fork();
     const idRaza = Number.parseInt (req.params.idRaza)
     const raza = await em.findOneOrFail (Raza , {idRaza}, {populate : ['especie']});
     res.status(200).json({ message: 'Raza found', data: raza });
@@ -87,11 +89,11 @@ async function findOne(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   console.log("Updating raza with data:", req.body.sanitizeInput);
   try{
+    const em = orm.em.fork();
     if (req.body.sanitizeInput.nomRaza === '' || req.body.sanitizeInput.nomRaza === undefined || req.body.sanitizeInput.nomRaza.length <= 3) {
       res.status(400).json({ message: "Nombre de raza invalido" });
       return;
     }
-    const em = RequestContext.getEntityManager()!;
     const idRaza = Number.parseInt(req.params.idRaza);
     console.log("idRaza", idRaza)
     const raza = await em.findOneOrFail(Raza, {idRaza} );
@@ -107,6 +109,7 @@ async function update(req: Request, res: Response) {
 
 async function remove (req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const idRaza = Number.parseInt (req.params.idRaza)
     const raza = await em.findOneOrFail (Raza, {idRaza})
     await em.removeAndFlush (raza)

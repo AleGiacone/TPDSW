@@ -18,10 +18,10 @@ function sanitizeEspecie(req: Request, res: Response, next: NextFunction) {
   next()
 }
 
-const em = orm.em
 
 async function findAll(req: Request, res: Response){
   try { 
+    const em = orm.em.fork();
     // Tipo de retorno promise
       const especies = await em.find (Especie, {}, {populate : ['razas']})
       res.status(200).json ({message: 'finded all especies', data: especies })
@@ -32,6 +32,7 @@ async function findAll(req: Request, res: Response){
 
 async function findOne(req: Request, res: Response) {
   try{
+    const em = orm.em.fork();
     const idEspecie = Number(req.params.idEspecie)
     const especie= await em.findOneOrFail (Especie , {idEspecie} , { populate : ['razas']});
     res.status(200).json({ message: 'Especie found', data: especie });
@@ -43,6 +44,7 @@ async function findOne(req: Request, res: Response) {
 async function add(req: Request, res: Response) {
   console.log("Adding especie with data:", req.body.sanitizeInput);
   try {
+    const em = orm.em.fork();
     const especie = em.create(Especie, req.body.sanitizeInput);
     await em.flush()
     res.status(200).json({ message: 'Especie created', data: especie });
@@ -54,6 +56,7 @@ async function add(req: Request, res: Response) {
 
 async function update(req: Request, res: Response) {
   try{
+    const em = orm.em.fork();
     if (req.body.sanitizeInput.nomEspecie === '' || req.body.sanitizeInput.nomEspecie === undefined || Object.keys(req.body.sanitizeInput).length <= 3) {
       res.status(400).json({ message: "Nombre de especie invalido" });
       return;
@@ -72,6 +75,7 @@ async function update(req: Request, res: Response) {
 
 async function remove (req: Request, res: Response) {
  try {
+   const em = orm.em.fork();
    const idEspecie = Number.parseInt (req.params.idEspecie)
    const especie = await em.findOneOrFail (Especie, {idEspecie} )
    await em.removeAndFlush (especie)

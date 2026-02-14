@@ -39,11 +39,12 @@ function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
 }
 
 
-const em = orm.em.fork();
+
 
 // Función para validar los datos de la publicación
 
 async function authenticatePublicacion(req: Request, res: Response): Promise<boolean> {
+  const em = orm.em.fork();
   const { titulo, descripcion, tarifaPorDia, ubicacion, tipoAlojamiento, cantAnimales } = req.body.sanitizeInput;
 
   if (!titulo || titulo.length <= 3) {
@@ -83,7 +84,7 @@ async function authenticatePublicacion(req: Request, res: Response): Promise<boo
 
 async function findAll(req: Request, res: Response) {
   try {
-
+    const em = orm.em.fork();
     // 1. Extraer los parámetros de la URL
     const {
       ubicacion,
@@ -156,6 +157,7 @@ async function findOne(req: Request, res: Response) {
 
 async function getDiasReservados(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     console.log("Obteniendo días reservados para la publicación:", req.params.idPublicacion);
     const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion: parseInt(req.params.idPublicacion) }, { populate: ['reservas'] });
       
@@ -178,6 +180,7 @@ async function getDiasReservados(req: Request, res: Response) {
 
 async function findByCuidador(req: Request, res: Response): Promise<void> {
   try {
+    const em = orm.em.fork();
     const idUsuario = Number(req.params.idUsuario);
 
     const cuidador = await em.findOne(Cuidador, { idUsuario: idUsuario });
@@ -233,6 +236,7 @@ async function add(req: Request, res: Response): Promise<void> {
     const files = req.files as Express.Multer.File[] || [];
 
     try {
+      const em = orm.em.fork();
         if (!req.body.sanitizeInput) {
             res.status(400).json({ message: "Datos no procesados correctamente" });
             return;
@@ -334,7 +338,7 @@ async function add(req: Request, res: Response): Promise<void> {
 
 async function update(req: Request, res: Response): Promise<void> {
   const files = req.files as Express.Multer.File[] || [];
-  
+  const em = orm.em.fork();
   try {
     const idPublicacion = Number.parseInt(req.params.idPublicacion);
     const publicacion = await em.findOneOrFail(
@@ -405,6 +409,7 @@ async function update(req: Request, res: Response): Promise<void> {
 
 async function remove(req: Request, res: Response) { 
   try {
+    const em = orm.em.fork();
     const idPublicacion = Number.parseInt(req.params.idPublicacion);
     const publicacion = await em.findOneOrFail(
       Publicacion, 

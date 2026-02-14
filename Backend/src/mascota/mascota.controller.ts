@@ -37,10 +37,11 @@ function sanitizeMascota(req: Request, res: Response, next: NextFunction) {
   next();
 };
 
-const em = orm.em;
 
 async function findAll(req: Request, res: Response) {
   try {
+  const em = orm.em.fork();
+
     const mascotas = await em.find(
       Mascota,
       {},
@@ -54,6 +55,8 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
+
     const idMascota = Number(req.params.idMascota);
     const mascota = await em.findOneOrFail(
       Mascota,
@@ -68,6 +71,8 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
+
     authenticate(req.body.sanitizeInput, res);
 
     // Solo validar raza si se proporciona
@@ -107,13 +112,15 @@ async function add(req: Request, res: Response) {
 
 async function update(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
+
     const idMascota = Number(req.params.idMascota);
     const mascota = await em.findOneOrFail(
       Mascota,
       { idMascota: idMascota },
       { populate: ['dueno', 'especie', 'raza', 'imagen'] }
     );
-    em.assign(mascota, req.body);
+    em.assign(mascota, req.body.sanitizeInput);
     await em.flush();
     await em.populate(mascota, ['dueno', 'especie', 'raza', 'imagen']);
     res.status(200).json({ message: 'Mascota updated', data: mascota });
@@ -124,6 +131,8 @@ async function update(req: Request, res: Response) {
 
 async function findByOwner(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
+
     const idDueno = Number(req.params.id);
 
     const mascotas = await em.find(
@@ -146,6 +155,8 @@ async function findByOwner(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
+
     const idMascota = Number(req.params.idMascota);
     const mascota = await em.findOneOrFail(
       Mascota,
@@ -173,6 +184,7 @@ async function remove(req: Request, res: Response) {
 
 async function authenticate(sanitizeInput: any, res: Response) {
   try {
+
     if (sanitizeInput.sexo !== 'M' && sanitizeInput.sexo !== 'F') {
       res.status(400).json({ message: 'Sexo must be M or F', data: sanitizeInput.sexo });
       return;
@@ -207,6 +219,7 @@ async function authenticate(sanitizeInput: any, res: Response) {
 
 async function uploadFiles(req: Request, res: Response): Promise<void> {
   try {
+
     if (!req.file) {
       res.status(400).json({ message: 'No file uploaded' });
       return;
@@ -224,7 +237,7 @@ async function uploadFiles(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const emFork = em.fork();
+    const emFork = orm.em.fork();
 
     let mascota;
     try {
