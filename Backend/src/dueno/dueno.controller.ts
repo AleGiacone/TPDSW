@@ -7,7 +7,6 @@ import sanitizeHTML from 'sanitize-html';
 import fs from 'fs'; 
 import path from 'path'; 
 
-const em = orm.em;
 
 function sanitizeDueno(req: Request, res: Response, next: NextFunction) {
     
@@ -35,7 +34,9 @@ function sanitizeDueno(req: Request, res: Response, next: NextFunction) {
 }
 
 async function authenticateDueno(req: Request, res: Response, next: NextFunction) {
+  
   try {
+    const em = orm.em.fork();
     const existingUser = await em.findOne(Usuario, { email: req.body.sanitizeInput.email });
     if (existingUser) {
       res.status(400).json({ message: 'El email ya está en uso' });
@@ -71,6 +72,7 @@ async function authenticateDueno(req: Request, res: Response, next: NextFunction
 
 async function authenticateUpdate(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    const em = orm.em.fork();
     const idUsuario = Number(req.params.idUsuario);
     const existingUser = await em.findOne(Dueno, { idUsuario });
     
@@ -119,6 +121,8 @@ async function authenticateUpdate(req: Request, res: Response, next: NextFunctio
 
 async function findAll(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
+
     const duenos = await em.find(Dueno, {});
     await em.populate(duenos, ['mascotas']);
     res.status(200).json({ message: 'Found all duenos', data: duenos });
@@ -129,6 +133,8 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
+
     const idUsuario = Number(req.params.idUsuario);
     const dueno = await em.findOneOrFail(Dueno, { idUsuario }, { populate: ['mascotas'] });
     res.status(200).json({ message: 'Dueno found', data: dueno});
@@ -139,6 +145,7 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const email = await em.findOne(Usuario, { email: req.body.sanitizeInput.email });
     if (email) {
       res.status(400).json({ message: 'Email already exists' });
@@ -156,6 +163,7 @@ async function add(req: Request, res: Response) {
 
 async function findPets(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const idUsuario = Number(req.params.idUsuario);
     const dueno = await em.findOneOrFail(Dueno, { idUsuario }, { populate: ['mascotas'] });
     res.status(200).json({ message: 'Mascotas found', data: dueno.mascotas });
@@ -166,6 +174,7 @@ async function findPets(req: Request, res: Response) {
 
 async function updateDueno(req: Request, res: Response): Promise<void> {
   try {
+    const em = orm.em.fork();
     const idUsuario = Number.parseInt(req.params.idUsuario);
     const dueno = await em.findOneOrFail(Dueno, { idUsuario });
 
@@ -188,7 +197,7 @@ async function updateDueno(req: Request, res: Response): Promise<void> {
 }
 
 async function remove(req: Request, res: Response) {
-  const emFork = em.fork();
+  const emFork = orm.em.fork();
   try {
     const idUsuario = Number.parseInt(req.params.idUsuario);
 
@@ -234,7 +243,7 @@ async function remove(req: Request, res: Response) {
 }
 
 async function updateProfileImageDueno(req: Request, res: Response): Promise<void> {
-  const emFork = em.fork(); 
+  const emFork = orm.em.fork(); 
   try {
     const idUsuario = Number(req.params.idUsuario);
 
@@ -286,6 +295,8 @@ async function updateProfileImageDueno(req: Request, res: Response): Promise<voi
 
 async function deleteProfileImageDueno(req: Request, res: Response): Promise<void> {
   try {
+    const em = orm.em.fork();
+
     const idUsuario = Number(req.params.idUsuario);
     const dueno = await em.findOneOrFail(Dueno, { idUsuario });
     

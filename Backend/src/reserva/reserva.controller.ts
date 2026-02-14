@@ -14,19 +14,20 @@ import { Temporal } from 'temporal-polyfill'
 import { DiaReservado } from "./diaReservado.entity.js";
 import { Collection, now } from "mongoose";
 import 'dotenv/config';
+import sanitizeHTML from 'sanitize-html';
 
-// PONER SANITIZE HTML EN TODOS LOS CAMPOS
+//Agrego campos sanitizados
 function sanitizeReserva(req: Request, res: Response, next: NextFunction) {
   console.log("Sanitizing reserva with data:", req.body);
   req.body.sanitizeInput = {
-    idReserva: req.body.idReserva,
-    fechaReserva: req.body.fechaReserva,
-    descripcion: req.body.descripcion,
+    idReserva: sanitizeHTML(req.body.idReserva),
+    fechaReserva: sanitizeHTML(req.body.fechaReserva),
+    descripcion: sanitizeHTML(req.body.descripcion),
 
-    idDueno: req.body.idDueno,
-    idMascotas: req.body.idMascotas,
-    idPublicacion: req.body.idPublicacion,
-    dias: req.body.dias,
+    idDueno: sanitizeHTML(req.body.idDueno),
+    idMascotas: sanitizeHTML(req.body.idMascotas),
+    idPublicacion: sanitizeHTML(req.body.idPublicacion),
+    dias: sanitizeHTML(req.body.dias),
   };
   Object.keys(req.body.sanitizeInput).forEach((key) => {
     if (req.body.sanitizeInput[key] === undefined) {
@@ -48,10 +49,11 @@ function sanitizeReserva(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-const em = orm.em;
 
 async function findAll(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
+
     const reservas = await em.find(Reserva, {}, { populate: ["dueno", "mascotas", "diasReservados"] });
     res.status(200).json({ message: "finded all reservas", data: reservas });
   } catch (error: any) {
@@ -61,6 +63,8 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
+  const em = orm.em.fork();
+
     const idReserva = Number(req.params.idReserva);
     const reserva = await em.findOneOrFail(Reserva, { idReserva }, { populate: ["dueno", "mascotas", "publicacion"] });
     res.status(200).json({ message: "Reserva found", data: reserva });
@@ -73,6 +77,7 @@ async function findOne(req: Request, res: Response) {
 // Función para verificar si las fechas están disponibles. Esta a parte para no molestar con los nombres 
 async function verifyDate(req: Request, res: Response, next: NextFunction) {
   try {
+    const em = orm.em.fork();
 
 
     const dias: Temporal.PlainDate[] = [];
@@ -118,7 +123,7 @@ async function verifyDate(req: Request, res: Response, next: NextFunction) {
 
 async function add(req: Request, res: Response) {
   try {
-
+    const em = orm.em.fork();
     const reserva = em.create(Reserva, req.body.sanitizeInput);
     console.log("Agregar dias reservados")
     //Agregar dias reservados
@@ -161,11 +166,8 @@ async function add(req: Request, res: Response) {
 async function authenticateAdd(req: Request, res: Response, next: NextFunction) {
   console.log("Authenticating reserva with data:", req.body.sanitizeInput);
   try {
-    if (req.body.fechaDesde >= req.body.fechaHasta) {
-      res.status(400).json({ message: "Fechas invalidas" })
-      return;
-    }
-
+    const em = orm.em.fork();
+    
     const publi = await em.findOneOrFail(Publicacion, { idPublicacion: req.body.sanitizeInput.idPublicacion });
     if (!publi) {
       res.status(400).json({ message: "Publicacion no existe" })
@@ -177,12 +179,6 @@ async function authenticateAdd(req: Request, res: Response, next: NextFunction) 
       res.status(400).json({ message: "Dueno no existe" })
       return;
     }
-
-    // Verificar que no exista una reserva en las mismas fechas para la misma publicacion
-    // const reservaExistente = await em.findOne(Reserva, {fechaDesde: req.body.sanitizeInput.fechaDesde, publicacion: req.body.sanitizeInput.idPublicacion});
-    // if(reservaExistente) {
-    //   res.status(400).json({ message: "Ya existe una reserva para esa publicacion en esa fecha"})
-    // }
     console.log("id mascotas", req.body.sanitizeInput.idMascotas)
     for (const idMascota of req.body.sanitizeInput.idMascotas) {
       const mascota = await em.findOneOrFail(Mascota, { idMascota: idMascota, dueno: req.body.sanitizeInput.idDueno });
@@ -191,7 +187,6 @@ async function authenticateAdd(req: Request, res: Response, next: NextFunction) 
         return;
       }
     }
-
     next();
   } catch (error: any) {
     res.status(500).json({ message: "Error authenticating reserva", error: error.message });
@@ -202,6 +197,7 @@ async function authenticateAdd(req: Request, res: Response, next: NextFunction) 
 
 async function update(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const idReserva = Number(req.params.idReserva);
     const reserva = await em.findOneOrFail(Reserva, { idReserva });
     em.assign(reserva, req.body.sanitizeInput);
@@ -214,6 +210,7 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const idReserva = Number(req.params.idReserva);
     const reserva = await em.findOneOrFail(Reserva, { idReserva });
     await em.removeAndFlush(reserva);
@@ -225,6 +222,7 @@ async function remove(req: Request, res: Response) {
 
 async function testDate(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const dias = [];
     req.body.sanitizeInput.dias.forEach(async (dia: any) => {
       const fecha = Temporal.PlainDate.from(dia);

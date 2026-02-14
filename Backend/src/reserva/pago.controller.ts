@@ -1,15 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { Pago } from './pago.entity.js';
 import { orm } from '../shared/db/orm.js';
-
+import sanitizeHTML from 'sanitize-html';
 // Ver como hacer el tema de pago, si implementar un medio de pago real o dejar
 
 function sanitizePago(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizeInput = {
-    idPago: req.body.idPago,
-    idReserva: req.body.idReserva,
-    monto: req.body.monto,
-    fechaPago: req.body.fechaPago
+    idPago: sanitizeHTML(req.body.idPago),
+    idReserva: sanitizeHTML(req.body.idReserva),
+    monto: parseFloat(sanitizeHTML(req.body.monto)),
+    fechaPago: sanitizeHTML(req.body.fechaPago)
   };
   Object.keys(req.body.sanitizeInput).forEach((key) => {
     if (req.body.sanitizeInput[key] === undefined) {
@@ -19,10 +19,10 @@ function sanitizePago(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-const em = orm.em;
 
 async function findAll(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const pagos = await em.find(Pago, {});
     res.status(200).json({ message: 'Found all pagos', data: pagos });
   } catch (error: any) {
@@ -32,8 +32,9 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const idPago = Number(req.params.idPago);
-    const pago = await orm.em.findOneOrFail(Pago, { idPago });
+    const pago = await em.findOneOrFail(Pago, { idPago });
     res.status(200).json({ message: 'Pago found', data: pago });
   } catch (error: any) {
     res.status(500).json({ message: "Error retrieving pago", error: error.message });
@@ -42,6 +43,7 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const pago = em.create(Pago, req.body.sanitizeInput);
     await em.flush();
     res.status(200).json({ message: 'Pago created', data: pago });
@@ -52,6 +54,7 @@ async function add(req: Request, res: Response) {
 
 async function update(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const idPago = Number.parseInt(req.params.idPago);
     const pago = await em.findOneOrFail(Pago, { idPago });
     em.assign(pago, req.body.sanitizeInput);
@@ -64,6 +67,7 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const idPago = Number.parseInt(req.params.idPago);
     const pago = await em.findOneOrFail(Pago, { idPago });
     await em.removeAndFlush(pago);

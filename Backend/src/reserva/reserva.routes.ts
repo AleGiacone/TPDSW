@@ -7,8 +7,7 @@ const reservaRouter = Router();
 reservaRouter.get("/", findAll);
 reservaRouter.get("/:idReserva", findOne);
 
-//Agregar el authenticateAdd middleware
-reservaRouter.post("/", sanitizeReserva, verifyDate, add);
+reservaRouter.post("/", sanitizeReserva, authenticateAdd, verifyDate, add);
 reservaRouter.put("/:idReserva", update);
 reservaRouter.delete("/:idReserva", remove);
 reservaRouter.patch("/:idReserva", update);
