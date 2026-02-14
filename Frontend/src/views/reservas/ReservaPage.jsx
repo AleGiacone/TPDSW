@@ -279,7 +279,7 @@ const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
       const { session } = await response.json();
 
      
-      window.location.href = session.url;
+      window.locatiogn.href = session.url;
 
       if (!response.ok) {
         const errorData = await response.json();
