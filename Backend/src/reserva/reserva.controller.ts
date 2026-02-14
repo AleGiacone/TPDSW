@@ -18,16 +18,17 @@ import sanitizeHTML from 'sanitize-html';
 
 //Agrego campos sanitizados
 function sanitizeReserva(req: Request, res: Response, next: NextFunction) {
-  console.log("Sanitizing reserva with data:", req.body);
+    console.log("Sanitizing reserva with data:", req.body);
   req.body.sanitizeInput = {
-    idReserva: sanitizeHTML(req.body.idReserva),
-    fechaReserva: sanitizeHTML(req.body.fechaReserva),
-    descripcion: sanitizeHTML(req.body.descripcion),
+    idReserva: req.body.idReserva,
+    fechaReserva: req.body.fechaReserva ? sanitizeHTML(String(req.body.fechaReserva)) : undefined,
+    descripcion: req.body.descripcion ? sanitizeHTML(String(req.body.descripcion)) : undefined,
 
-    idDueno: sanitizeHTML(req.body.idDueno),
-    idMascotas: sanitizeHTML(req.body.idMascotas),
-    idPublicacion: sanitizeHTML(req.body.idPublicacion),
-    dias: sanitizeHTML(req.body.dias),
+    idDueno: req.body.idDueno,
+    idMascotas: req.body.idMascotas,
+    idPublicacion: req.body.idPublicacion,
+    dias: req.body.dias,
+    //agregar sanitizacion de los
   };
   Object.keys(req.body.sanitizeInput).forEach((key) => {
     if (req.body.sanitizeInput[key] === undefined) {
@@ -310,7 +311,7 @@ async function testPagoStripe(req: Request, res: Response) {
 
 // Webhook de stripe
 // La llave la pedimos cuando iniciamos el middleware del webhook
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET;
 
 // // ─── Reemplazar SOLO la función stripeWebHook en reserva.controller.ts ───────
 // // El resto del archivo queda igual.
