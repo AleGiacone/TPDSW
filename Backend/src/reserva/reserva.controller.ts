@@ -18,14 +18,15 @@ import sanitizeHTML from 'sanitize-html';
 function sanitizeReserva(req: Request, res: Response, next: NextFunction) {
   console.log("Sanitizing reserva with data:", req.body);
   req.body.sanitizeInput = {
-    idReserva: sanitizeHTML(req.body.idReserva),
-    fechaReserva: sanitizeHTML(req.body.fechaReserva),
-    descripcion: sanitizeHTML(req.body.descripcion),
+    idReserva: req.body.idReserva,
+    fechaReserva: req.body.fechaReserva ? sanitizeHTML(String(req.body.fechaReserva)) : undefined,
+    descripcion: req.body.descripcion ? sanitizeHTML(String(req.body.descripcion)) : undefined,
 
-    idDueno: sanitizeHTML(req.body.idDueno),
-    idMascotas: sanitizeHTML(req.body.idMascotas),
-    idPublicacion: sanitizeHTML(req.body.idPublicacion),
-    dias: sanitizeHTML(req.body.dias),
+    idDueno: req.body.idDueno,
+    idMascotas: req.body.idMascotas,
+    idPublicacion: req.body.idPublicacion,
+    dias: req.body.dias,
+    //agregar sanitizacion de los campos que se necesiten
   };
   Object.keys(req.body.sanitizeInput).forEach((key) => {
     if (req.body.sanitizeInput[key] === undefined) {
@@ -253,7 +254,9 @@ async function testPagoStripe(req: Request, res: Response) {
   console.log("Datos recibidos para el pago:", req.body.sanitizeInput.dias);
   console.log("Datos recibido del id de las mascotas", req.body.sanitizeInput.idMascotas);
   // La session de stripe la pedimos con el middleware
+  try {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+  
   const session = await stripe.checkout.sessions.create({
     line_items: [
       {
@@ -269,7 +272,7 @@ async function testPagoStripe(req: Request, res: Response) {
       
     ],
     mode: 'payment',
-
+    
 /*
     idReserva: req.body.idReserva,
     fechaReserva: req.body.fechaReserva,
@@ -294,19 +297,26 @@ async function testPagoStripe(req: Request, res: Response) {
        
 
 
-    success_url: 'http://localhost:3308/dashboards/dueno',
+    success_url: 'http://localhost:3307/dashboards/dueno',
     cancel_url: 'https://example.com/cancel',
-});
-
+  });
   res.status(200).json({ session });
+  } catch (error) {
+    console.error("Error initializing Stripe:", error);
+    res.status(500).json({ message: "Error initializing Stripe", error });
+    return;
+  }
   return;
 }
 
 // Webhook de stripe
 // La llave la pedimos cuando iniciamos el middleware del webhook
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET;
 
 async function stripeWebHook(req: Request, res: Response) {
+  console.log("🔔 WEBHOOK RECIBIDO");
+  console.log("🔑 endpointSecret definido?", !!endpointSecret);
+  console.log("📦 Body type:", typeof req.body, Buffer.isBuffer(req.body) ? "(Buffer)" : "");
   // Usamos un EntityManager forkeado para este webhook,
   // evitando el uso del contexto global (requerido por MikroORM 6).
   const emWebhook = orm.em.fork();
