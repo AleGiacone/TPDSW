@@ -4,6 +4,8 @@ import { Calendar, X, AlertCircle, Upload, Trash2, Home, CalendarCheck, User, Lo
 import PublicacionesGrid from '../../components/PublicacionesGrid';
 import { useAuth } from '../../hooks/useAuth';
 import '../../styles/DashboardCuidador.css';
+import { useReservas } from '../../hooks/useReservas';
+import ReservaCard from '../../components/ReservaCard';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -155,7 +157,6 @@ const CuidadorDashboard = () => {
     const navigate = useNavigate();
     const [currentView, setCurrentView] = useState('publicaciones');
     const [publicaciones, setPublicaciones] = useState([]);
-    const [reservas, setReservas] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [existingImages, setExistingImages] = useState([]);
@@ -189,6 +190,16 @@ const CuidadorDashboard = () => {
         cantAnimales: '',
         exotico: false
     });
+
+    const {
+        reservas,
+        loading: reservasLoading,
+        error: reservasError,
+        aceptarReserva,
+        rechazarReserva,
+        getReservasByEstado,
+        isReservaExpired
+    } = useReservas(user?.idUsuario, 'cuidador');
 
     const startEditProfile = () => {
         if (user) {
@@ -364,22 +375,6 @@ const CuidadorDashboard = () => {
             setError('Error al cargar publicaciones: ' + err.message);
         } finally {
             setLoading(false);
-        }
-    }, [user?.idUsuario]);
-
-    const fetchReservas = useCallback(async () => {
-        if (!user?.idUsuario) return;
-        try {
-            const response = await fetch(`${API_BASE_URL}/reservas`, {
-                credentials: 'include'
-            });
-            const data = await response.json();
-            const reservasCuidador = data.data.filter(r =>
-                r.publicacion?.idCuidador?.idUsuario === user.idUsuario
-            );
-            setReservas(reservasCuidador);
-        } catch (err) {
-            console.error('Error:', err);
         }
     }, [user?.idUsuario]);
 
@@ -1223,16 +1218,31 @@ const CuidadorDashboard = () => {
     };
 
     const renderReservas = () => {
-        const [expandedReserva, setExpandedReserva] = useState(null);
         const [filterStatus, setFilterStatus] = useState('todas');
 
-        const toggleExpand = (reservaId) => {
-            setExpandedReserva(expandedReserva === reservaId ? null : reservaId);
+        const reservasFiltradas = getReservasByEstado(filterStatus);
+
+        const handleAceptar = async (reservaId) => {
+            const result = await aceptarReserva(reservaId);
+            if (result.success) {
+                alert('✅ Reserva aceptada exitosamente');
+            } else {
+                alert('❌ Error: ' + result.error);
+            }
         };
 
-        const reservasFiltradas = filterStatus === 'todas'
-            ? reservas
-            : reservas.filter(r => (r.estado || 'pendiente') === filterStatus);
+        const handleRechazar = async (reservaId) => {
+            if (!window.confirm('¿Estás seguro de rechazar esta reserva?')) {
+                return;
+            }
+
+            const result = await rechazarReserva(reservaId);
+            if (result.success) {
+                alert('✅ Reserva rechazada');
+            } else {
+                alert('❌ Error: ' + result.error);
+            }
+        };
 
         return (
             <div className="dashboard-main">
@@ -1250,23 +1260,21 @@ const CuidadorDashboard = () => {
                             onClick={() => setFilterStatus('pendiente')}
                             className={`filter-btn ${filterStatus === 'pendiente' ? 'active' : ''}`}
                         >
-                            Pendientes ({reservas.filter(r => (r.estado || 'pendiente') === 'pendiente').length})
+                            Pendientes ({getReservasByEstado('pendiente').length})
                         </button>
                         <button
                             onClick={() => setFilterStatus('confirmada')}
                             className={`filter-btn ${filterStatus === 'confirmada' ? 'active' : ''}`}
                         >
-                            Confirmadas ({reservas.filter(r => r.estado === 'confirmada').length})
+                            Confirmadas ({getReservasByEstado('confirmada').length})
                         </button>
                     </div>
                 </div>
 
-                {loading && <div className="loading-message">Cargando reservas...</div>}
-                {error && <div className="error-message">{error}</div>}
+                {reservasLoading && <div className="loading-message">Cargando reservas...</div>}
+                {reservasError && <div className="error-message">{reservasError}</div>}
 
-                {!Array.isArray(reservasFiltradas) ? (
-                    <div className="error-message">Error: Datos de reservas inválidos.</div>
-                ) : reservasFiltradas.length === 0 && !loading ? (
+                {reservasFiltradas.length === 0 && !reservasLoading ? (
                     <div className="empty-state">
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
                         <h3>
@@ -1279,200 +1287,16 @@ const CuidadorDashboard = () => {
                     </div>
                 ) : (
                     <div className="reservas-grid">
-                        {reservasFiltradas.map((reserva) => {
-                            const reservaId = reserva.id || reserva.idReserva;
-                            const isExpanded = expandedReserva === reservaId;
-                            const publicacion = reserva.publicacion;
-                            const dueno = reserva.dueno;
-                            const primeraImagen = publicacion?.imagenes?.[0];
-
-                            return (
-                                <div key={reservaId} className="reserva-card-expanded reserva-cuidador">
-                                    <div className="reserva-header-with-image">
-                                        {primeraImagen ? (
-                                            <div className="reserva-publicacion-image">
-                                                <img
-                                                    src={primeraImagen.url || `http://localhost:3000${primeraImagen.path}`}
-                                                    alt={publicacion?.titulo || 'Publicación'}
-                                                    onError={(e) => {
-                                                        e.target.style.display = 'none';
-                                                        e.target.nextSibling.style.display = 'flex';
-                                                    }}
-                                                />
-                                                <div className="reserva-image-placeholder" style={{ display: 'none' }}>🏠</div>
-                                            </div>
-                                        ) : (
-                                            <div className="reserva-publicacion-image">
-                                                <div className="reserva-image-placeholder">🏠</div>
-                                            </div>
-                                        )}
-
-                                        <div className="reserva-header-info">
-                                            <h3>{publicacion?.titulo || 'Sin título'}</h3>
-                                            <p className="reserva-dueno-info">
-                                                <strong>Dueño:</strong> {dueno?.nombre || 'N/A'}
-                                            </p>
-                                            {dueno?.telefono && (
-                                                <p className="reserva-dueno-contacto">📱 {dueno.telefono}</p>
-                                            )}
-                                            <span className={`status-badge status-${reserva.estado || 'pendiente'}`}>
-                                                {(reserva.estado || 'PENDIENTE').toUpperCase()}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="reserva-info">
-                                        <div className="reserva-date-range">
-                                            <div className="date-item">
-                                                <span className="date-label">Check-in</span>
-                                                <span className="date-value">
-                                                    {reserva.fechaDesde ? new Date(reserva.fechaDesde).toLocaleDateString('es-AR') : reserva.fechaInicio || 'N/A'}
-                                                </span>
-                                            </div>
-                                            <div className="date-separator">→</div>
-                                            <div className="date-item">
-                                                <span className="date-label">Check-out</span>
-                                                <span className="date-value">
-                                                    {reserva.fechaHasta ? new Date(reserva.fechaHasta).toLocaleDateString('es-AR') : reserva.fechaFin || 'N/A'}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className="reserva-price">
-                                            <span className="price-label">Ganancia estimada</span>
-                                            <span className="price-value">
-                                                ${reserva.total || (publicacion?.tarifaPorDia ? publicacion.tarifaPorDia * Math.ceil((new Date(reserva.fechaHasta) - new Date(reserva.fechaDesde)) / (1000 * 60 * 60 * 24)) : 'N/A')}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="reserva-mascotas-preview">
-                                        <strong>Mascotas a cuidar:</strong>
-                                        <div className="mascotas-thumbnails">
-                                            {reserva.mascotas && reserva.mascotas.length > 0 ? (
-                                                reserva.mascotas.map((mascota, idx) => (
-                                                    <div key={idx} className="mascota-thumb" title={`${mascota.nombre || mascota.nomMascota} - ${mascota.especie}`}>
-                                                        {mascota.imagen ? (
-                                                            <img
-                                                                src={mascota.imagen}
-                                                                alt={mascota.nombre || mascota.nomMascota}
-                                                                onError={(e) => {
-                                                                    e.target.style.display = 'none';
-                                                                    e.target.nextSibling.style.display = 'flex';
-                                                                }}
-                                                            />
-                                                        ) : null}
-                                                        <div className="mascota-thumb-placeholder" style={{ display: mascota.imagen ? 'none' : 'flex' }}>
-                                                            {mascota.exotico ? '🦎' : '🐕'}
-                                                        </div>
-                                                        <span className="mascota-thumb-name">{mascota.nombre || mascota.nomMascota}</span>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <span className="no-data">No especificado</span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        onClick={() => toggleExpand(reservaId)}
-                                        className="btn-expand"
-                                    >
-                                        {isExpanded ? '▲ Ver menos' : '▼ Ver más detalles'}
-                                    </button>
-
-                                    {isExpanded && (
-                                        <div className="reserva-expanded-details">
-                                            <div className="detail-section">
-                                                <h4>Información del Dueño</h4>
-                                                <p><strong>Nombre:</strong> {dueno?.nombre || 'N/A'}</p>
-                                                <p><strong>Email:</strong> {dueno?.email || 'N/A'}</p>
-                                                {dueno?.telefono && <p><strong>Teléfono:</strong> {dueno.telefono}</p>}
-                                            </div>
-
-                                            {reserva.descripcion && (
-                                                <div className="detail-section">
-                                                    <h4>Notas del Dueño</h4>
-                                                    <p>{reserva.descripcion}</p>
-                                                </div>
-                                            )}
-
-                                            <div className="detail-section">
-                                                <h4>Detalles de las Mascotas</h4>
-                                                <div className="mascotas-detail-list">
-                                                    {reserva.mascotas && reserva.mascotas.map((mascota, idx) => (
-                                                        <div key={idx} className="mascota-detail-item">
-                                                            <div className="mascota-detail-image">
-                                                                {mascota.imagen ? (
-                                                                    <img
-                                                                        src={mascota.imagen}
-                                                                        alt={mascota.nombre || mascota.nomMascota}
-                                                                        onError={(e) => {
-                                                                            e.target.style.display = 'none';
-                                                                            e.target.nextSibling.style.display = 'flex';
-                                                                        }}
-                                                                    />
-                                                                ) : null}
-                                                                <div className="mascota-detail-placeholder" style={{ display: mascota.imagen ? 'none' : 'flex' }}>
-                                                                    {mascota.exotico ? '🦎' : '🐕'}
-                                                                </div>
-                                                            </div>
-                                                            <div className="mascota-detail-info">
-                                                                <h5>{mascota.nombre || mascota.nomMascota}</h5>
-                                                                <p><strong>Especie:</strong> {mascota.especie}</p>
-                                                                <p><strong>Raza:</strong> {mascota.raza}</p>
-                                                                <p><strong>Edad:</strong> {mascota.edad} años</p>
-                                                                <p><strong>Sexo:</strong> {mascota.sexo === 'M' ? 'Macho' : 'Hembra'}</p>
-                                                                {mascota.exotico && (
-                                                                    <p className="exotic-tag">✨ Mascota Exótica</p>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <div className="detail-section">
-                                                <h4>Fechas Específicas Reservadas</h4>
-                                                <div className="dias-reservados-list">
-                                                    {reserva.diasReservados && reserva.diasReservados.length > 0 ? (
-                                                        <div className="dias-grid">
-                                                            {reserva.diasReservados.map((dia, idx) => (
-                                                                <span key={idx} className="dia-badge">
-                                                                    {new Date(dia).toLocaleDateString('es-AR', {
-                                                                        day: 'numeric',
-                                                                        month: 'short'
-                                                                    })}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    ) : (
-                                                        <p className="no-data">No especificado</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {(reserva.estado === 'pendiente' || !reserva.estado) && (
-                                        <div className="reserva-actions">
-                                            <button
-                                                onClick={() => updateReservaEstado(reserva.id, 'rechazada')}
-                                                className="btn-reject"
-                                            >
-                                                ✕ Rechazar
-                                            </button>
-                                            <button
-                                                onClick={() => updateReservaEstado(reservaId, 'confirmada')}
-                                                className="btn-accept"
-                                            >
-                                                ✓ Aceptar Reserva
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
+                        {reservasFiltradas.map((reserva) => (
+                            <ReservaCard
+                                key={reserva.id || reserva.idReserva}
+                                reserva={reserva}
+                                userType="cuidador"
+                                onAceptar={handleAceptar}
+                                onRechazar={handleRechazar}
+                                isExpired={isReservaExpired(reserva)}
+                            />
+                        ))}
                     </div>
                 )}
             </div>

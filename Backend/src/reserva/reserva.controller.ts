@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import e, { Request, Response, NextFunction } from "express";
 import { Reserva } from "./reserva.entity.js";
 import { orm } from "../shared/db/orm.js";
@@ -255,7 +257,8 @@ async function testPagoStripe(req: Request, res: Response) {
   console.log("Datos recibidos para el pago:", req.body.sanitizeInput.dias);
   console.log("Datos recibido del id de las mascotas", req.body.sanitizeInput.idMascotas);
   // La session de stripe la pedimos con el middleware
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+  console.log("Stripe secret key:", process.env.STRIPE_SECRET_KEY);
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string)
   const session = await stripe.checkout.sessions.create({
     line_items: [
       {
@@ -296,8 +299,11 @@ async function testPagoStripe(req: Request, res: Response) {
        
 
 
-    success_url: 'http://localhost:3308/dashboards/dueno',
-    cancel_url: 'https://example.com/cancel',
+   success_url: `${process.env.FRONTEND_URL || 'http://localhost:3308'}/payment/success`,
+   cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3308'}/payment/cancel`
+
+   // success_url: 'http://localhost:3308/dashboards/dueno',
+   // cancel_url: 'https://example.com/cancel',
 });
 
   res.status(200).json({ session });
@@ -308,20 +314,110 @@ async function testPagoStripe(req: Request, res: Response) {
 // La llave la pedimos cuando iniciamos el middleware del webhook
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+// // ─── Reemplazar SOLO la función stripeWebHook en reserva.controller.ts ───────
+// // El resto del archivo queda igual.
+// async function stripeWebHook(req: Request, res: Response) {
+//   console.log('=== WEBHOOK DEBUG ===');
+//   console.log('Signature recibida:', req.headers['stripe-signature']?   req.headers['stripe-signature'].toString().substring(0, 30) + '...' : 'No signature');
+//   console.log('Secret usado:', endpointSecret?.substring(0, 30));
+//   console.log('Body length:', req.body?.length);
+//   console.log('Secret RAW:', JSON.stringify(process.env.STRIPE_WEBHOOK_SECRET));
+//   console.log('Body type:', typeof req.body);
+//   console.log('Is Buffer:', Buffer.isBuffer(req.body));
+//   console.log('Content-Type:', req.headers['content-type']);
+//   console.log('Has signature:', !!req.headers['stripe-signature']);
+//   console.log('Secret cargado:', process.env.STRIPE_WEBHOOK_SECRET?.substring(0, 20) + '...');
+//   const emWebhook = orm.em.fork();
+
+//   const signature = req.headers['stripe-signature'];
+
+//   if (!signature || !endpointSecret) {
+//     res.status(400).json({ error: 'Missing signature or secret' });
+//     return;
+//   }
+
+//   let event: any;
+
+//   try {
+//     event = Stripe.webhooks.constructEvent(req.body, signature, endpointSecret);
+//   } catch (err: any) {
+//     console.error('❌ Error verificando firma Stripe:', err.message);
+//     res.status(400).json({ error: `Webhook Error: ${err.message}` });
+//     return;
+//   }
+
+//   // ✅ Responder a Stripe INMEDIATAMENTE — antes de cualquier await
+//   // Si no respondés en ~30s, Stripe marca el webhook como fallido
+//   res.json({ received: true });
+
+//   // Procesar en segundo plano (ya respondimos, no importa cuánto tarde)
+//   console.log('✅ Evento Stripe recibido:', event.type);
+
+//   try {
+//     if (event.type === 'checkout.session.completed') {
+//       const session = event.data.object;
+
+//       if (session.payment_status !== 'paid') return;
+
+//       const { fechaReserva, descripcion, idDueno, idMascotas, idPublicacion, dias } = session.metadata || {};
+
+//       if (!idPublicacion || !idDueno || !dias) {
+//         console.error('❌ Metadata incompleta:', { idPublicacion, idDueno, dias });
+//         return;
+//       }
+
+//       const diasArray = JSON.parse(dias);
+//       const mascotasArray = idMascotas ? JSON.parse(idMascotas) : [];
+
+//       console.log('💰 Creando reserva — Días:', diasArray, '| Mascotas:', mascotasArray);
+
+//       const publi = await emWebhook.findOneOrFail(Publicacion, { idPublicacion: Number(idPublicacion) });
+//       const dueno = await emWebhook.findOneOrFail(Dueno, { idUsuario: Number(idDueno) });
+
+//       const reserva = emWebhook.create(Reserva, {
+//         fechaReserva: new Date(fechaReserva || new Date()),
+//         descripcion: descripcion || 'Reserva de pago Stripe',
+//         publicacion: publi,
+//         dueno: dueno
+//       } as any);
+
+//       for (const dia of diasArray) {
+//         const diaReservado = emWebhook.create(DiaReservado, { fechaReservada: dia, reserva });
+//         reserva.diasReservados.add(diaReservado);
+//       }
+
+//       for (const idMascota of mascotasArray) {
+//         try {
+//           const mascota = await emWebhook.findOneOrFail(Mascota, { idMascota: Number(idMascota) });
+//           reserva.mascotas.add(mascota);
+//         } catch {
+//           console.warn(`⚠️ Mascota ${idMascota} no encontrada`);
+//         }
+//       }
+
+//       await emWebhook.flush();
+//       console.log('✅ Reserva creada exitosamente:', reserva.idReserva);
+//     }
+//   } catch (error: any) {
+//     console.error('❌ Error procesando webhook:', error.message);
+//   }
+// }
+
+
 async function stripeWebHook(req: Request, res: Response) {
   // Usamos un EntityManager forkeado para este webhook,
   // evitando el uso del contexto global (requerido por MikroORM 6).
   const emWebhook = orm.em.fork();
   let event;
-  
+
   if (endpointSecret) {
     // Get the signature sent by Stripe
-    console.log ("Stripe signature", req.headers['stripe-signature']);
+    console.log("Stripe signature", req.headers['stripe-signature']);
     const signature = req.headers['stripe-signature'];
-    
+
     if (!signature) {
-     res.status(400).send('No signature found');
-     return;
+      res.status(400).send('No signature found');
+      return;
     }
     try {
       console.log("ESTOY EN TRY OMO");
@@ -331,124 +427,125 @@ async function stripeWebHook(req: Request, res: Response) {
         endpointSecret
       );
 
-  // ✅ Ahora TypeScript sabe que event existe
-    console.log("Handling Stripe event:", event.type);
-  
-  switch (event.type) {
-      case 'checkout.session.completed':
-        const session = event.data.object;
-  
-      const { fechaReserva, descripcion, idDueno, idMascotas, idPublicacion, dias } = session.metadata || {};
-      
-      if (session.payment_status === 'paid') {
-        try {
-          console.log("💰 Pago confirmado - Creando reserva");
-          
-          // Validar que tenemos los datos necesarios
-          if (!idPublicacion || !idDueno || !dias) {
-            console.error("❌ Datos incompletos en metadata:", { idPublicacion, idDueno, dias });
-            break;
-          }
+      // ✅ Ahora TypeScript sabe que event existe
+      console.log("Handling Stripe event:", event.type);
 
-          // Parsear datos que vienen como strings
-          const diasArray = typeof dias === 'string' ? JSON.parse(dias) : [];
-          const mascotasArray = typeof idMascotas === 'string' ? JSON.parse(idMascotas) : [];
+      switch (event.type) {
+        case 'checkout.session.completed':
+          const session = event.data.object;
 
-          console.log("Días a reservar:", diasArray);
-          console.log("Mascotas a reservar:", mascotasArray);
+          const { fechaReserva, descripcion, idDueno, idMascotas, idPublicacion, dias } = session.metadata || {};
 
-          // Obtener entidades requeridas
-          const publi = await emWebhook.findOneOrFail(Publicacion, { 
-            idPublicacion: Number(idPublicacion) 
-          });
-          console.log("✅ Publicación encontrada:", publi.idPublicacion);
+          if (session.payment_status === 'paid') {
+            try {
+              console.log("💰 Pago confirmado - Creando reserva");
 
-          const dueno = await emWebhook.findOneOrFail(Dueno, { 
-            idUsuario: Number(idDueno) 
-          });
-          console.log("✅ Dueño encontrado:", dueno.idUsuario);
-
-          // Crear reserva con las propiedades correctas
-          // Nota: casteamos a any para que TypeScript no exija idReserva,
-          // ya que es una primary key autoincremental manejada por la BD.
-          const reserva = emWebhook.create(Reserva, {
-            fechaReserva: new Date(fechaReserva || new Date()),
-            descripcion: descripcion || 'Reserva de pago Stripe',
-            publicacion: publi,
-            dueno: dueno
-          } as any);
-
-          console.log("✅ Reserva creada en memoria");
-
-          // Agregar días reservados
-          if (diasArray && diasArray.length > 0) {
-            for (const dia of diasArray) {
-              const diaReservado = emWebhook.create(DiaReservado, { 
-                fechaReservada: dia, 
-                reserva: reserva 
-              });
-              reserva.diasReservados.add(diaReservado);
-            }
-            console.log("✅ Días agregados:", diasArray.length);
-          }
-
-          // Agregar mascotas
-          if (mascotasArray && mascotasArray.length > 0) {
-            for (const idMascota of mascotasArray) {
-              try {
-                const mascota = await emWebhook.findOneOrFail(Mascota, { 
-                  idMascota: Number(idMascota)
-                });
-                reserva.mascotas.add(mascota);
-              } catch (err) {
-                console.warn(`⚠️ Mascota ${idMascota} no encontrada, continuando...`);
+              // Validar que tenemos los datos necesarios
+              if (!idPublicacion || !idDueno || !dias) {
+                console.error("❌ Datos incompletos en metadata:", { idPublicacion, idDueno, dias });
+                break;
               }
+
+              // Parsear datos que vienen como strings
+              const diasArray = typeof dias === 'string' ? JSON.parse(dias) : [];
+              const mascotasArray = typeof idMascotas === 'string' ? JSON.parse(idMascotas) : [];
+
+              console.log("Días a reservar:", diasArray);
+              console.log("Mascotas a reservar:", mascotasArray);
+
+              // Obtener entidades requeridas
+              const publi = await emWebhook.findOneOrFail(Publicacion, {
+                idPublicacion: Number(idPublicacion)
+              });
+              console.log("✅ Publicación encontrada:", publi.idPublicacion);
+
+              const dueno = await emWebhook.findOneOrFail(Dueno, {
+                idUsuario: Number(idDueno)
+              });
+              console.log("✅ Dueño encontrado:", dueno.idUsuario);
+
+              // Crear reserva con las propiedades correctas
+              // Nota: casteamos a any para que TypeScript no exija idReserva,
+              // ya que es una primary key autoincremental manejada por la BD.
+              const reserva = emWebhook.create(Reserva, {
+                fechaReserva: new Date(fechaReserva || new Date()),
+                descripcion: descripcion || 'Reserva de pago Stripe',
+                publicacion: publi,
+                dueno: dueno
+              } as any);
+
+              console.log("✅ Reserva creada en memoria");
+
+              // Agregar días reservados
+              if (diasArray && diasArray.length > 0) {
+                for (const dia of diasArray) {
+                  const diaReservado = emWebhook.create(DiaReservado, {
+                    fechaReservada: dia,
+                    reserva: reserva
+                  });
+                  reserva.diasReservados.add(diaReservado);
+                }
+                console.log("✅ Días agregados:", diasArray.length);
+              }
+
+              // Agregar mascotas
+              if (mascotasArray && mascotasArray.length > 0) {
+                for (const idMascota of mascotasArray) {
+                  try {
+                    const mascota = await emWebhook.findOneOrFail(Mascota, {
+                      idMascota: Number(idMascota)
+                    });
+                    reserva.mascotas.add(mascota);
+                  } catch (err) {
+                    console.warn(`⚠️ Mascota ${idMascota} no encontrada, continuando...`);
+                  }
+                }
+                console.log("✅ Mascotas agregadas");
+              }
+
+              console.log("📝 Antes de flush");
+              await emWebhook.flush();
+
+              console.log("✅ Reserva creada exitosamente:", reserva.idReserva);
+
             }
-            console.log("✅ Mascotas agregadas");
+            catch (error: any) {
+              console.error("❌ Error creando reserva desde webhook:", error.message);
+              console.error("Stack:", error.stack);
+            }
           }
 
-          console.log("📝 Antes de flush");
-          await emWebhook.flush();
-          
-          console.log("✅ Reserva creada exitosamente:", reserva.idReserva);
-          
-        }
-        catch (error: any) {
-          console.error("❌ Error creando reserva desde webhook:", error.message);
-          console.error("Stack:", error.stack);
-        }
+
+          break;
+
+        case 'payment_intent.succeeded':
+          const paymentIntent = event.data.object;
+          console.log("PaymentIntent was successful:", paymentIntent.id);
+          break;
+
+        case 'payment_method.attached':
+          const paymentMethod = event.data.object;
+          console.log("PaymentMethod attached");
+          break;
+
+        default:
+          console.log(`Unhandled event type: ${event.type}`);
       }
-  
-        
-        break;
 
-      case 'payment_intent.succeeded':
-        const paymentIntent = event.data.object;
-        console.log("PaymentIntent was successful:", paymentIntent.id);
-        break;
-
-      case 'payment_method.attached':
-        const paymentMethod = event.data.object;
-        console.log("PaymentMethod attached");
-        break;
-
-      default:
-        console.log(`Unhandled event type: ${event.type}`);
+      res.json({ received: true });
+      return;
+    } catch (err) {
+      console.log("Error constructing Stripe event:", err);
+      res.status(400);
+      return;
     }
 
+
+    // Return a response to acknowledge receipt of the event
     res.json({ received: true });
     return;
-  } catch (err) {
-    console.log("Error constructing Stripe event:", err);
-    res.status(400);
-    return;
   }
-
-
-  // Return a response to acknowledge receipt of the event
-  res.json({received: true});
-  return;
-}}
+}
 
 
 // async function addWebHook(fechaReserva: string, descripcion: string, horaReserva: string, idDueno: string, idMascotas: any, idPublicacion: string, dias: any) {

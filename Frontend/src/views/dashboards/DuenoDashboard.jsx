@@ -4,12 +4,35 @@ import { Navigate } from 'react-router-dom';
 import '../../styles/DashboardDueno.css';
 import { useNavigate } from 'react-router-dom';
 import { Home, PawPrint, CalendarCheck, User, LogOut } from 'lucide-react';
+import { useReservas } from '../../hooks/useReservas';
+import ReservaCard from '../../components/ReservaCard';
 
+
+const forceNavbarVisibility = () => {
+    const navbar = document.querySelector('#main-dashboard #main-navbar');
+    if (navbar) {
+        navbar.style.cssText = `
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+        `;
+
+        const buttons = navbar.querySelectorAll('button');
+        buttons.forEach(btn => {
+            btn.style.cssText = `
+                display: inline-flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                position: static !important;
+            `;
+        });
+    }
+};
 const DuenoDashboard = () => {
     const { user, logout, updateUser } = useAuth();
     const [currentView, setCurrentView] = useState('mascotas');
     const [mascotas, setMascotas] = useState([]);
-    const [reservas, setReservas] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [razasFiltradas, setRazasFiltradas] = useState([]);
@@ -17,9 +40,27 @@ const DuenoDashboard = () => {
     const navigate = useNavigate();
     const API_BASE_URL = 'http://localhost:3000/api';
     const [profileImageFile, setProfileImageFile] = useState(null);
-    
+
+    useEffect(() => {
+        // Forzar visibilidad al montar
+        forceNavbarVisibility();
+
+        // Forzar visibilidad cada 100ms durante 1 segundo (por si hay re-renders)
+        const intervals = [];
+        for (let i = 0; i < 10; i++) {
+            intervals.push(setTimeout(forceNavbarVisibility, i * 100));
+        }
+
+        return () => intervals.forEach(clearTimeout);
+    }, []);
+
+    // 👇 TAMBIÉN agregá esto cada vez que cambia la vista
+    useEffect(() => {
+        forceNavbarVisibility();
+    }, [currentView]);
+
     const [mascotaImageFile, setMascotaImageFile] = useState(null);
-    
+
     const [mascotaForm, setMascotaForm] = useState({
         nombre: '',
         edad: '',
@@ -44,6 +85,27 @@ const DuenoDashboard = () => {
     });
     const [editingPerfil, setEditingPerfil] = useState(false);
 
+    // ─── FIX: filterStatus moved here, out of renderReservas ───────────────────
+    const [filterStatus, setFilterStatus] = useState('todas');
+
+    const {
+        reservas,
+        loading: reservasLoading,
+        error: reservasError,
+        cancelarReserva,
+        getReservasByEstado,
+        isReservaExpired
+    } = useReservas(user?.idUsuario, 'dueno');
+
+    // ─── Redirect to reservas view if coming back from a successful payment ────
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('from') === 'payment') {
+            setCurrentView('reservas');
+            // Clean up the URL without reloading
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    }, []);
 
     const uploadMascotaImage = async (mascotaId, file) => {
         setImageUploading(true);
@@ -61,10 +123,7 @@ const DuenoDashboard = () => {
                 throw new Error(errorData.message || 'Error al subir imagen');
             }
             const result = await response.json();
-            console.log('Imagen subida exitosamente:', result);
-            
             await fetchMascotas();
-            
             return result;
         } catch (error) {
             console.error('Error uploading image:', error);
@@ -75,31 +134,23 @@ const DuenoDashboard = () => {
     };
 
     const deleteMascotaImage = async (mascotaId) => {
-        if (!window.confirm('¿Estás seguro de eliminar la imagen de esta mascota?')) {
-            return;
-        }
-
+        if (!window.confirm('¿Estás seguro de eliminar la imagen de esta mascota?')) return;
         try {
             setLoading(true);
-            
             const response = await fetch(`${API_BASE_URL}/mascotas/${mascotaId}/imagen`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
-
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(errorText || 'Error al eliminar la imagen');
             }
-
             setMascotas(prevMascotas =>
                 prevMascotas.map(mascota =>
                     mascota.idMascota === mascotaId ? { ...mascota, imagen: null, fotoPerfil: null } : mascota
                 )
             );
-
             alert('Imagen eliminada exitosamente');
-
         } catch (error) {
             console.error('Error deleting image:', error);
             alert('Error al eliminar imagen: ' + error.message);
@@ -111,70 +162,35 @@ const DuenoDashboard = () => {
     const handleImageUpload = async (mascotaId, event) => {
         const file = event.target.files[0];
         if (!file) return;
-
-        if (!file.type.startsWith('image/')) {
-            alert('Por favor selecciona un archivo de imagen válido');
-            return;
-        }
-
-        if (file.size > 5 * 1024 * 1024) {
-            alert('El archivo es muy grande. Máximo 5MB permitido');
-            return;
-        }
-
+        if (!file.type.startsWith('image/')) { alert('Por favor selecciona un archivo de imagen válido'); return; }
+        if (file.size > 5 * 1024 * 1024) { alert('El archivo es muy grande. Máximo 5MB permitido'); return; }
         try {
             await uploadMascotaImage(mascotaId, file);
             alert('Imagen subida exitosamente');
         } catch (error) {
             alert('Error al subir imagen: ' + error.message);
         }
-
         event.target.value = '';
     };
 
     const handleMascotaImageChange = (e) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            
-            if (!file.type.startsWith('image/')) {
-                alert('Por favor selecciona un archivo de imagen válido');
-                return;
-            }
-            
-            if (file.size > 5 * 1024 * 1024) {
-                alert('El archivo es muy grande. Máximo 5MB permitido');
-                return;
-            }
-            
+            if (!file.type.startsWith('image/')) { alert('Por favor selecciona un archivo de imagen válido'); return; }
+            if (file.size > 5 * 1024 * 1024) { alert('El archivo es muy grande. Máximo 5MB permitido'); return; }
             setMascotaImageFile(file);
         }
     };
 
     const deleteMascotaImageFromForm = async () => {
-        if (!editingMascota?.idMascota) {
-            setMascotaImageFile(null);
-            return;
-        }
-
+        if (!editingMascota?.idMascota) { setMascotaImageFile(null); return; }
         try {
             setImageUploading(true);
-            const response = await fetch(
-                `${API_BASE_URL}/mascotas/${editingMascota.idMascota}/imagen`,
-                {
-                    method: 'DELETE',
-                    credentials: 'include'
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error('Error al eliminar imagen');
-            }
-
-            setEditingMascota(prev => ({
-                ...prev,
-                imagen: null,
-                fotoPerfil: null
-            }));
+            const response = await fetch(`${API_BASE_URL}/mascotas/${editingMascota.idMascota}/imagen`, {
+                method: 'DELETE', credentials: 'include'
+            });
+            if (!response.ok) throw new Error('Error al eliminar imagen');
+            setEditingMascota(prev => ({ ...prev, imagen: null, fotoPerfil: null }));
             setMascotaImageFile(null);
             alert('Imagen de mascota eliminada.');
         } catch (error) {
@@ -185,35 +201,23 @@ const DuenoDashboard = () => {
         }
     };
 
- 
     const handleProfileImageChange = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            setProfileImageFile(e.target.files[0]);
-        }
+        if (e.target.files && e.target.files[0]) setProfileImageFile(e.target.files[0]);
     };
 
     const uploadDuenoProfileImage = async () => {
         if (!profileImageFile) return user.perfilImage;
-
         setImageUploading(true);
         const formData = new FormData();
         formData.append('profileImage', profileImageFile);
-
         try {
-            const response = await fetch(
-                `${API_BASE_URL}/duenos/${user.idUsuario}/profile-image`,
-                {
-                    method: 'POST',
-                    body: formData,
-                    credentials: 'include'
-                }
-            );
-
+            const response = await fetch(`${API_BASE_URL}/duenos/${user.idUsuario}/profile-image`, {
+                method: 'POST', body: formData, credentials: 'include'
+            });
             if (!response.ok) {
                 const imgError = await response.json().catch(() => ({}));
                 throw new Error(imgError.message || 'Error al actualizar la imagen');
             }
-
             const imageData = await response.json();
             return imageData.data.perfilImage;
         } catch (error) {
@@ -227,20 +231,11 @@ const DuenoDashboard = () => {
     const deleteDuenoProfileImage = async () => {
         try {
             setImageUploading(true);
-            const response = await fetch(
-                `${API_BASE_URL}/duenos/${user.idUsuario}/profile-image`,
-                {
-                    method: 'DELETE',
-                    credentials: 'include'
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error('Error al eliminar imagen');
-            }
-
-            const updatedUserData = { ...user, perfilImage: undefined };
-            updateUser(updatedUserData);
+            const response = await fetch(`${API_BASE_URL}/duenos/${user.idUsuario}/profile-image`, {
+                method: 'DELETE', credentials: 'include'
+            });
+            if (!response.ok) throw new Error('Error al eliminar imagen');
+            updateUser({ ...user, perfilImage: undefined });
             setProfileImageFile(null);
             alert('Imagen de perfil eliminada.');
         } catch (error) {
@@ -251,7 +246,6 @@ const DuenoDashboard = () => {
         }
     };
 
-
     useEffect(() => {
         fetchEspecies();
         fetchRazas();
@@ -260,42 +254,23 @@ const DuenoDashboard = () => {
     useEffect(() => {
         if (mascotaForm.idEspecie) {
             const especieId = parseInt(mascotaForm.idEspecie);
-            
-            const razasDeEspecie = razas.filter(raza => {
-                return parseInt(raza.idEspecie) === especieId; 
-            });
-
-            setRazasFiltradas(razasDeEspecie);
+            setRazasFiltradas(razas.filter(raza => parseInt(raza.idEspecie) === especieId));
         } else {
             setRazasFiltradas([]);
         }
     }, [mascotaForm.idEspecie, razas]);
 
-
     const fetchMascotas = useCallback(async () => {
-        console.log('FETCHMASCOTAS INICIADO');
-        
-        if (!user?.idUsuario) {
-            console.log('FETCHMASCOTAS: No hay user.idUsuario, saliendo');
-            return;
-        }
-        
+        if (!user?.idUsuario) return;
         setLoading(true);
         setError('');
-        
         try {
-            const url = `${API_BASE_URL}/mascotas/duenos/${user.idUsuario}`;
-            
-            const response = await fetch(url, {
-                method: 'GET',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' }
+            const response = await fetch(`${API_BASE_URL}/mascotas/duenos/${user.idUsuario}`, {
+                method: 'GET', credentials: 'include', headers: { 'Content-Type': 'application/json' }
             });
-
             if (response.ok) {
                 const data = await response.json();
                 let mascotasArray = data.data || data.mascotas || data || [];
-
                 const mascotasNormalizadas = mascotasArray.map(mascota => ({
                     id: mascota.idMascota || mascota.id,
                     idMascota: mascota.idMascota || mascota.id,
@@ -325,18 +300,12 @@ const DuenoDashboard = () => {
                     idEspecie: mascota.especie?.idEspecie || mascota.especie?.id || mascota.idEspecie,
                     idRaza: mascota.raza?.idRaza || mascota.raza?.id || mascota.idRaza
                 }));
-                
                 setMascotas(mascotasNormalizadas);
-                
             } else {
-                console.error('FETCH Error status:', response.status);
-                const errorText = await response.text();
-                console.error('FETCH Error response:', errorText);
                 setError(`Error del servidor: ${response.status}`);
                 setMascotas([]);
             }
         } catch (err) {
-            console.error('FETCH Error completo:', err);
             setError('Error de conexión al cargar mascotas');
             setMascotas([]);
         } finally {
@@ -344,52 +313,18 @@ const DuenoDashboard = () => {
         }
     }, [user?.idUsuario]);
 
-
-    const fetchReservas = useCallback(async () => {
-        if (!user?.idUsuario) return;
-        try {
-            const response = await fetch(`${API_BASE_URL}/reservas`, {
-                credentials: 'include'
-            });
-            const data = await response.json();
-            // Filtrar solo las reservas del dueño actual
-            const misReservas = data.data.filter(r => r.dueno?.idUsuario === user.idUsuario || r.dueno === user.idUsuario);
-            setReservas(misReservas);
-        } catch (err) {
-            console.error('Error:', err);
-        }
-    }, [user?.idUsuario]);
-
     const fetchEspecies = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/especies`, {
-                method: 'GET',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' }
+                method: 'GET', credentials: 'include', headers: { 'Content-Type': 'application/json' }
             });
-            
             if (response.ok) {
                 const data = await response.json();
-                
                 const especiesArray = data.data || data.especies || data || [];
-                
-                if (especiesArray.length === 0) {
-                    setError('Advertencia: No se encontraron especies en la base de datos.');
-                    return;
-                }
-                
-                const especiesFormateadas = especiesArray.map(especie => ({
-                    id: especie.idEspecie || especie.id,
-                    nombre: especie.nomEspecie || especie.nombre
-                }));
-                
-                setEspecies(especiesFormateadas);
-            } else {
-                console.error('Error response:', response.status, response.statusText);
-                setError('Error de servidor al cargar especies.');
+                if (especiesArray.length === 0) { setError('Advertencia: No se encontraron especies.'); return; }
+                setEspecies(especiesArray.map(e => ({ id: e.idEspecie || e.id, nombre: e.nomEspecie || e.nombre })));
             }
         } catch (err) {
-            console.error('Error completo al cargar especies:', err);
             setError('Error de conexión al cargar especies.');
         }
     };
@@ -397,44 +332,20 @@ const DuenoDashboard = () => {
     const fetchRazas = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/razas`, {
-                method: 'GET',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' }
+                method: 'GET', credentials: 'include', headers: { 'Content-Type': 'application/json' }
             });
-            
             if (response.ok) {
                 const data = await response.json();
                 let razasArray = data.data || data.razas || data || [];
-                
-                if (razasArray.length === 0) {
-                    setError(prev => prev + ' | No se encontraron razas en la base de datos.');
-                    return;
-                }
-                
-                const razasFormateadas = razasArray.map((raza) => {
+                setRazas(razasArray.map(raza => {
                     let especieId;
-                    if (raza.especie && (raza.especie.idEspecie || raza.especie.id)) {
-                        especieId = raza.especie.idEspecie || raza.especie.id;
-                    } else if (raza.idEspecie) {
-                        especieId = raza.idEspecie;
-                    } else if (raza.especie && typeof raza.especie === 'number') {
-                        especieId = raza.especie;
-                    }
-                    
-                    return {
-                        id: raza.idRaza || raza.id,
-                        nombre: raza.nomRaza || raza.nombre,
-                        idEspecie: especieId ? String(especieId) : '' 
-                    };
-                });
-                
-                setRazas(razasFormateadas);
-            } else {
-                console.error('Error response razas:', response.status, response.statusText);
-                setError(prev => prev + ' | Error de servidor al cargar razas.');
+                    if (raza.especie && (raza.especie.idEspecie || raza.especie.id)) especieId = raza.especie.idEspecie || raza.especie.id;
+                    else if (raza.idEspecie) especieId = raza.idEspecie;
+                    else if (raza.especie && typeof raza.especie === 'number') especieId = raza.especie;
+                    return { id: raza.idRaza || raza.id, nombre: raza.nomRaza || raza.nombre, idEspecie: especieId ? String(especieId) : '' };
+                }));
             }
         } catch (err) {
-            console.error('Error completo al cargar razas:', err);
             setError(prev => prev + ' | Error de conexión al cargar razas.');
         }
     };
@@ -443,29 +354,13 @@ const DuenoDashboard = () => {
         e.preventDefault();
         setLoading(true);
         setError('');
-
         const edadNumerica = parseInt(mascotaForm.edad, 10);
         const pesoNumerico = parseFloat(mascotaForm.peso);
-
-        if (isNaN(edadNumerica) || edadNumerica <= 0) {
-            setError('Por favor, ingresa una edad válida (número entero positivo).');
-            setLoading(false);
-            return;
-        }
-        
-        if (isNaN(pesoNumerico) || pesoNumerico <= 0) {
-            setError('Por favor, ingresa un peso válido (número positivo).');
-            setLoading(false);
-            return;
-        }
-
+        if (isNaN(edadNumerica) || edadNumerica <= 0) { setError('Por favor, ingresa una edad válida.'); setLoading(false); return; }
+        if (isNaN(pesoNumerico) || pesoNumerico <= 0) { setError('Por favor, ingresa un peso válido.'); setLoading(false); return; }
         try {
-            const url = editingMascota 
-                ? `${API_BASE_URL}/mascotas/${editingMascota.idMascota || editingMascota.id}`
-                : `${API_BASE_URL}/mascotas`;
-            
+            const url = editingMascota ? `${API_BASE_URL}/mascotas/${editingMascota.idMascota || editingMascota.id}` : `${API_BASE_URL}/mascotas`;
             const method = editingMascota ? 'PUT' : 'POST';
-            
             const mascotaData = {
                 nomMascota: mascotaForm.nombre.trim(),
                 edad: mascotaForm.edad.toString(),
@@ -473,21 +368,16 @@ const DuenoDashboard = () => {
                 exotico: Boolean(mascotaForm.exotico),
                 descripcion: mascotaForm.descripcion.trim(),
                 peso: pesoNumerico,
-                especie: parseInt(mascotaForm.idEspecie), 
+                especie: parseInt(mascotaForm.idEspecie),
                 raza: parseInt(mascotaForm.idRaza),
                 dueno: parseInt(user.idUsuario)
             };
-            if (editingMascota) {
-                mascotaData.idMascota = editingMascota.idMascota;
-            }
-            
+            if (editingMascota) mascotaData.idMascota = editingMascota.idMascota;
             const response = await fetch(url, {
-                method: method,
-                credentials: 'include',
+                method, credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(mascotaData)
             });
-            
             if (!response.ok) {
                 const errorData = await response.json().catch(async () => {
                     const text = await response.text();
@@ -495,46 +385,30 @@ const DuenoDashboard = () => {
                 });
                 throw new Error(errorData.message || `Error ${response.status}`);
             }
-
             const result = await response.json();
             const mascotaId = result.data.idMascota || editingMascota?.idMascota;
-
             if (mascotaImageFile && mascotaId) {
-                try {
-                    await uploadMascotaImage(mascotaId, mascotaImageFile);
-                } catch (imgError) {
-                    console.error('Error al subir imagen:', imgError);
-                    alert('Mascota guardada pero hubo un error al subir la imagen: ' + imgError.message);
-                }
+                try { await uploadMascotaImage(mascotaId, mascotaImageFile); }
+                catch (imgError) { alert('Mascota guardada pero hubo un error al subir la imagen: ' + imgError.message); }
             }
-
-            await fetchMascotas(); 
-
+            await fetchMascotas();
             alert(editingMascota ? 'Mascota actualizada exitosamente!' : 'Mascota creada exitosamente!');
-
-            setMascotaForm({
-                nombre: '', edad: '', sexo: '', exotico: false, descripcion: '',
-                peso: '', idEspecie: '', idRaza: ''
-            });
-            
-            setMascotaImageFile(null); 
+            setMascotaForm({ nombre: '', edad: '', sexo: '', exotico: false, descripcion: '', peso: '', idEspecie: '', idRaza: '' });
+            setMascotaImageFile(null);
             setEditingMascota(null);
             setCurrentView('mascotas');
-            
         } catch (err) {
-            console.error('ERROR:', err);
             setError('Error: ' + err.message);
         } finally {
             setLoading(false);
         }
     };
-    
+
     useEffect(() => {
         if (user?.idUsuario) {
             fetchMascotas();
-            fetchReservas();
-        } 
-    }, [user?.idUsuario, fetchMascotas, fetchReservas]);
+        }
+    }, [user?.idUsuario, fetchMascotas]);
 
     useEffect(() => {
         if (user) {
@@ -548,131 +422,70 @@ const DuenoDashboard = () => {
         }
     }, [user]);
 
-    const handlePerfilFormChange = (e) => {
-        setPerfilForm({ ...perfilForm, [e.target.name]: e.target.value });
-    };
+    const handlePerfilFormChange = (e) => setPerfilForm({ ...perfilForm, [e.target.name]: e.target.value });
 
     const handleDeleteUser = async () => {
-        if (!window.confirm('🚨 ADVERTENCIA: Esta acción es IRREVERSIBLE. ¿Estás absolutamente seguro de que quieres ELIMINAR tu cuenta? Se eliminarán TODAS tus mascotas y reservas.')) {
-            return;
-        }
-
+        if (!window.confirm('🚨 ADVERTENCIA: Esta acción es IRREVERSIBLE. ¿Estás absolutamente seguro?')) return;
         setLoading(true);
         setError('');
-
         try {
             const userId = user.idUsuario;
-            if (!userId) {
-                throw new Error('ID de usuario no encontrado.');
-            }
-
-            const response = await fetch(
-                `${API_BASE_URL}/duenos/${userId}`, 
-                {
-                    method: 'DELETE',
-                    credentials: 'include'
-                }
-            );
-
+            if (!userId) throw new Error('ID de usuario no encontrado.');
+            const response = await fetch(`${API_BASE_URL}/duenos/${userId}`, { method: 'DELETE', credentials: 'include' });
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.message || `Error ${response.status} al eliminar la cuenta.`);
             }
-
-           
             await logout();
-            alert('✅ Cuenta eliminada exitosamente. Serás redirigido.');
-            navigate('/'); 
+            alert('✅ Cuenta eliminada exitosamente.');
+            navigate('/');
         } catch (error) {
-            console.error('❌ Error al eliminar la cuenta:', error);
-            setError(error.message || 'Error al eliminar la cuenta. Inténtalo de nuevo.');
+            setError(error.message || 'Error al eliminar la cuenta.');
             alert('Error: ' + (error.message || 'No se pudo eliminar la cuenta.'));
         } finally {
             setLoading(false);
         }
     };
 
-
     const handlePerfilSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
-
         try {
-           
-
             let updatedImagePath = user?.perfilImage;
-            if (profileImageFile) {
-                updatedImagePath = await uploadDuenoProfileImage();
-            }
-
-
+            if (profileImageFile) updatedImagePath = await uploadDuenoProfileImage();
             const response = await fetch(`${API_BASE_URL}/duenos/${user.idUsuario}`, {
-                method: 'PUT',
-                credentials: 'include',
+                method: 'PUT', credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(perfilForm)
             });
-
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.message || `Error ${response.status}`);
             }
-
-            const data = await response.json();
-            console.log(' Respuesta del servidor:', data);
-
-            const updatedUserData = {
-                ...user,
-                ...perfilForm,
-                perfilImage: updatedImagePath
-            };
-
-            console.log('🔄 Actualizando contexto con:', updatedUserData);
-            updateUser(updatedUserData);
-
-            alert(' Perfil actualizado exitosamente!');
+            updateUser({ ...user, ...perfilForm, perfilImage: updatedImagePath });
+            alert('Perfil actualizado exitosamente!');
             setEditingPerfil(false);
             setProfileImageFile(null);
-
         } catch (err) {
-            console.error(' Error al actualizar perfil:', err);
             setError('Error al actualizar perfil: ' + err.message);
-            alert(' Error al actualizar perfil: ' + err.message);
+            alert('Error al actualizar perfil: ' + err.message);
         } finally {
             setLoading(false);
         }
     };
 
     const deleteMascota = async (mascotaId) => {
-        const id = mascotaId;
-        if (!id) {
-            alert('Error: No se pudo identificar la mascota');
-            return;
-        }
-        
-        if (!window.confirm('¿Estás seguro de eliminar esta mascota?')) {
-            return;
-        }
-
+        if (!mascotaId) { alert('Error: No se pudo identificar la mascota'); return; }
+        if (!window.confirm('¿Estás seguro de eliminar esta mascota?')) return;
         try {
-            const response = await fetch(`${API_BASE_URL}/mascotas/${id}`, {
-                method: 'DELETE',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' }
+            const response = await fetch(`${API_BASE_URL}/mascotas/${mascotaId}`, {
+                method: 'DELETE', credentials: 'include', headers: { 'Content-Type': 'application/json' }
             });
-
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}`);
-            }
-
-            setMascotas(prev => prev.filter(m => 
-                (m.id !== id) && (m.idMascota !== id)
-            ));
-            
+            if (!response.ok) throw new Error(`Error ${response.status}`);
+            setMascotas(prev => prev.filter(m => (m.id !== mascotaId) && (m.idMascota !== mascotaId)));
             alert('Mascota eliminada exitosamente');
         } catch (err) {
-            console.error('Error al eliminar:', err);
             alert('Error al eliminar mascota: ' + err.message);
         }
     };
@@ -688,68 +501,106 @@ const DuenoDashboard = () => {
             idEspecie: String(mascota.especie?.idEspecie || mascota.especie?.id || mascota.idEspecie || mascota.especie || ''),
             idRaza: String(mascota.raza?.idRaza || mascota.raza?.id || mascota.idRaza || mascota.raza || '')
         });
-        
         setEditingMascota(mascota);
-        setMascotaImageFile(null); 
+        setMascotaImageFile(null);
         setCurrentView('nueva-mascota');
     };
 
     const handleMascotaChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setMascotaForm(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
+        setMascotaForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
     const handleLogout = async () => {
-        try {
-            await logout();
-            alert('Sesión cerrada');
-        } catch (err) {
-            console.error('Error al cerrar sesión:', err);
-        }
+        try { await logout(); alert('Sesión cerrada'); }
+        catch (err) { console.error('Error al cerrar sesión:', err); }
     };
 
-    const cancelarReserva = async (reservaId) => {
-        if (!window.confirm('¿Estás seguro de cancelar esta reserva?')) {
-            return;
-        }
+    // ─── renderReservas: NO hooks inside, uses filterStatus from component scope ─
+    const renderReservas = () => {
+        const reservasFiltradas = getReservasByEstado(filterStatus);
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/reserva/${reservaId}/estado`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ estado: 'cancelada' })
-            });
+        const handleCancelarReserva = async (reservaId) => {
+            if (!window.confirm('¿Estás seguro de cancelar esta reserva?')) return;
+            const result = await cancelarReserva(reservaId);
+            if (result.success) alert('✅ Reserva cancelada exitosamente');
+            else alert('❌ Error: ' + result.error);
+        };
 
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}`);
-            }
-            
-            setReservas(prev => 
-                prev.map(reserva => 
-                    reserva.id === reservaId 
-                        ? { ...reserva, estado: 'cancelada' }
-                        : reserva
-                )
-            );
-            
-            alert('Reserva cancelada exitosamente');
-        } catch (err) {
-            alert('Error al cancelar reserva: ' + err.message);
-        }
+        return (
+            <div className="dashboard-main">
+                <div className="reservas-header">
+                    <h2 className="section-title">Mis Reservas</h2>
+
+                    <div className="reservas-filters">
+                        <button
+                            onClick={() => setFilterStatus('todas')}
+                            className={`filter-btn ${filterStatus === 'todas' ? 'active' : ''}`}
+                        >
+                            Todas ({reservas.length})
+                        </button>
+                        <button
+                            onClick={() => setFilterStatus('pendiente')}
+                            className={`filter-btn ${filterStatus === 'pendiente' ? 'active' : ''}`}
+                        >
+                            Pendientes ({getReservasByEstado('pendiente').length})
+                        </button>
+                        <button
+                            onClick={() => setFilterStatus('confirmada')}
+                            className={`filter-btn ${filterStatus === 'confirmada' ? 'active' : ''}`}
+                        >
+                            Confirmadas ({getReservasByEstado('confirmada').length})
+                        </button>
+                        <button
+                            onClick={() => setFilterStatus('cancelada')}
+                            className={`filter-btn ${filterStatus === 'cancelada' ? 'active' : ''}`}
+                        >
+                            Canceladas ({getReservasByEstado('cancelada').length})
+                        </button>
+                    </div>
+                </div>
+
+                {reservasLoading && <div className="loading-message">Cargando reservas...</div>}
+                {reservasError && <div className="error-message">{reservasError}</div>}
+
+                {reservasFiltradas.length === 0 && !reservasLoading ? (
+                    <div className="empty-state">
+                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>📅</div>
+                        <h3>No tienes reservas {filterStatus !== 'todas' ? filterStatus + 's' : ''}</h3>
+                        <p>Explora las publicaciones disponibles y haz tu primera reserva</p>
+                        <button onClick={() => navigate('/')} className="btn-primary" style={{ marginTop: '16px' }}>
+                            Ver Publicaciones
+                        </button>
+                    </div>
+                ) : (
+                    <div className="reservas-grid">
+                        {reservasFiltradas.map((reserva) => (
+                            <ReservaCard
+                                key={reserva.id || reserva.idReserva}
+                                reserva={reserva}
+                                userType="dueno"
+                                onCancelar={handleCancelarReserva}
+                                isExpired={isReservaExpired(reserva)}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
     };
+
+
 
     const renderMascotas = () => (
-        <div className="dashboard-main">
+        // Usamos un fragmento para que no haya wrapper extra
+        <>
+            {/* CABECERA: fuera del contenedor de cards */}
             <div className="mascotas-header">
                 <h2 className="section-title">Mis Mascotas</h2>
                 <button
                     onClick={() => {
-                        setEditingMascota(null); 
-                        setMascotaImageFile(null); 
+                        setEditingMascota(null);
+                        setMascotaImageFile(null);
                         setCurrentView('nueva-mascota');
                     }}
                     className="btn-primary"
@@ -758,658 +609,387 @@ const DuenoDashboard = () => {
                 </button>
             </div>
 
-            {loading && <div className="loading-message">Cargando mascotas...</div>}
-            
-            {error && <div className="error-message">{error}</div>}
-
-            {!Array.isArray(mascotas) ? (
-                <div className="error-message">
-                    Error: Datos de mascotas inválidos. Por favor, recarga la página.
-                </div>
-            ) : mascotas.length === 0 && !loading ? (
-                <div className="empty-state">
-                    <p>Aún no tienes mascotas registradas</p>
-                </div>
-            ) : (
-                <div className="mascotas-grid">
-                    {mascotas.map((mascota) => (
-                        <div key={mascota.id || mascota.idMascota} className="mascota-card">
-                            <div className="mascota-image-section-horizontal">
-                                {mascota.imagen?.path || mascota.fotoPerfil ? (
-                                    <div className="mascota-image-container">
-                                        <img 
-                                            src={mascota.imagen?.path || mascota.fotoPerfil}
-                                            alt={`Foto de ${mascota.nomMascota || mascota.nombre}`} width="300" height="350"
-                                            className="mascota-image"
-                                            onError={(e) => {
-                                                e.target.style.display = 'none';
-                                            }}
-                                        />
-                                        <div className="image-overlay">
-                                            <button 
-                                                onClick={() => deleteMascotaImage(mascota.id || mascota.idMascota)}
-                                                className="btn-delete-image"
-                                                title="Eliminar imagen"
-                                            >
-                                                🗑️
-                                            </button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="mascota-no-image">
-                                        {mascota.exotico ? '🦎' : '🐕'}
-                                    </div>
-                                )}
-                                
-                                <div className="image-upload-section">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => handleImageUpload(mascota.id || mascota.idMascota, e)}
-                                        className="file-input-hidden"
-                                        id={`file-input-${mascota.id || mascota.idMascota}`}
-                                        disabled={imageUploading}
-                                    />
-                                    <label 
-                                        htmlFor={`file-input-${mascota.id || mascota.idMascota}`}
-                                        className="btn-upload-image"
-                                    >
-                                        {imageUploading ? '📤 Subiendo...' : '📷 Cambiar Foto'}
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div className="mascota-details-section">
-                                <div className="mascota-header">
-                                    <h3 className="mascota-name">
-                                        {mascota.nomMascota || mascota.nombre || 'Sin nombre'}
-                                    </h3>
-                                </div>
-                                
-                                <div className="mascota-details">
-                                    <p><strong>Especie:</strong> {mascota.especie?.nomEspecie || mascota.especie?.nombre || 'N/A'}</p>
-                                    <p><strong>Raza:</strong> {mascota.raza?.nomRaza || mascota.raza?.nombre || 'N/A'}</p>
-                                    <p><strong>Edad:</strong> {mascota.edad} años</p>
-                                    <p><strong>Sexo:</strong> {mascota.sexo === 'M' ? 'Macho' : mascota.sexo === 'F' ? 'Hembra' : mascota.sexo}</p>
-                                    <p><strong>Peso:</strong> {mascota.peso} kg</p>
-                                    {mascota.exotico && <span className="exotic-badge">Exótica</span>}
-                                </div>
-                                {mascota.descripcion && (
-                                    <p className="mascota-description">{mascota.descripcion}</p>
-                                )}
-                            </div>
-                            <div className="mascota-actions">
-                                <button 
-                                    onClick={() => startEditMascota(mascota)}
-                                    className="btn-edit"
-                                >
-                                    Editar
-                                </button>
-                                <button 
-                                    onClick={() => deleteMascota(mascota.id || mascota.idMascota)}
-                                    className="btn-delete"
-                                >
-                                    Eliminar
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-
-    const renderNuevaMascota = () => (
-        <div className="dashboard-main">
-            <div className="form-container">
-                <h2 className="section-title">
-                    {editingMascota ? 'Editar Mascota' : 'Agregar Nueva Mascota'}
-                </h2>
-                
-                <form onSubmit={handleMascotaSubmit} className="form-card">
-                    <div className="form-group" style={{ textAlign: 'center', marginBottom: '30px' }}>
-                        <label className="form-label">Foto de la mascota:</label>
-                        <div style={{ margin: '15px 0' }}>
-                            {mascotaImageFile ? (
-                                <img
-                                    src={URL.createObjectURL(mascotaImageFile)}
-                                    alt="Preview"
-                                    style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #3b82f6' }}
-                                />
-                            ) : editingMascota?.imagen?.path || editingMascota?.fotoPerfil ? (
-                                <img
-                                    src={editingMascota.imagen?.path || editingMascota.fotoPerfil}
-                                    alt="Foto actual"
-                                    style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #3b82f6' }}
-                                />
-                            ) : (
-                                <div style={{ width: '150px', height: '150px', borderRadius: '50%', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontSize: '48px', color: '#6b7280' }}>
-                                    🐾
-                                </div>
-                            )}
-                        </div>
-
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleMascotaImageChange}
-                            className="form-input"
-                            style={{ marginTop: '10px' }}
-                        />
-
-                        {(editingMascota?.imagen?.path || editingMascota?.fotoPerfil || mascotaImageFile) && (
-                            <button
-                                type="button"
-                                onClick={deleteMascotaImageFromForm}
-                                className="btn-delete"
-                                disabled={imageUploading}
-                                style={{ marginTop: '10px' }}
-                            >
-                                {imageUploading ? 'Eliminando...' : 'Eliminar Foto'}
-                            </button>
-                        )}
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Nombre:</label>
-                        <input
-                            type="text"
-                            name="nombre"
-                            value={mascotaForm.nombre}
-                            onChange={handleMascotaChange}
-                            required
-                            className="form-input"
-                        />
-                    </div>
-
-                    <div className="form-grid">
-                        <div className="form-group">
-                            <label className="form-label">Especie:</label>
-                            <select
-                                name="idEspecie"
-                                value={mascotaForm.idEspecie}
-                                onChange={handleMascotaChange}
-                                required
-                                className="form-select"
-                            >
-                                <option value="">Seleccionar especie...</option>
-                                {especies.map((especie) => (
-                                    <option 
-                                        key={especie.id} 
-                                        value={especie.id}
-                                    >
-                                        {especie.nombre}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Raza:</label>
-                            <select
-                                name="idRaza"
-                                value={mascotaForm.idRaza}
-                                onChange={handleMascotaChange}
-                                required
-                                className="form-select"
-                                disabled={!mascotaForm.idEspecie}
-                            >
-                                <option value="">
-                                    {!mascotaForm.idEspecie 
-                                        ? "Primero selecciona una especie..." 
-                                        : razasFiltradas.length === 0 
-                                            ? "No hay razas disponibles para esta especie"
-                                            : "Seleccionar raza..."
-                                    }
-                                </option>
-                                {razasFiltradas.map((raza) => (
-                                    <option 
-                                        key={raza.id} 
-                                        value={raza.id}
-                                    >
-                                        {raza.nombre}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="form-grid">
-                        <div className="form-group">
-                            <label className="form-label">Edad (años):</label>
-                            <input
-                                type="number"
-                                name="edad"
-                                value={mascotaForm.edad}
-                                onChange={handleMascotaChange}
-                                min="0"
-                                max="30"
-                                required
-                                className="form-input"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Sexo:</label>
-                            <select
-                                name="sexo"
-                                value={mascotaForm.sexo}
-                                onChange={handleMascotaChange}
-                                required
-                                className="form-select"
-                            >
-                                <option value="">Seleccionar...</option>
-                                <option value="M">Macho</option>
-                                <option value="F">Hembra</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Peso (kg):</label>
-                        <input
-                            type="number"
-                            name="peso"
-                            value={mascotaForm.peso}
-                            onChange={handleMascotaChange}
-                            min="0"
-                            step="0.1"
-                            required
-                            className="form-input"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Descripción (opcional):</label>
-                        <textarea
-                            name="descripcion"
-                            value={mascotaForm.descripcion}
-                            onChange={handleMascotaChange}
-                            rows={3}
-                            className="form-textarea"
-                            placeholder="Características especiales, comportamiento, etc."
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label className="checkbox-group">
-                            <input
-                                type="checkbox"
-                                name="exotico"
-                                checked={mascotaForm.exotico}
-                                onChange={handleMascotaChange}
-                                className="checkbox-input"
-                            />
-                            <span>Es una mascota exótica</span>
-                        </label>
-                    </div>
-
-                    {error && (
-                        <div className="error-message">
-                            {error}
-                        </div>
-                    )}
-
-                    <div className="form-buttons">
-                        <button 
-                            type="button" 
-                            onClick={() => {
-                                setCurrentView('mascotas');
-                                setEditingMascota(null);
-                                setMascotaImageFile(null); 
-                                setMascotaForm({
-                                    nombre: '', edad: '', sexo: '', exotico: false, descripcion: '',
-                                    peso: '', idEspecie: '', idRaza: ''
-                                });
-                            }}
-                            className="btn-secondary"
-                        >
-                            Cancelar
-                        </button>
-                        <button 
-                            type="submit" 
-                            disabled={loading || imageUploading}
-                            className="btn-primary"
-                        >
-                            {loading || imageUploading ? 'Guardando...' : editingMascota ? 'Actualizar Mascota' : 'Agregar Mascota'}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-
-    const renderReservas = () => {
-        const [expandedReserva, setExpandedReserva] = useState(null);
-
-        const toggleExpand = (reservaId) => {
-            setExpandedReserva(expandedReserva === reservaId ? null : reservaId);
-        };
-
-        return (
-            <div className="dashboard-main">
-                <h2 className="section-title">Mis Reservas</h2>
-
-                {loading && <div className="loading-message">Cargando reservas...</div>}
-
+            {/* GRID: ocupa toda la pantalla */}
+            <div className="mascotas-grid-wrapper">
+                {loading && <div className="loading-message">Cargando mascotas...</div>}
                 {error && <div className="error-message">{error}</div>}
 
-                {!Array.isArray(reservas) ? (
-                    <div className="error-message">
-                        Error: Datos de reservas inválidos. Por favor, recarga la página.
-                    </div>
-                ) : reservas.length === 0 && !loading ? (
+                {!Array.isArray(mascotas) ? (
+                    <div className="error-message">Error: Datos de mascotas inválidos.</div>
+                ) : mascotas.length === 0 && !loading ? (
                     <div className="empty-state">
-                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>📅</div>
-                        <h3>No tienes reservas aún</h3>
-                        <p>Explora las publicaciones disponibles y haz tu primera reserva</p>
+                        <div style={{ fontSize: '64px', marginBottom: '12px' }}>🐾</div>
+                        <h3>Todavía no tenés mascotas registradas</h3>
+                        <p style={{ marginBottom: '20px', color: 'var(--text-gray)' }}>
+                            Agregá tu primera mascota para empezar
+                        </p>
                         <button
-                            onClick={() => navigate('/')}
+                            onClick={() => {
+                                setEditingMascota(null);
+                                setMascotaImageFile(null);
+                                setCurrentView('nueva-mascota');
+                            }}
                             className="btn-primary"
-                            style={{ marginTop: '16px' }}
                         >
-                            Ver Publicaciones
+                            + Agregar Mascota
                         </button>
                     </div>
                 ) : (
-                    <div className="reservas-grid">
-                        {reservas.map((reserva) => {
-                            const reservaId = reserva.id || reserva.idReserva;
-                            const isExpanded = expandedReserva === reservaId;
-                            const publicacion = reserva.publicacion;
-                            const primeraImagen = publicacion?.imagenes?.[0];
+                    <div className="mascotas-grid">
+                        {mascotas.map((mascota) => (
+                            <div key={mascota.id || mascota.idMascota} className="mascota-card">
 
-                            return (
-                                <div key={reservaId} className="reserva-card-expanded">
-                                    {/* Header con imagen de publicación */}
-                                    <div className="reserva-header-with-image">
-                                        {primeraImagen ? (
-                                            <div className="reserva-publicacion-image">
-                                                <img
-                                                    src={primeraImagen.url || `http://localhost:3000${primeraImagen.path}`}
-                                                    alt={publicacion?.titulo || 'Publicación'}
-                                                    onError={(e) => {
-                                                        e.target.style.display = 'none';
-                                                        e.target.nextSibling.style.display = 'flex';
-                                                    }}
-                                                />
-                                                <div className="reserva-image-placeholder" style={{ display: 'none' }}>
-                                                    🏠
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="reserva-publicacion-image">
-                                                <div className="reserva-image-placeholder">🏠</div>
-                                            </div>
-                                        )}
-
-                                        <div className="reserva-header-info">
-                                            <h3>{publicacion?.titulo || 'Sin título'}</h3>
-                                            <p className="reserva-cuidador">
-                                                <strong>Cuidador:</strong> {publicacion?.cuidador?.nombre || reserva.cuidador?.nombre || 'N/A'}
-                                            </p>
-                                            <span className={`status-badge status-${reserva.estado || 'pendiente'}`}>
-                                                {(reserva.estado || 'pendiente').toUpperCase()}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* Info básica de la reserva */}
-                                    <div className="reserva-info">
-                                        <div className="reserva-date-range">
-                                            <div className="date-item">
-                                                <span className="date-label">Check-in</span>
-                                                <span className="date-value">
-                                                    {reserva.fechaDesde ? new Date(reserva.fechaDesde).toLocaleDateString('es-AR') : reserva.fechaInicio || 'N/A'}
-                                                </span>
-                                            </div>
-                                            <div className="date-separator">→</div>
-                                            <div className="date-item">
-                                                <span className="date-label">Check-out</span>
-                                                <span className="date-value">
-                                                    {reserva.fechaHasta ? new Date(reserva.fechaHasta).toLocaleDateString('es-AR') : reserva.fechaFin || 'N/A'}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className="reserva-price">
-                                            <span className="price-label">Total</span>
-                                            <span className="price-value">
-                                                ${reserva.total || (publicacion?.tarifaPorDia ? publicacion.tarifaPorDia * Math.ceil((new Date(reserva.fechaHasta) - new Date(reserva.fechaDesde)) / (1000 * 60 * 60 * 24)) : 'N/A')}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* Mascotas de la reserva */}
-                                    <div className="reserva-mascotas-preview">
-                                        <strong>Mascotas:</strong>
-                                        <div className="mascotas-thumbnails">
-                                            {reserva.mascotas && reserva.mascotas.length > 0 ? (
-                                                reserva.mascotas.map((mascota, idx) => (
-                                                    <div key={idx} className="mascota-thumb" title={mascota.nombre || mascota.nomMascota}>
-                                                        {mascota.imagen ? (
-                                                            <img
-                                                                src={mascota.imagen}
-                                                                alt={mascota.nombre || mascota.nomMascota}
-                                                                onError={(e) => {
-                                                                    e.target.style.display = 'none';
-                                                                    e.target.nextSibling.style.display = 'flex';
-                                                                }}
-                                                            />
-                                                        ) : null}
-                                                        <div className="mascota-thumb-placeholder" style={{ display: mascota.imagen ? 'none' : 'flex' }}>
-                                                            🐕
-                                                        </div>
-                                                        <span className="mascota-thumb-name">{mascota.nombre || mascota.nomMascota}</span>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <span className="no-data">N/A</span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Botón para expandir detalles */}
-                                    <button
-                                        onClick={() => toggleExpand(reservaId)}
-                                        className="btn-expand"
-                                    >
-                                        {isExpanded ? '▲ Ver menos' : '▼ Ver más detalles'}
-                                    </button>
-
-                                    {/* Detalles expandidos */}
-                                    {isExpanded && (
-                                        <div className="reserva-expanded-details">
-                                            <div className="detail-section">
-                                                <h4>Información de la Publicación</h4>
-                                                <p><strong>Ubicación:</strong> {publicacion?.ubicacion || 'N/A'}</p>
-                                                <p><strong>Descripción:</strong> {publicacion?.descripcion || 'N/A'}</p>
-                                                <p><strong>Tarifa por día:</strong> ${publicacion?.tarifaPorDia || 'N/A'}</p>
-                                            </div>
-
-                                            <div className="detail-section">
-                                                <h4>Información del Cuidador</h4>
-                                                <p><strong>Nombre:</strong> {publicacion?.cuidador?.nombre || 'N/A'}</p>
-                                                <p><strong>Email:</strong> {publicacion?.cuidador?.email || 'N/A'}</p>
-                                            </div>
-
-                                            {reserva.descripcion && (
-                                                <div className="detail-section">
-                                                    <h4>Notas de la Reserva</h4>
-                                                    <p>{reserva.descripcion}</p>
-                                                </div>
-                                            )}
-
-                                            <div className="detail-section">
-                                                <h4>Detalles de las Mascotas</h4>
-                                                <div className="mascotas-detail-list">
-                                                    {reserva.mascotas && reserva.mascotas.map((mascota, idx) => (
-                                                        <div key={idx} className="mascota-detail-item">
-                                                            <div className="mascota-detail-image">
-                                                                {mascota.imagen ? (
-                                                                    <img
-                                                                        src={mascota.imagen}
-                                                                        alt={mascota.nombre || mascota.nomMascota}
-                                                                        onError={(e) => {
-                                                                            e.target.style.display = 'none';
-                                                                            e.target.nextSibling.style.display = 'flex';
-                                                                        }}
-                                                                    />
-                                                                ) : null}
-                                                                <div className="mascota-detail-placeholder" style={{ display: mascota.imagen ? 'none' : 'flex' }}>
-                                                                    🐕
-                                                                </div>
-                                                            </div>
-                                                            <div className="mascota-detail-info">
-                                                                <h5>{mascota.nombre || mascota.nomMascota}</h5>
-                                                                <p>{mascota.especie} - {mascota.raza}</p>
-                                                                <p>{mascota.edad} años</p>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
+                                {/* ── Imagen ── */}
+                                <div className="mascota-image-section-horizontal">
+                                    {mascota.imagen?.path || mascota.fotoPerfil ? (
+                                        <img
+                                            src={mascota.imagen?.path || mascota.fotoPerfil}
+                                            alt={`Foto de ${mascota.nomMascota || mascota.nombre}`}
+                                            className="mascota-image"
+                                            onError={(e) => { e.target.style.display = 'none'; }}
+                                        />
+                                    ) : (
+                                        <div className="mascota-no-image">
+                                            {mascota.exotico ? '🦎' : '🐕'}
                                         </div>
                                     )}
 
-                                    {/* Acciones */}
-                                    {(reserva.estado === 'pendiente' || !reserva.estado) && (
-                                        <div className="reserva-actions">
-                                            <button
-                                                onClick={() => cancelarReserva(reservaId)}
-                                                className="btn-cancel"
-                                            >
-                                                Cancelar Reserva
-                                            </button>
-                                        </div>
+                                    {/* Botón cambiar foto flotante sobre la imagen */}
+                                    <div className="image-upload-section">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => handleImageUpload(mascota.id || mascota.idMascota, e)}
+                                            className="file-input-hidden"
+                                            id={`file-input-${mascota.id || mascota.idMascota}`}
+                                            disabled={imageUploading}
+                                            style={{ display: 'none' }}
+                                        />
+                                        <label
+                                            htmlFor={`file-input-${mascota.id || mascota.idMascota}`}
+                                            className="btn-upload-image"
+                                        >
+                                            {imageUploading ? '📤 Subiendo...' : '📷 Cambiar foto'}
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* ── Info ── */}
+                                <div className="mascota-details-section">
+                                    <div className="mascota-header">
+                                        <h3 className="mascota-name">
+                                            {mascota.nomMascota || mascota.nombre || 'Sin nombre'}
+                                        </h3>
+                                    </div>
+
+                                    <div className="mascota-details">
+                                        <p><strong>Especie:</strong> {mascota.especie?.nomEspecie || mascota.especie?.nombre || 'N/A'}</p>
+                                        <p><strong>Raza:</strong>   {mascota.raza?.nomRaza || mascota.raza?.nombre || 'N/A'}</p>
+                                        <p><strong>Edad:</strong>   {mascota.edad} años</p>
+                                        <p><strong>Sexo:</strong>   {mascota.sexo === 'M' ? 'Macho' : mascota.sexo === 'F' ? 'Hembra' : mascota.sexo}</p>
+                                        <p><strong>Peso:</strong>   {mascota.peso} kg</p>
+                                    </div>
+
+                                    {mascota.exotico && (
+                                        <span className="exotic-badge">Exótica</span>
+                                    )}
+
+                                    {mascota.descripcion && (
+                                        <p className="mascota-description">{mascota.descripcion}</p>
                                     )}
                                 </div>
-                            );
-                        })}
+
+                                {/* ── Acciones ── */}
+                                <div className="mascota-actions">
+                                    <button onClick={() => startEditMascota(mascota)} className="btn-edit">
+                                        ✏️ Editar
+                                    </button>
+                                    <button onClick={() => deleteMascota(mascota.id || mascota.idMascota)} className="btn-delete">
+                                        🗑️ Eliminar
+                                    </button>
+                                </div>
+
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>
-        );
-    };
+        </>
+    );
 
-    const renderPerfil = () => (
-        <div className="dashboard-main">
-            <div className="perfil-container">
-                <div className="perfil-header">
-                    <h2 className="section-title">Mi Perfil</h2>
+
+
+
+    const renderNuevaMascota = () => (
+        <div className="form-container">
+
+            {/* Título fuera de la card */}
+            <h2 className="section-title">
+                {editingMascota ? 'Editar Mascota' : 'Agregar Nueva Mascota'}
+            </h2>
+
+            {/* Card blanca del formulario */}
+            <form onSubmit={handleMascotaSubmit} className="form-card">
+
+                {/* ── Preview de imagen ── */}
+                <div className="form-group" style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <label className="form-label">Foto de la mascota:</label>
+                    <div style={{ margin: '1rem 0' }}>
+                        {mascotaImageFile ? (
+                            <img
+                                src={URL.createObjectURL(mascotaImageFile)}
+                                alt="Preview"
+                                style={{
+                                    width: '280px', height: '240px',
+                                    borderRadius: '16px', objectFit: 'contain',
+                                    backgroundColor: '#f8f8f8', border: '2px solid #e5e7eb',
+                                    display: 'block', margin: '0 auto'
+                                }}
+                            />
+                        ) : editingMascota?.imagen?.path || editingMascota?.fotoPerfil ? (
+                            <img
+                                src={editingMascota.imagen?.path || editingMascota.fotoPerfil}
+                                alt="Foto actual"
+                                style={{
+                                    width: '280px', height: '240px',
+                                    borderRadius: '16px', objectFit: 'contain',
+                                    backgroundColor: '#f8f8f8', border: '2px solid #e5e7eb',
+                                    display: 'block', margin: '0 auto'
+                                }}
+                            />
+                        ) : (
+                            <div style={{
+                                width: '280px', height: '240px', borderRadius: '16px',
+                                backgroundColor: '#fff5f2', border: '2px dashed #ff8f73',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                margin: '0 auto', fontSize: '5rem', color: '#f97840'
+                            }}>
+                                🐾
+                            </div>
+                        )}
+                    </div>
+
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleMascotaImageChange}
+                        className="form-input"
+                        style={{ marginTop: '0.75rem', cursor: 'pointer' }}
+                    />
+
+                    {(editingMascota?.imagen?.path || editingMascota?.fotoPerfil || mascotaImageFile) && (
+                        <button
+                            type="button"
+                            onClick={deleteMascotaImageFromForm}
+                            className="btn-delete"
+                            disabled={imageUploading}
+                            style={{ marginTop: '0.75rem', width: 'auto', padding: '0.6rem 1.5rem', flex: 'none' }}
+                        >
+                            {imageUploading ? 'Eliminando...' : '🗑️ Eliminar Foto'}
+                        </button>
+                    )}
+                </div>
+
+                {/* ── Nombre ── */}
+                <div className="form-group">
+                    <label className="form-label">Nombre:</label>
+                    <input
+                        type="text"
+                        name="nombre"
+                        value={mascotaForm.nombre}
+                        onChange={handleMascotaChange}
+                        required
+                        className="form-input"
+                        placeholder="Ej: Panchito"
+                    />
+                </div>
+
+                {/* ── Especie / Raza ── */}
+                <div className="form-grid">
+                    <div className="form-group">
+                        <label className="form-label">Especie:</label>
+                        <select
+                            name="idEspecie"
+                            value={mascotaForm.idEspecie}
+                            onChange={handleMascotaChange}
+                            required
+                            className="form-select"
+                        >
+                            <option value="">Seleccionar especie...</option>
+                            {especies.map((especie) => (
+                                <option key={especie.id} value={especie.id}>{especie.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Raza:</label>
+                        <select
+                            name="idRaza"
+                            value={mascotaForm.idRaza}
+                            onChange={handleMascotaChange}
+                            required
+                            className="form-select"
+                            disabled={!mascotaForm.idEspecie}
+                        >
+                            <option value="">
+                                {!mascotaForm.idEspecie
+                                    ? 'Primero seleccioná una especie...'
+                                    : razasFiltradas.length === 0
+                                        ? 'No hay razas disponibles'
+                                        : 'Seleccionar raza...'}
+                            </option>
+                            {razasFiltradas.map((raza) => (
+                                <option key={raza.id} value={raza.id}>{raza.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {/* ── Edad / Sexo ── */}
+                <div className="form-grid">
+                    <div className="form-group">
+                        <label className="form-label">Edad (años):</label>
+                        <input
+                            type="number"
+                            name="edad"
+                            value={mascotaForm.edad}
+                            onChange={handleMascotaChange}
+                            min="0"
+                            max="30"
+                            required
+                            className="form-input"
+                            placeholder="Ej: 3"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Sexo:</label>
+                        <select
+                            name="sexo"
+                            value={mascotaForm.sexo}
+                            onChange={handleMascotaChange}
+                            required
+                            className="form-select"
+                        >
+                            <option value="">Seleccionar...</option>
+                            <option value="M">Macho</option>
+                            <option value="F">Hembra</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* ── Peso ── */}
+                <div className="form-group">
+                    <label className="form-label">Peso (kg):</label>
+                    <input
+                        type="number"
+                        name="peso"
+                        value={mascotaForm.peso}
+                        onChange={handleMascotaChange}
+                        min="0"
+                        step="0.1"
+                        required
+                        className="form-input"
+                        placeholder="Ej: 6.5"
+                    />
+                </div>
+
+                {/* ── Descripción ── */}
+                <div className="form-group">
+                    <label className="form-label">Descripción (opcional):</label>
+                    <textarea
+                        name="descripcion"
+                        value={mascotaForm.descripcion}
+                        onChange={handleMascotaChange}
+                        rows={4}
+                        className="form-textarea"
+                        placeholder="Características especiales, comportamiento, gustos..."
+                    />
+                </div>
+
+                {/* ── Exótico ── */}
+                <div className="form-group">
+                    <label className="checkbox-group">
+                        <input
+                            type="checkbox"
+                            name="exotico"
+                            checked={mascotaForm.exotico}
+                            onChange={handleMascotaChange}
+                            className="checkbox-input"
+                        />
+                        <span>Es una mascota exótica</span>
+                    </label>
+                </div>
+
+                {error && <div className="error-message">{error}</div>}
+
+                {/* ── Botones ── */}
+                <div className="form-buttons">
                     <button
+                        type="button"
                         onClick={() => {
-                            setEditingPerfil(!editingPerfil);
-                            setProfileImageFile(null);
-                            setError('');
-                            if(editingPerfil) {
-                                setPerfilForm({
-                                    nombre: user?.nombre || '',
-                                    email: user?.email || '',
-                                    telefono: user?.telefono || '',
-                                    nroDocumento: user?.nroDocumento || '',
-                                    tipoDocumento: user?.tipoDocumento || ''
-                                });
-                            }
+                            setCurrentView('mascotas');
+                            setEditingMascota(null);
+                            setMascotaImageFile(null);
+                            setMascotaForm({ nombre: '', edad: '', sexo: '', exotico: false, descripcion: '', peso: '', idEspecie: '', idRaza: '' });
                         }}
+                        className="btn-secondary"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={loading || imageUploading}
                         className="btn-primary"
                     >
-                        {editingPerfil ? 'Cancelar Edición' : 'Editar Perfil'}
+                        {loading || imageUploading
+                            ? 'Guardando...'
+                            : editingMascota ? '✅ Actualizar Mascota' : '+ Agregar Mascota'}
                     </button>
                 </div>
 
-                {error && <p className="error-message">{error}</p>}
+            </form>
+        </div>
+    );
 
+    const renderPerfil = () => (
+        <div className="form-container">
+            <div className="perfil-container">
+                <div className="perfil-header">
+                    <h2 className="section-title">Mi Perfil</h2>
+                    <button onClick={() => { setEditingPerfil(!editingPerfil); setProfileImageFile(null); setError(''); if (editingPerfil) { setPerfilForm({ nombre: user?.nombre || '', email: user?.email || '', telefono: user?.telefono || '', nroDocumento: user?.nroDocumento || '', tipoDocumento: user?.tipoDocumento || '' }); } }} className="btn-primary">
+                        {editingPerfil ? 'Cancelar Edición' : 'Editar Perfil'}
+                    </button>
+                </div>
+                {error && <p className="error-message">{error}</p>}
                 {editingPerfil ? (
                     <form onSubmit={handlePerfilSubmit} className="form-card">
                         <div className="form-group" style={{ textAlign: 'center', marginBottom: '30px' }}>
                             <label className="form-label">Foto de perfil:</label>
                             <div style={{ margin: '15px 0' }}>
                                 {profileImageFile ? (
-                                    <img
-                                        src={URL.createObjectURL(profileImageFile)}
-                                        alt="Preview"
-                                        style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #f97840' }}
-                                    />
+                                    <img src={URL.createObjectURL(profileImageFile)} alt="Preview" style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #f97840' }} />
                                 ) : user?.perfilImage ? (
-                                    <img
-                                        src={`http://localhost:3000${user.perfilImage}`}
-                                        alt="Foto actual"
-                                        style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #3b82f6' }}
-                                    />
+                                    <img src={`http://localhost:3000${user.perfilImage}`} alt="Foto actual" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #3b82f6' }} />
                                 ) : (
-                                    <div style={{ width: '150px', height: '150px', borderRadius: '50%', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontSize: '48px', color: '#6b7280' }}>
-                                        👤
-                                    </div>
+                                    <div style={{ width: '150px', height: '150px', borderRadius: '50%', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontSize: '48px', color: '#6b7280' }}>👤</div>
                                 )}
                             </div>
-
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleProfileImageChange}
-                                className="form-input"
-                                style={{ marginTop: '10px' }}
-                            />
-
+                            <input type="file" accept="image/*" onChange={handleProfileImageChange} className="form-input" style={{ marginTop: '10px' }} />
                             {user?.perfilImage && (
-                                <button
-                                    type="button"
-                                    onClick={deleteDuenoProfileImage}
-                                    className="btn-delete"
-                                    disabled={imageUploading}
-                                    style={{ marginTop: '10px' }}
-                                >
+                                <button type="button" onClick={deleteDuenoProfileImage} className="btn-delete" disabled={imageUploading} style={{ marginTop: '10px' }}>
                                     {imageUploading ? 'Eliminando...' : 'Eliminar Foto Actual'}
                                 </button>
                             )}
                         </div>
-
-                        <div className="form-group">
-                            <label>Nombre:</label>
-                            <input
-                                type="text"
-                                name="nombre"
-                                value={perfilForm.nombre}
-                                onChange={handlePerfilFormChange}
-                                required
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Email:</label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={perfilForm.email}
-                                onChange={handlePerfilFormChange}
-                                required
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Teléfono:</label>
-                            <input
-                                type="text"
-                                name="telefono"
-                                value={perfilForm.telefono}
-                                onChange={handlePerfilFormChange}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Número de Documento:</label>
-                            <input
-                                type="text"
-                                name="nroDocumento"
-                                value={perfilForm.nroDocumento}
-                                onChange={handlePerfilFormChange}
-                            />
-                        </div>
+                        <div className="form-group"><label>Nombre:</label><input type="text" name="nombre" value={perfilForm.nombre} onChange={handlePerfilFormChange} required /></div>
+                        <div className="form-group"><label>Email:</label><input type="email" name="email" value={perfilForm.email} onChange={handlePerfilFormChange} required /></div>
+                        <div className="form-group"><label>Teléfono:</label><input type="text" name="telefono" value={perfilForm.telefono} onChange={handlePerfilFormChange} /></div>
+                        <div className="form-group"><label>Número de Documento:</label><input type="text" name="nroDocumento" value={perfilForm.nroDocumento} onChange={handlePerfilFormChange} /></div>
                         <div className="form-group">
                             <label>Tipo de Documento:</label>
-                            <select
-                                name="tipoDocumento"
-                                value={perfilForm.tipoDocumento}
-                                onChange={handlePerfilFormChange}
-                            >
+                            <select name="tipoDocumento" value={perfilForm.tipoDocumento} onChange={handlePerfilFormChange}>
                                 <option value="">Selecciona tipo</option>
                                 <option value="DNI">DNI</option>
                                 <option value="Pasaporte">Pasaporte</option>
@@ -1424,11 +1004,7 @@ const DuenoDashboard = () => {
                     <div className="profile-details-card">
                         <div className="profile-image-display">
                             {user?.perfilImage ? (
-                                <img
-                                    src={`http://localhost:3000${user.perfilImage}`}
-                                    alt="Foto de perfil"
-                                    className="profile-display-img"
-                                />
+                                <img src={`http://localhost:3000${user.perfilImage}`} alt="Foto de perfil" className="profile-display-img" />
                             ) : (
                                 <div className="profile-placeholder-img">👤</div>
                             )}
@@ -1439,75 +1015,69 @@ const DuenoDashboard = () => {
                             <p><strong>Teléfono:</strong> {user?.telefono || 'N/A'}</p>
                             <p><strong>Documento:</strong> {user?.tipoDocumento} {user?.nroDocumento || 'N/A'}</p>
                         </div>
-                            <div className="delete-user-section">
-                                <button
-                                    onClick={handleDeleteUser}
-                                    className="btn-delete"
-                                    disabled={loading}
-                                    style={{ width: '100%', padding: '10px', marginTop: '20px' }}
-                                >
-                                    {loading ? 'Eliminando Cuenta...' : '🗑️ Eliminar Cuenta Definitivamente'}
-                                </button>
-                            </div>
+                        <div className="delete-user-section">
+                            <button onClick={handleDeleteUser} className="btn-delete" disabled={loading} style={{ width: '100%', padding: '10px', marginTop: '20px' }}>
+                                {loading ? 'Eliminando Cuenta...' : '🗑️ Eliminar Cuenta Definitivamente'}
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
         </div>
     );
 
-    if (loading) {
+    if (loading && !mascotas.length && currentView === 'mascotas') {
         return <div className="loading-message">Cargando...</div>;
     }
 
-    if (!user) {
-        return <Navigate to="/login" replace />;
-    }
+    if (!user) return <Navigate to="/login" replace />;
 
     return (
         <div id="main-dashboard" className="dashboard-container">
             <nav id="main-navbar" className="dashboard-navbar">
                 <div className="navbar-brand">
-                    <h1 id="main-title" className="navbar-title">PetsBnB Dueño</h1>
-                    <span className="navbar-welcome">Bienvenido, {user?.nombre}</span>
+                    <h1 id="main-title" className="navbar-title">
+                        🐈 Petsbnb Dueño
+                    </h1>
                 </div>
-                <div className="navbar-buttons">
-                    <div className="navbar-buttons-general">
-                    <button
-                        onClick={() => navigate('/')} 
-                        className="nav-button btn-home"
-                    >
-                        <Home size={18} style={{marginRight: '5px'}}/>
+
+                <div className="navbar-buttons-center">
+                    <button onClick={() => navigate('/')} className="nav-button btn-home">
+                        <Home size={18} />
                         Ver Publicaciones
                     </button>
                     <button
                         onClick={() => setCurrentView('mascotas')}
                         className={`nav-button ${currentView === 'mascotas' ? 'active' : ''}`}
-                    >   <PawPrint size={18} style={{marginRight: '5px'}}/>
+                    >
+                        <PawPrint size={18} />
                         Mascotas
                     </button>
                     <button
                         onClick={() => setCurrentView('reservas')}
                         className={`nav-button ${currentView === 'reservas' ? 'active' : ''}`}
-                    >   <CalendarCheck size={18} style={{marginRight: '5px'}}/>
+                    >
+                        <CalendarCheck size={18} />
                         Reservas
                     </button>
-                    </div>
-                    <div className="navbar-buttons-especifico">
+                </div>
+
+                <div className="navbar-buttons-right">
                     <button
                         onClick={() => setCurrentView('perfil')}
                         className={`nav-button ${currentView === 'perfil' ? 'active' : ''}`}
-                    >   <User size={18} style={{marginRight: '5px'}}/>
+                    >
+                        <User size={18} />
+                        Perfil
                     </button>
-                    <button 
-                        onClick={handleLogout}
-                        className="logout-button"
-                    >    <LogOut size={18} style={{marginRight: '5px'}}/>
+                    <button onClick={handleLogout} className="logout-button">
+                        <LogOut size={18} />
+                        Logout
                     </button>
-                    </div>
                 </div>
             </nav>
 
-            <main>
+            <main className="dashboard-main">
                 {currentView === 'mascotas' && renderMascotas()}
                 {currentView === 'reservas' && renderReservas()}
                 {currentView === 'perfil' && renderPerfil()}
@@ -1517,4 +1087,4 @@ const DuenoDashboard = () => {
     );
 };
 
-export default DuenoDashboard; 
+export default DuenoDashboard;

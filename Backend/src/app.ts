@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { usuarioRouter } from './usuario/usuario.routes.js';
 import 'reflect-metadata'
 import express from "express";
@@ -19,6 +20,8 @@ import cors from 'cors';
 import { reservaRouter, webHookRouter } from './reserva/reserva.routes.js';
 import { pagoRouter } from './reserva/pago.routers.js';
 
+console.log('ENV:', process.env.STRIPE_SECRET_KEY)
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -33,8 +36,7 @@ declare global {
 const app = express();
 
 
-
-app.use("/webhook", webHookRouter);
+app.use("/webhook", express.raw({ type: 'application/json' }), webHookRouter);
 app.use(cookieParser());
 app.use(cors({ origin: ['http://localhost:3307', 'http://localhost:3308'], credentials: true }));
 app.use(express.json());
