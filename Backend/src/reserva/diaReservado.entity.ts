@@ -1,5 +1,6 @@
 import { Entity, ManyToOne, PrimaryKey, Property, Rel, Type} from "@mikro-orm/core";
 import { Reserva } from "../reserva/reserva.entity.js";
+import { Publicacion } from "../publicacion/publicacion.entity.js";
 import { Temporal } from 'temporal-polyfill';
 
 
@@ -31,11 +32,12 @@ export class DiaReservado {
   idDiaReservado?: number;
 
   @ManyToOne(() => Reserva, { nullable: true})
-  reserva!: Rel<Reserva>;
+  reserva?: Rel<Reserva>;
 
   @Property({ nullable: true, unique: false})
   fechaReservada!: String;
 
-
+  @ManyToOne(() => Publicacion, { nullable: true})
+  publicacion?: Rel<Publicacion>;
 
 }

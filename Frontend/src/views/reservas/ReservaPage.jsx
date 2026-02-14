@@ -276,17 +276,14 @@ const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reservaData)
       });
-      const { session } = await response.json();
-
-     
-      window.location.href = session.url;
+      const data = await response.json();
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al crear reserva');
+        throw new Error(data.message || 'Error al crear reserva');
       }
 
-      alert('¡Reserva creada exitosamente!');
+      const { session } = data;
+      window.location.href = session.url;
       // Reset form
       setFechaInicio(null);
       setFechaFin(null);
