@@ -399,7 +399,7 @@ async function authMiddleware(req: Request, res: Response, next: NextFunction) {
   }
 
   try {
-    const decoded = jwt.verify(token, SECRET_JWT_KEY!) as any;
+    const decoded = jwt.verify(token, SECRET_JWT_KEY!);
     req.usuario = decoded;
     next(); 
   } catch (err) {

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { sanitizePublicacion, findAll, findOne, findByCuidador, add, update, remove, getDiasReservados } from './publicacion.controller.js';
+import { sanitizePublicacion, findAll, findOne, findByCuidador, add, update, remove, getDiasReservados, reservaCuidador, diasReservados} from './publicacion.controller.js';
 import { publicacionImageUpload } from '../shared/multer.config.js';
 
 export const publicacionRouter = Router();
@@ -20,3 +20,7 @@ publicacionRouter.put('/:idPublicacion', publicacionImageUpload, sanitizePublica
 publicacionRouter.patch("/:idPublicacion", sanitizePublicacion, update);
 // Eliminar una publicacion
 publicacionRouter.delete("/:idPublicacion", remove);
+// Reservar una publicacion por parte del cuidador
+publicacionRouter.post("/reserva-cuidador", sanitizePublicacion, reservaCuidador);
+// Todos los dias reservados de una publicacion
+publicacionRouter.post("/dias-reservados", sanitizePublicacion, diasReservados);
