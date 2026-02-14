@@ -7,10 +7,10 @@ import { Publicacion } from '../publicacion/publicacion.entity.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-const em = orm.em;
 
 async function add(req: Request, res: Response): Promise<void> {
  try {
+  const em = orm.em.fork();
   const imagen = new Imagen();
   if (!req.file) {
    res.status(400).json({ message: 'No file uploaded' });
@@ -56,6 +56,7 @@ async function add(req: Request, res: Response): Promise<void> {
 
 async function findAll(req: Request, res: Response): Promise<void> {
   try {
+    const em = orm.em.fork();
     if( req.body.idUsuario != null) {
       const imagen = await em.find(Imagen, { usuario: { idUsuario: parseInt(req.body.idUsuario) } });
       res.status(200).json({ message: 'Found image', data: imagen });
@@ -75,6 +76,7 @@ async function findAll(req: Request, res: Response): Promise<void> {
 
 async function remove(req: Request, res: Response): Promise<void> {
   try {
+    const em = orm.em.fork();
     const idImagen = Number(req.params.idImagen);
     const imagen = await em.findOneOrFail(Imagen, { idImagen });
     
@@ -96,6 +98,7 @@ async function remove(req: Request, res: Response): Promise<void> {
 
 async function update(req: Request, res: Response): Promise<void> {
   try {
+    const em = orm.em.fork();
     const idImagen = Number(req.params.idImagen);
     const imagen = await em.findOneOrFail(Imagen, { idImagen });
     imagen.path = req.body.path || imagen.path;
@@ -109,6 +112,7 @@ async function update(req: Request, res: Response): Promise<void> {
 
 async function removeMascotaImage(req: Request, res: Response): Promise<void> {
   try {
+    const em = orm.em.fork();
     const idMascota = Number(req.params.idMascota);
     
 

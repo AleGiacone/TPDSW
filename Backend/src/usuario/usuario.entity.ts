@@ -34,4 +34,7 @@ export abstract class Usuario {
 
   @Property({ nullable: true, unique: false })
   perfilImage?: string;
+
+  @Property({ nullable: true, unique: false })
+  twoFactorSecret?: string;
 }

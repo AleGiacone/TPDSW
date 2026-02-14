@@ -270,12 +270,16 @@ const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
         fechaHasta: fechaFin.toISOString()
       };
 
-      const response = await fetch(`${API_BASE_URL}/reservas`, {
+      const response = await fetch(`${API_BASE_URL}/reservas/test-pago`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reservaData)
       });
+      const { session } = await response.json();
+
+      // Redirigir al usuario a la página de pago de Stripe
+      window.location.href = session.url;
 
       if (!response.ok) {
         const errorData = await response.json();
