@@ -278,7 +278,7 @@ const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
       });
       const { session } = await response.json();
 
-      // Redirigir al usuario a la página de pago de Stripe
+     
       window.location.href = session.url;
 
       if (!response.ok) {

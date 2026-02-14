@@ -8,7 +8,6 @@
   gap: 40px;
   align-items: start;
 }
-
 /* Sección de la publicación */
 .reserva-publicacion-section {
   width: 100%;
@@ -29,6 +28,8 @@
   padding: 24px;
   position: sticky;
   top: 20px;
+  margin-top: 56px;
+  /* ← bajá este valor hasta que quede alineado */
 }
 
 .price-header {
@@ -41,8 +42,9 @@
 }
 
 .price {
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 28px;
+  /* ← antes 22px */
+  font-weight: 700;
   color: #222;
 }
 
@@ -107,10 +109,11 @@
 }
 
 .section-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: #222;
+  font-size: 1.3rem;
+  /* ← antes 16px */
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: #f97840;
 }
 
 .mascotas-list {
@@ -122,10 +125,10 @@
 .mascota-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 16px;
+  padding: 16px;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -149,12 +152,13 @@
 
 /* Imagen de la mascota en miniatura */
 .mascota-image-thumb {
-  width: 50px;
-  height: 50px;
+  width: 80px;
+  /* ← antes 50px */
+  height: 80px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  position: relative;
+  margin-left:1rem;
 }
 
 .mascota-image-thumb img {
@@ -179,16 +183,20 @@
   min-width: 0;
 }
 
-.mascota-name {
-  font-size: 14px;
-  font-weight: 600;
+.mascota-item .mascota-info .mascota-name {
+  font-size: 1.3rem!important;
+  /* ← antes 14px */
+  font-weight: 700;
   color: #222;
-  margin-bottom: 2px;
 }
 
 .mascota-details {
-  font-size: 12px;
+  font-size: 1.1rem;
+  /* ← antes 12px */
   color: #717171;
+  margin-left:1.5rem;
+  margin-bottom: 0.7rem;
+ 
 }
 
 /* Sin mascotas */
@@ -230,14 +238,14 @@
 
 .notes-textarea {
   width: 100%;
-  min-height: 80px;
-  padding: 12px;
+  min-height: 100px;
+  padding: 14px;
   border: 1px solid #b0b0b0;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 1rem;
+  /* ← antes 14px */
   font-family: inherit;
   resize: vertical;
-  transition: border-color 0.2s;
 }
 
 .notes-textarea:focus {
@@ -248,16 +256,18 @@
 /* Botón de reservar */
 .reserve-button {
   width: 100%;
-  padding: 14px;
+  padding: 18px;
+  /* ← antes 14px */
   background: linear-gradient(to right, #f97840, #ff6b35);
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 1.1rem;
+  /* ← antes 16px */
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  margin-bottom: 16px;
+  margin-bottom: 2px;
 }
 
 .reserve-button:hover:not(:disabled) {
@@ -311,7 +321,7 @@
 .modal-content {
   background: white;
   border-radius: 16px;
-  padding: 32px;
+  padding: 30px;
   max-width: 900px;
   width: 100%;
   max-height: 90vh;
@@ -354,7 +364,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 10px;
   padding: 0 12px;
 }
 
@@ -419,6 +429,7 @@
   border-radius: 50%;
   transition: all 0.2s;
   position: relative;
+  color:#222;
 }
 
 .calendar-day:not(.empty):not(.disabled):hover {

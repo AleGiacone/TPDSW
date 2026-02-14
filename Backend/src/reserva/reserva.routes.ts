@@ -18,7 +18,7 @@ reservaRouter.post("/test-pago", sanitizeReserva, testPagoStripe);
 // STRIPE 
 const webHookRouter = Router();
 
-webHookRouter.post('/',express.raw({ type: 'application/json' }), stripeWebHook);
+webHookRouter.post('/', stripeWebHook);
 
 
 export { reservaRouter, webHookRouter };
