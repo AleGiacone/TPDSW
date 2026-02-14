@@ -91,6 +91,15 @@ async function reservaCuidador(req: Request, res: Response, next: NextFunction) 
         return;
       }
     }
+    const diasOcupados = publicacion.diasOcupados.getItems().map(d => d.fechaReservada);
+    for (let dia of req.body.sanitizeInput.dias) {
+      if(diasOcupados.includes(Temporal.PlainDate.from(dia).toString())){
+        res.status(400).json({ message: `La fecha ${Temporal.PlainDate.from(dia).toString()} ya está ocupada.` });
+        return;
+      }
+    }
+
+
     for (const dia of req.body.sanitizeInput.dias) {
       
       const diaReservado = em.create(DiaReservado, { fechaReservada: dia, publicacion: publicacion });
