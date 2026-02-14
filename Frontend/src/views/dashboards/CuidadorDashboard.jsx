@@ -190,6 +190,40 @@ const CuidadorDashboard = () => {
         exotico: false
     });
 
+    // Estados para 2FA
+    const [show2FAModal, setShow2FAModal] = useState(false);
+    const [qrCode2FA, setQrCode2FA] = useState(null);
+    const [loading2FA, setLoading2FA] = useState(false);
+
+    const handleActivate2FA = async () => {
+        setLoading2FA(true);
+        setShow2FAModal(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/usuarios/2fa/generate`, {
+                method: 'POST',
+                credentials: 'include',
+                body: JSON.stringify({ email: user.email }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            if (data.qrDataUrl) {
+                setQrCode2FA(data.qrDataUrl);
+            }
+        } catch (err) {
+            console.error('Error al generar 2FA:', err);
+            setError('Error al generar código QR para 2FA');
+        } finally {
+            setLoading2FA(false);
+        }
+    };
+
+    const close2FAModal = () => {
+        setShow2FAModal(false);
+        setQrCode2FA(null);
+    };
+
     const startEditProfile = () => {
         if (user) {
             setProfileFormData({
@@ -1526,6 +1560,13 @@ const CuidadorDashboard = () => {
                                 {user?.descripcion || 'Sin descripción personalizada'}
                             </p>
                         </div>
+                        {/* ACTIVACION 2FA */}
+                        <div>
+                            <label className='2FA' >Activacion de 2FA:</label>
+                            <button onClick={handleActivate2FA} disabled={loading2FA}>
+                                {loading2FA ? 'Generando...' : 'Activar verificacion de dos pasos'}
+                            </button>
+                        </div>
                         <button
                             onClick={startEditProfile}
                             className="btn-primary"
@@ -1734,6 +1775,61 @@ const CuidadorDashboard = () => {
                 {currentView === 'nueva-publicacion' && renderNuevaPublicacion()}
                 {currentView === 'editar-publicacion' && renderEditarPublicacion()}
             </main>
+
+            {/* Modal 2FA */}
+            {show2FAModal && (
+                <div className="modal-overlay" style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000
+                }}>
+                    <div className="modal-content" style={{
+                        backgroundColor: 'white',
+                        padding: '2rem',
+                        borderRadius: '8px',
+                        maxWidth: '400px',
+                        width: '90%',
+                        textAlign: 'center'
+                    }}>
+                        <h3 style={{ marginBottom: '1rem' }}>2FA factor</h3>
+                        <p style={{ marginBottom: '1rem', color: '#666' }}>
+                            Escanea este código QR con Google Authenticator
+                        </p>
+                        {loading2FA ? (
+                            <p>Cargando código QR...</p>
+                        ) : qrCode2FA ? (
+                            <img 
+                                src={qrCode2FA} 
+                                alt="Código QR 2FA" 
+                                style={{ maxWidth: '200px', margin: '1rem auto' }}
+                            />
+                        ) : (
+                            <p style={{ color: 'red' }}>Error al cargar el código QR</p>
+                        )}
+                        <button 
+                            onClick={close2FAModal}
+                            style={{
+                                marginTop: '1rem',
+                                padding: '0.5rem 1.5rem',
+                                backgroundColor: '#e74c3c',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

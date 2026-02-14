@@ -15,10 +15,8 @@ declare global {
     }
   }
 }
+//Ver porque me parece que no va, esta raro tener un usuario any en el codigo
 
-
-
-const em = orm.em
 
 async function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
   console.log('req.body.session usuario:', req.cookies.access_token);
@@ -51,7 +49,8 @@ async function sanitizeUsuario(req: Request, res: Response, next: NextFunction) 
 async function findAll(req: Request, res: Response) {
   console.log("Finding all usuarios");
   try {
-    const usuarios = await orm.em.find(Usuario, {});
+    const em = orm.em.fork();
+    const usuarios = await em.find(Usuario, {});
     res.status(200).json({ message: 'Found all usuarios', data: usuarios });
   } catch (error: any) {
     res.status(500).json({ message: "Error retrieving usuarios", error: error.message });
@@ -62,6 +61,7 @@ async function findAll(req: Request, res: Response) {
 async function add(req: Request, res: Response) {
 
   console.log("Adding usuario with body:", req.body);
+  const em = orm.em.fork();
   const email = await em.findOne(Usuario, { email: req.body.email });
   if(!email){
     try {
@@ -90,13 +90,12 @@ async function update(req: Request, res: Response) {
   console.log("Updating usuario with body:", req.body);
 
   try {
+    const em = orm.em.fork();
     console.log("Updating usuario with body:", req.body);
     const usuario = await em.findOneOrFail(Usuario, { email: req.body.email });
       // Poner un input adicional para que el usuario pueda cambiar su contraseña
-    if (usuario.password !== req.body.sanitizeInput.password) { 
-      // El 10 representa el número de rondas de sal o hashing
-      req.body.sanitizeInput.password = await bcrypt.hash(req.body.sanitizeInput.password, 10);
-    }
+
+    const match = await bcrypt.compare(req.body.sanitizeInput.password, usuario.password);
     em.assign(usuario, req.body.sanitizeInput);
     await em.flush();
     res.status(200).json({ message: 'Usuario updated', data: usuario });
@@ -107,6 +106,7 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const idUsuario = Number.parseInt(req.params.idUsuario);
     const usuario = await em.findOneOrFail(Usuario, { idUsuario: idUsuario });
     await em.removeAndFlush(usuario);
@@ -119,6 +119,7 @@ async function remove(req: Request, res: Response) {
 async function loginCtrl(req: Request, res: Response) {
 
   try {
+    const em = orm.em.fork();
     const { email, password } = req.body.sanitizeInput;
     
     if (!email || !password) {
@@ -133,7 +134,7 @@ async function loginCtrl(req: Request, res: Response) {
     const usuario = await em.findOne(Usuario, { email });
     
     if (!usuario) {
-       res.status(404).json({ 
+      res.status(404).json({ 
         success: false,
         message: 'Credenciales incorrectas' 
       });
@@ -149,7 +150,7 @@ async function loginCtrl(req: Request, res: Response) {
     });
       return;
     }
-
+    if(!usuario.twoFactorSecret) {
     const token = jwt.sign(
       { 
         idUsuario: usuario.idUsuario, 
@@ -175,12 +176,69 @@ async function loginCtrl(req: Request, res: Response) {
         email: usuario.email,
         tipoUsuario: usuario.tipoUsuario,
         perfilImage: usuario.perfilImage || null
-      }, 
-      token: token
+      }
     });
     return;
+    } else if (usuario.twoFactorSecret && req.body.token != null) {
+        if (usuario && usuario.twoFactorSecret != null) {
+        console.log(usuario.twoFactorSecret);
+        const secret = usuario.twoFactorSecret;
+        const token = req.body.token;
+        console.log("Validating 2FA token:", token, "with secret:", secret);
+        const result = await verify({ secret, token });
+        console.log("Valid:", result.valid); // true
+        if(result.valid == true)
+        {
+          const token = jwt.sign(
+                { 
+                  idUsuario: usuario.idUsuario, 
+                  email: usuario.email,
+                  tipoUsuario: usuario.tipoUsuario
+                }, 
+                SECRET_JWT_KEY, 
+                { expiresIn: '1h' }
+              );
+              res.cookie('access_token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 1000 * 60 * 60 // 1 hora
+              });
 
-  } catch (error: any) {
+              res.status(200).json({ 
+                success: true,
+                message: 'Login exitoso',
+                user: {
+                  idUsuario: usuario.idUsuario,
+                  nombre: usuario.nombre,
+                  email: usuario.email,
+                  tipoUsuario: usuario.tipoUsuario,
+                  perfilImage: usuario.perfilImage || null
+                }
+              });
+              return;
+          }
+          else {
+              res.status(400).json({
+              success: false,
+              message: 'Invalid 2FA code'
+              })
+              return;
+          }
+      }
+    }
+      else if (usuario.twoFactorSecret && req.body.token == null) {
+        res.status(400).json({
+          success: false,
+          message: '2FA code is required'
+        })
+        return;
+      }
+  
+      
+    }
+
+    catch (error: any) {
     res.status(500).json({ 
       success: false,
       message: "Error durante el login", 
@@ -211,6 +269,7 @@ async function authenticate(usuario: Usuario) {
 // Preguntar por funcion que no se usa xd
 async function getMe(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     if (!req.usuario) {
       res.status(401).json({ 
         success: false,
@@ -294,7 +353,7 @@ async function uploadFiles(req: Request, res: Response) {
   } else {
     console.log("Session found:", req.session.usuario);
     const email = req.session.usuario.email;
-    const emFork = em.fork();
+    const emFork = orm.em.fork();
       try {
         console.log("EL FUCKING MAIL", email);
         if (!req.file) {
@@ -316,6 +375,7 @@ async function uploadFiles(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const idUsuario = Number(req.params.idUsuario);
     const usuario = await em.findOneOrFail(Usuario, { idUsuario: idUsuario });
     res.status(200).json({ message: 'Usuario found', data: usuario });
@@ -353,4 +413,95 @@ async function authMiddleware(req: Request, res: Response, next: NextFunction) {
 }
 
 
-export { sanitizeUsuario, authMiddleware, findAll, findOne, add, update, remove, loginCtrl, authenticate, uploadFiles, getMe };
+// TOTP Y 2FA utilizando otplib 
+
+import { generateSecret, generateURI } from "otplib";
+import QRCode from "qrcode"; // npm install qrcode
+
+async function setupTwoFactor(req: Request, res: Response, next: NextFunction) {
+  console.log("Setting up 2FA for user:", req.body.email);
+  if(!req.body.email) {
+    res.status(400).json({ 
+      success: false,
+      message: 'Email is required for 2FA setup' 
+    });
+    return;
+  }
+  // Generate a new secret
+  const secret = generateSecret();
+
+  // Create otpauth:// URI
+  if(req.body.email) {
+  const em = orm.em.fork();
+  const uri = generateURI({
+    issuer: "MyApp",
+    label: req.body.email,
+    secret,
+  });
+
+  // Generate QR code as data URL
+  const qrDataUrl = await QRCode.toDataURL(uri);
+  console.log("qrDataUrl:", qrDataUrl);
+  const usuario = await em.findOne(Usuario, { email: req.body.email });
+  if(!usuario) {
+    res.status(404).json({ 
+      success: false,
+      message: 'Usuario not found' 
+    });
+    return;
+  }
+  em.assign(usuario, { twoFactorSecret: secret });
+  await em.flush();
+  res.status(200).json({
+    success: true,
+    qrDataUrl
+  })}
+ ;
+}
+
+async function codeValidation(req: Request, res: Response) {
+  const em = orm.em.fork();
+  const usuario = await em.findOne(Usuario, { email: req.body.email });
+  if (usuario && usuario.twoFactorSecret != null) {
+    console.log(usuario.twoFactorSecret);
+    const secret = usuario.twoFactorSecret;
+    const token = req.body.token;
+    console.log("Validating 2FA token:", token, "with secret:", secret);
+    const result = await verify({ secret, token });
+    console.log("Valid:", result.valid); // true
+    if(result.valid == true)
+    {
+      res.status(200).json({
+        success: true,
+        message: '2FA code valid'
+      })
+    }
+    else {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid 2FA code'
+      })
+    }
+  }
+  
+
+}
+
+import { generate, verify } from "otplib";
+import { nextTick } from 'process';
+
+// Generate a secret
+
+
+// // Generate current token
+// const token = await generate({ secret });
+// console.log("Token:", token); // e.g., "123456"
+
+// // Verify a token
+// const result = await verify({ secret, token });
+// console.log("Valid:", result.valid); // true
+// // result.epoch is available here for TOTP
+
+
+
+export { sanitizeUsuario, authMiddleware, findAll, findOne, add, update, remove, loginCtrl, authenticate, uploadFiles, getMe, setupTwoFactor, codeValidation };

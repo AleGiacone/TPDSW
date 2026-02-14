@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware, sanitizeUsuario, findAll, findOne, add, update, remove, loginCtrl, uploadFiles } from './usuario.controller.js';
+import { authMiddleware, sanitizeUsuario, findAll, findOne, add, update, remove, loginCtrl, uploadFiles, setupTwoFactor, codeValidation } from './usuario.controller.js';
 import { appendFile } from 'fs';
 
 export const usuarioRouter = Router();
@@ -17,4 +17,9 @@ usuarioRouter.put('/:email', sanitizeUsuario, update);
 usuarioRouter.patch('/:email', sanitizeUsuario, update);
 usuarioRouter.delete('/:email', remove);
 usuarioRouter.post('/upload-image', upload.single('imageFile'), uploadFiles, add);
+
+// 2FA
+
+usuarioRouter.post('/2fa/generate', setupTwoFactor)
+usuarioRouter.post('/2fa/validate', codeValidation)
 

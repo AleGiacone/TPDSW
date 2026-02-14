@@ -1,18 +1,24 @@
 import { Router } from "express";
-import { sanitizeReserva, findAll, findOne, add, update, remove, authenticateAdd, verifyDate, testDate } from "./reserva.controller.js";
+import { sanitizeReserva, findAll, findOne, add, update, remove, authenticateAdd, verifyDate, testDate, stripeWebHook, testPagoStripe} from "./reserva.controller.js";
+import express from "express";
 
 const reservaRouter = Router();
 
 reservaRouter.get("/", findAll);
 reservaRouter.get("/:idReserva", findOne);
 
-//Agregar el authenticateAdd middleware
-reservaRouter.post("/", sanitizeReserva, verifyDate, add);
+reservaRouter.post("/", sanitizeReserva, authenticateAdd, verifyDate, add);
 reservaRouter.put("/:idReserva", update);
 reservaRouter.delete("/:idReserva", remove);
 reservaRouter.patch("/:idReserva", update);
 reservaRouter.post("/test-date", sanitizeReserva, testDate);
+reservaRouter.post("/test-pago", sanitizeReserva, testPagoStripe);
 
 
+// STRIPE 
+const webHookRouter = Router();
 
-export { reservaRouter };
+webHookRouter.post('/',express.raw({ type: 'application/json' }), stripeWebHook);
+
+
+export { reservaRouter, webHookRouter };

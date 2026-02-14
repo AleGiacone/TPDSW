@@ -16,8 +16,9 @@ import { imagenRouter } from './imagen/imagenes.routes.js';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import cors from 'cors';
-import { reservaRouter } from './reserva/reserva.routes.js';
-
+import { reservaRouter, webHookRouter } from './reserva/reserva.routes.js';
+import { pagoRouter } from './reserva/pago.routers.js';
+import rateLimit from 'express-rate-limit';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -32,6 +33,8 @@ declare global {
 const app = express();
 
 
+
+app.use("/webhook", webHookRouter);
 app.use(cookieParser());
 app.use(cors({ origin: ['http://localhost:3307', 'http://localhost:3308'], credentials: true }));
 app.use(express.json());
@@ -59,6 +62,21 @@ app.use((req, res, next) => {
 });
 
 
+// Rate limiter general
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100,                  // 100 requests por IP
+  standardHeaders: true,     // Devuelve info en headers `RateLimit-*`
+  legacyHeaders: false,      // Deshabilita headers `X-RateLimit-*`
+  handler: (req, res) => {
+    res.status(429).json({ error: 'Demasiadas solicitudes, intenta más tarde' });
+  }
+});
+
+
+
+app.use(generalLimiter); 
+
 app.use("/api/usuarios", usuarioRouter);
 app.use("/api/mascotas", mascotaRouter);
 app.use("/api/especies", especieRouter);
@@ -69,10 +87,12 @@ app.use("/api/usuario/upload-image", usuarioRouter);
 app.use("/api/publicacion", publicacionRouter);
 app.use("/api/imagenes", imagenRouter);
 app.use("/api/reservas", reservaRouter);
+app.use("/api/pagos", pagoRouter);
 
 
 app.get('/', (req, res) => {
   console.log('Session:', req.session);
+  console.log(`Endpoint llamado: ${req.method} ${req.url}`);
   const { usuario } = req.session ?? { usuario: null };
   if (!usuario) {
     res.status(401).send('Acceso no autorizado')
