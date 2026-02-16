@@ -1,298 +1,511 @@
-/* ============================
-   ESTILOS GENERALES DEL DASHBOARD
-   ============================ */
+/* ============================================
+   VARIABLES Y RESET (DASHBOARD CUIDADOR)
+   ============================================ */
+:root {
+  --primary-orange: #f97840;
+  --secondary-orange: #ff8f73;
+  --dark-orange: #e65c2b;
+  --light-peach: #fff5f2;
+  --lighter-peach: #fffaf8;
+  --white: #ffffff;
+  --text-dark: #1f2937;
+  --text-gray: #6b7280;
+  --bg-light: #f9fafb;
+  --border-gray: #e5e7eb;
+  --error-red: #ef4444;
+  --success-green: #10b981;
+  --warning-yellow: #f59e0b;
+  --blue-primary: #3b82f6;
+  --blue-dark: #2563eb;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.15);
+  --shadow-orange: 0 4px 16px rgba(249, 120, 64, 0.2);
+}
 
+/* ============================================
+   DASHBOARD CUIDADOR CONTAINER
+   ============================================ */
 .dashboard-container {
-background-color: white;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fff5f2 0%, #ffffff 100%);
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.dashboard-navbar {
-  background-color:  #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 16px 24px;
-  
+/* ============================================
+   NAVBAR CUIDADOR - ANCHO COMPLETO
+   ============================================ */
+.dashboard-container .dashboard-navbar {
+  background: linear-gradient(135deg, #f97840 0%, #ff6b45 100%);
+  box-shadow: 0 4px 20px rgba(249, 120, 64, 0.25);
+  padding: 1.5rem 2rem;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
 }
 
-.navbar-brand {
+.dashboard-container .navbar-brand {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 1.25rem;
+  width: 100%;
 }
 
-.navbar-title {
-  font-size: 3rem;
-  font-weight: 700;
-  color: #f97840;
+.dashboard-container .navbar-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--white);
   margin: 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
 }
 
-.navbar-welcome {
-  font-size: 14px;
-  color: #666;
+.dashboard-container .navbar-welcome {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
 }
 
-.navbar-buttons {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.up-buttons,
-.down-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.nav-button {
-  padding: 10px 20px;
-  border: none;
-  background-color: #f0f0f0;
-  color: #333;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-}
-
-.nav-button:hover {
-  background-color: #e0e0e0;
-}
-
-.nav-button.active {
-  background-color: #f97840;
-  color: white;
-}
-
-.btn-publicaciones-extra {
-  background-color: #3b82f6;
-  color: white;
-}
-
-.btn-publicaciones-extra:hover {
-  background-color: #2563eb;
-}
-
-.logout-button {
-  padding: 10px 20px;
-  border: none;
-  background-color: #dc2626;
-  color: white;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-}
-
-.logout-button:hover {
-  background-color: #b91c1c;
-}
-
-/* ============================
-   CONTENIDO PRINCIPAL
-   ============================ */
-
-main {
-  padding: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.dashboard-main {
+/* SECCIÓN DE BOTONES CUIDADOR */
+.dashboard-container .navbar-buttons {
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  align-items: flex-start;
+  gap: 2rem;
   width: 100%;
 }
 
-.section-title {
-  font-size: 28px;
-  font-weight: 600;
-  color: #222;
-  margin-bottom: 24px;
-}
-
-/* ============================
-   PUBLICACIONES
-   ============================ */
-
-.publicaciones-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.btn-primary {
-  padding: 12px 24px;
-  background-color: #f97840;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-primary:hover {
-  background-color: #e86730;
-}
-
-.btn-primary:disabled {
-  background-color: #e0e0e0;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.btn-secondary {
-  padding: 12px 24px;
-  background-color: white;
-  color: #666;
-  border: 1px solid #d0d0d0;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-secondary:hover {
-  background-color: #f5f5f5;
-}
-
-.btn-edit {
-  padding: 8px 16px;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-edit:hover {
-  background-color: #2563eb;
-}
-
-.btn-delete {
-  padding: 8px 16px;
-  background-color: #dc2626;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-delete:hover {
-  background-color: #b91c1c;
-}
-
-.btn-delete:disabled {
-  background-color: #e0e0e0;
-  cursor: not-allowed;
-}
-
-/* ============================
-   FORMULARIOS
-   ============================ */
-
-.form-container {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.form-card {
-  background-color: white;
-  padding: 32px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-label {
+.dashboard-container .navbar-buttons::before {
+  content: '';
   display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: #555;
-  font-size: 14px;
 }
 
-.form-input,
-.form-textarea,
-.form-select {
+.dashboard-container .up-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.dashboard-container .down-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  align-items: flex-start;
+}
+
+/* BOTONES DE LA NAVBAR CUIDADOR */
+.dashboard-container .nav-button,
+.dashboard-container .btn-publicaciones-extra,
+.dashboard-container .logout-button {
+  padding: 0.875rem 1.75rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--white);
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+
+.dashboard-container .nav-button:hover {
+  background: var(--white);
+  color: var(--primary-orange);
+  border-color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-container .nav-button.active {
+  background: var(--white);
+  color: var(--primary-orange);
+  border-color: var(--white);
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.3);
+}
+
+.dashboard-container .btn-publicaciones-extra {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dashboard-container .btn-publicaciones-extra:hover {
+  background: var(--blue-primary);
+  border-color: var(--blue-primary);
+  color: var(--white);
+}
+
+.dashboard-container .logout-button {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dashboard-container .logout-button:hover {
+  background: var(--error-red);
+  border-color: var(--error-red);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   MAIN CONTENT CUIDADOR
+   ============================================ */
+.dashboard-container .dashboard-main {
+  max-width: 1400px;
   width: 100%;
-  padding: 12px;
-  border: 1px solid #d0d0d0;
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: inherit;
-  transition: border-color 0.2s;
+  margin: 0 auto;
+  padding: 3rem 2rem;
 }
 
-.form-input:focus,
-.form-textarea:focus,
-.form-select:focus {
+.dashboard-container .section-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #f97840 0%, #ff6b45 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 2rem;
+  letter-spacing: -0.5px;
+}
+
+/* ============================================
+   BOTONES PRINCIPALES CUIDADOR
+   ============================================ */
+.dashboard-container .btn-primary {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #f97840 0%, #ff6b45 100%);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-orange);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.dashboard-container .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(249, 120, 64, 0.35);
+}
+
+.dashboard-container .btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.dashboard-container .btn-secondary {
+  padding: 1rem 2rem;
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  color: var(--text-dark);
+  border: 2px solid var(--border-gray);
+  font-weight: 700;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-container .btn-secondary:hover {
+  background: var(--bg-light);
+  border-color: var(--primary-orange);
+  color: var(--primary-orange);
+  transform: translateY(-2px);
+}
+
+.dashboard-container .btn-delete {
+  background: var(--error-red);
+  color: var(--white);
+  border: none;
+  padding: 0.875rem 1.5rem;
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-container .btn-delete:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+}
+
+.dashboard-container .btn-edit {
+  background: var(--blue-primary);
+  color: var(--white);
+  border: none;
+  padding: 0.875rem 1.5rem;
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container .btn-edit:hover {
+  background: var(--blue-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+}
+
+/* ============================================
+   PUBLICACIONES HEADER CUIDADOR
+   ============================================ */
+.dashboard-container .publicaciones-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* ============================================
+   PUBLICACIONES GRID CUIDADOR - CARDS MÁS PEQUEÑAS
+   ============================================ */
+.dashboard-container .publicaciones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  max-width: 100%;
+}
+
+.dashboard-container .publicacion-card {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  border: 2px solid transparent;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 100%;
+}
+
+.dashboard-container .publicacion-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--light-peach);
+}
+
+.dashboard-container .publicacion-image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 60%;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
+}
+
+.dashboard-container .publicacion-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.dashboard-container .publicacion-card:hover .publicacion-image {
+  transform: scale(1.05);
+}
+
+.dashboard-container .publicacion-details {
+  padding: 1.5rem;
+}
+
+.dashboard-container .publicacion-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+.dashboard-container .publicacion-description {
+  font-size: 0.95rem;
+  color: var(--text-gray);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dashboard-container .publicacion-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.dashboard-container .publicacion-price {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary-orange);
+  margin: 1rem 0;
+}
+
+.dashboard-container .publicacion-actions {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--light-peach);
+}
+
+.dashboard-container .publicacion-actions .btn-edit,
+.dashboard-container .publicacion-actions .btn-delete {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+}
+
+/* ============================================
+   FORMULARIOS CUIDADOR
+   ============================================ */
+.dashboard-container .form-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.dashboard-container .form-card {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 3rem;
+  box-shadow: var(--shadow-md);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container .form-card:hover {
+  border-color: var(--light-peach);
+  box-shadow: var(--shadow-lg);
+}
+
+.dashboard-container .form-group {
+  margin-bottom: 2rem;
+}
+
+.dashboard-container .form-label {
+  display: block;
+  background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
+  color: var(--text-dark);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-lg);
+  font-weight: 800;
+  font-size: 1.05rem;
+  margin-bottom: 0.75rem;
+  width: fit-content;
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-container .form-input,
+.dashboard-container .form-select,
+.dashboard-container .form-textarea {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--border-gray);
+  border-radius: var(--radius-lg);
+  font-size: 1.05rem;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background: var(--white);
+}
+
+.dashboard-container .form-input:focus,
+.dashboard-container .form-select:focus,
+.dashboard-container .form-textarea:focus {
   outline: none;
-  border-color: #f97840;
+  border-color: var(--primary-orange);
+  box-shadow: 0 0 0 4px rgba(249, 120, 64, 0.1);
+  transform: translateY(-2px);
 }
 
-.form-textarea {
+.dashboard-container .form-textarea {
   resize: vertical;
-  min-height: 100px;
+  min-height: 120px;
 }
 
-.form-grid {
+.dashboard-container .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 2rem;
 }
 
-.checkbox-group {
+.dashboard-container .checkbox-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 1rem;
   cursor: pointer;
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding: 1rem;
+  background: var(--lighter-peach);
+  border-radius: var(--radius-lg);
+  transition: all 0.3s ease;
 }
 
-.checkbox-input {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
+.dashboard-container .checkbox-group:hover {
+  background: var(--light-peach);
 }
 
-.form-buttons {
+.dashboard-container .checkbox-input {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  accent-color: var(--primary-orange);
+}
+
+.dashboard-container .form-buttons {
   display: flex;
-  gap: 16px;
-  justify-content: flex-end;
-  margin-top: 24px;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 2.5rem;
+  flex-wrap: wrap;
 }
 
-/* ============================
-   MANEJO DE IMÁGENES
-   ============================ */
-
-.file-upload-group {
-  background-color: #f9fafb;
-  padding: 20px;
-  border-radius: 8px;
+/* ============================================
+   MANEJO DE IMÁGENES CUIDADOR
+   ============================================ */
+.dashboard-container .file-upload-group {
+  background: var(--lighter-peach);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
 }
 
-.file-input-wrapper {
+.dashboard-container .file-input-wrapper {
   position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 1.5rem;
 }
 
-.file-input {
+.dashboard-container .file-input {
   position: absolute;
   width: 0.1px;
   height: 0.1px;
@@ -301,608 +514,680 @@ main {
   z-index: -1;
 }
 
-.file-input-label {
+.dashboard-container .file-input-label {
   display: inline-block;
-  padding: 12px 24px;
-  background-color: #3b82f6;
-  color: white;
-  border-radius: 8px;
+  padding: 1rem 2rem;
+  background: var(--blue-primary);
+  color: var(--white);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
+  font-weight: 700;
+  font-size: 1.05rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.file-input-label:hover {
-  background-color: #2563eb;
+.dashboard-container .file-input-label:hover {
+  background: var(--blue-dark);
+  transform: translateY(-2px);
 }
 
-.file-input-label.disabled {
-  background-color: #e0e0e0;
+.dashboard-container .file-input-label.disabled {
+  background: var(--border-gray);
   cursor: not-allowed;
-  color: #999;
+  color: var(--text-gray);
+  transform: none;
 }
 
-.file-count {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 12px;
-}
-
-.file-count-label {
-  font-size: 14px;
+.dashboard-container .file-count,
+.dashboard-container .file-count-label {
+  font-size: 1rem;
+  color: var(--text-gray);
   font-weight: 600;
-  color: #333;
-  margin-bottom: 12px;
+  margin-bottom: 1rem;
 }
 
-.image-preview-container {
-  margin-top: 16px;
+.dashboard-container .image-preview-container {
+  margin-top: 1.5rem;
 }
 
-.image-preview-grid {
+.dashboard-container .image-preview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 12px;
+  gap: 1.5rem;
 }
 
-.image-preview-item {
+.dashboard-container .image-preview-item {
   position: relative;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 2px solid #e5e7eb;
+  border: 3px solid var(--border-gray);
+  transition: all 0.3s ease;
 }
 
-.image-preview-item.existing-image {
-  border-color: #e5e7eb;
+.dashboard-container .image-preview-item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
 }
 
-.image-preview-item.new-image {
-  border-color: #3b82f6;
+.dashboard-container .image-preview-item.existing-image {
+  border-color: var(--primary-orange);
 }
 
-.preview-thumbnail {
+.dashboard-container .image-preview-item.new-image {
+  border-color: var(--blue-primary);
+}
+
+.dashboard-container .preview-thumbnail {
   width: 100%;
   height: 150px;
   object-fit: cover;
   display: block;
 }
 
-.remove-image-btn {
+.dashboard-container .remove-image-btn {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background-color: #dc2626;
-  color: white;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: var(--error-red);
+  color: var(--white);
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.remove-image-btn:hover {
-  background-color: #b91c1c;
+.dashboard-container .remove-image-btn:hover {
+  background: #dc2626;
   transform: scale(1.1);
 }
 
-.image-name {
+.dashboard-container .image-name {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 4px 8px;
-  font-size: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--white);
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.image-label {
+.dashboard-container .image-label {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 4px 8px;
-  font-size: 11px;
-  border-radius: 4px;
-  font-weight: 600;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--white);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+  border-radius: var(--radius-md);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.image-label.new-label {
-  background-color: #3b82f6;
+.dashboard-container .image-label.new-label {
+  background: var(--blue-primary);
 }
 
-.existing-images-container {
-  margin-bottom: 16px;
+.dashboard-container .existing-images-container {
+  margin-bottom: 2rem;
 }
 
-/* ============================
-   CALENDARIO DE DISPONIBILIDAD
-   ============================ */
-
-.disponibilidad-section {
-  margin: 32px 0;
-  padding: 20px;
-  background-color: #fff5f0;
-  border-radius: 8px;
+/* ============================================
+   CALENDARIO DE DISPONIBILIDAD CUIDADOR
+   ============================================ */
+.dashboard-container .disponibilidad-section {
+  margin: 2.5rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--primary-orange);
 }
 
-.disponibilidad-header {
+.dashboard-container .disponibilidad-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-.disponibilidad-header h3 {
-  font-size: 18px;
+.dashboard-container .disponibilidad-header h3 {
+  font-size: 1.5rem;
   margin: 0;
-  color: #333;
+  color: var(--text-dark);
+  font-weight: 800;
 }
 
-.icon-calendar {
-  color: #f97840;
+.dashboard-container .icon-calendar {
+  color: var(--primary-orange);
 }
 
-.disponibilidad-description {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 16px;
-}
-
-.btn-toggle-calendar {
-  padding: 12px 24px;
-  background-color: #f97840;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
+.dashboard-container .disponibilidad-description {
+  font-size: 1rem;
+  color: var(--text-gray);
+  margin-bottom: 1.5rem;
   font-weight: 600;
+}
+
+.dashboard-container .btn-toggle-calendar {
+  padding: 1rem 2rem;
+  background: var(--primary-orange);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 1.05rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-orange);
 }
 
-.btn-toggle-calendar:hover {
-  background-color: #e86730;
+.dashboard-container .btn-toggle-calendar:hover {
+  background: var(--dark-orange);
+  transform: translateY(-2px);
 }
 
-.reservas-alert {
-  margin-top: 16px;
-  padding: 12px;
-  background-color: #fef3c7;
-  border-radius: 8px;
+.dashboard-container .reservas-alert {
+  margin-top: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: #fef3c7;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 1rem;
+  font-size: 1rem;
   color: #92400e;
+  font-weight: 700;
+  border: 2px solid var(--warning-yellow);
 }
 
-.calendar-section {
-  margin-bottom: 32px;
+.dashboard-container .calendar-section {
+  margin-bottom: 2rem;
 }
 
-.btn-bloquear-fechas {
+.dashboard-container .btn-bloquear-fechas {
   width: 100%;
-  margin-top: 16px;
-  padding: 12px 24px;
+  margin-top: 1.5rem;
+  padding: 1rem 2rem;
   border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
+  border-radius: var(--radius-lg);
+  font-size: 1.05rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
-  background-color: #10b981;
-  color: white;
+  transition: all 0.3s ease;
+  background: var(--success-green);
+  color: var(--white);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
-.btn-bloquear-fechas:hover {
-  background-color: #059669;
+.dashboard-container .btn-bloquear-fechas:hover {
+  background: #059669;
+  transform: translateY(-2px);
 }
 
-.btn-bloquear-fechas:disabled {
-  background-color: #e0e0e0;
-  color: #999;
+.dashboard-container .btn-bloquear-fechas:disabled {
+  background: var(--border-gray);
+  color: var(--text-gray);
   cursor: not-allowed;
   opacity: 0.6;
+  transform: none;
 }
 
-/* Componente Calendario */
-.disponibilidad-calendar {
+/* Componente Calendario Cuidador */
+.dashboard-container .disponibilidad-calendar {
   width: 100%;
-  padding: 20px;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
 }
 
-.calendar-header {
+.dashboard-container .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding: 0 12px;
+  margin-bottom: 2rem;
 }
 
-.calendar-nav-btn {
-  background: none;
-  border: none;
-  font-size: 20px;
+.dashboard-container .calendar-nav-btn {
+  background: var(--lighter-peach);
+  border: 2px solid var(--primary-orange);
+  font-size: 1.5rem;
+  color: var(--primary-orange);
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 8px;
-  transition: background 0.2s;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+  font-weight: 800;
 }
 
-.calendar-nav-btn:hover {
-  background-color: #f5f5f5;
+.dashboard-container .calendar-nav-btn:hover {
+  background: var(--primary-orange);
+  color: var(--white);
 }
 
-.calendar-month-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #222;
+.dashboard-container .calendar-month-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-dark);
 }
 
-.calendar-grid-container {
+.dashboard-container .calendar-grid-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 32px;
+  gap: 3rem;
 }
 
-.calendar-month-grid {
+.dashboard-container .calendar-month-grid {
   width: 100%;
 }
 
-.calendar-weekdays {
+.dashboard-container .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-  margin-bottom: 8px;
+  gap: 4px;
+  margin-bottom: 1rem;
 }
 
-.calendar-weekday {
+.dashboard-container .calendar-weekday {
   text-align: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: #717171;
-  padding: 8px 0;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--text-gray);
+  padding: 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.calendar-days-grid {
+.dashboard-container .calendar-days-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 4px;
 }
 
-.calendar-day-empty {
+.dashboard-container .calendar-day-empty {
   aspect-ratio: 1;
   visibility: hidden;
 }
 
-.calendar-day {
+.dashboard-container .calendar-day {
   aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  border-radius: 50%;
-  transition: all 0.2s;
-  background-color: transparent;
-  color: #222;
-  font-weight: 400;
-  border: none;
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  border: 2px solid transparent;
 }
 
-.calendar-day:hover {
-  background-color: #f5f5f5;
+.dashboard-container .calendar-day:hover {
+  background: var(--lighter-peach);
+  border-color: var(--primary-orange);
+  transform: scale(1.05);
 }
 
-.calendar-day-past {
+.dashboard-container .calendar-day-past {
   cursor: not-allowed;
-  background-color: #f5f5f5;
-  color: #d0d0d0;
+  background: var(--border-gray);
+  color: var(--text-gray);
+  opacity: 0.5;
   text-decoration: line-through;
 }
 
-.calendar-day-past:hover {
-  background-color: #f5f5f5;
+.dashboard-container .calendar-day-past:hover {
+  background: var(--border-gray);
+  transform: none;
 }
 
-.calendar-day-blocked {
-  background-color: #fee2e2;
+.dashboard-container .calendar-day-blocked {
+  background: #fee2e2;
   color: #991b1b;
-  font-weight: 600;
-  border: 2px solid #dc2626;
+  font-weight: 800;
+  border: 3px solid var(--error-red);
   cursor: not-allowed;
 }
 
-.calendar-day-blocked:hover {
-  background-color: #fee2e2;
+.dashboard-container .calendar-day-blocked:hover {
+  background: #fee2e2;
+  transform: none;
 }
 
-.calendar-day-selected {
-  background-color: #f97840;
-  color: white;
-  font-weight: 600;
+.dashboard-container .calendar-day-selected {
+  background: var(--primary-orange);
+  color: var(--white);
+  font-weight: 800;
+  border: 3px solid var(--dark-orange);
+  box-shadow: var(--shadow-orange);
 }
 
-.calendar-day-selected:hover {
-  background-color: #e86730;
+.dashboard-container .calendar-day-selected:hover {
+  background: var(--dark-orange);
 }
 
-.calendar-legend {
-  margin-top: 20px;
-  padding: 16px;
-  background-color: #f9fafb;
-  border-radius: 8px;
+.dashboard-container .calendar-legend {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--lighter-peach);
+  border-radius: var(--radius-lg);
 }
 
-.legend-item {
+.dashboard-container .legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  margin-bottom: 8px;
+  gap: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-dark);
 }
 
-.legend-item:last-child {
+.dashboard-container .legend-item:last-child {
   margin-bottom: 0;
 }
 
-.legend-icon {
-  width: 20px;
-  height: 20px;
+.dashboard-container .legend-icon {
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-}
-
-.legend-icon-blocked {
-  border: 2px solid #dc2626;
-  background-color: #fee2e2;
-}
-
-.legend-icon-selected {
-  background-color: #f97840;
-}
-
-.legend-icon-available {
-  border: 1px solid #e0e0e0;
-}
-
-.calendar-selection-summary {
-  margin-top: 16px;
-  padding: 12px;
-  background-color: #fff5f0;
-  border-radius: 8px;
-  text-align: center;
-  color: #f97840;
-  font-weight: 600;
-}
-
-/* ============================
-   RESERVAS
-   ============================ */
-
-.reservas-header {
-  margin-bottom: 24px;
-}
-
-.reservas-filters {
-  display: flex;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.filter-btn {
-  padding: 10px 20px;
-  border: 1px solid #d0d0d0;
-  background-color: white;
-  color: #333;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.filter-btn:hover {
-  background-color: #f5f5f5;
-}
-
-.filter-btn.active {
-  background-color: #f97840;
-  color: white;
-  border-color: #f97840;
-}
-
-.reservas-grid {
-  display: grid;
-  gap: 20px;
-}
-
-.reserva-card-expanded {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-}
-
-.reserva-header-with-image {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.reserva-publicacion-image {
-  width: 120px;
-  height: 120px;
-  border-radius: 8px;
-  overflow: hidden;
   flex-shrink: 0;
 }
 
-.reserva-publicacion-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.dashboard-container .legend-icon-blocked {
+  border: 3px solid var(--error-red);
+  background: #fee2e2;
 }
 
-.reserva-image-placeholder {
-  width: 100%;
-  height: 100%;
+.dashboard-container .legend-icon-selected {
+  background: var(--primary-orange);
+  border: 3px solid var(--dark-orange);
+}
+
+.dashboard-container .legend-icon-available {
+  background: var(--bg-light);
+  border: 2px solid var(--border-gray);
+}
+
+.dashboard-container .calendar-selection-summary {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: var(--light-peach);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  color: var(--primary-orange);
+  font-weight: 800;
+  font-size: 1.15rem;
+  border: 2px solid var(--primary-orange);
+}
+
+/* ============================================
+   RESERVAS CUIDADOR
+   ============================================ */
+.dashboard-container .reservas-header {
+  margin-bottom: 2.5rem;
+}
+
+.dashboard-container .reservas-filters {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f5f5f5;
-  font-size: 48px;
-}
-
-.reserva-header-info h3 {
-  margin: 0 0 8px 0;
-  font-size: 20px;
-  color: #222;
-}
-
-.reserva-dueno-info {
-  font-size: 14px;
-  color: #666;
-  margin: 4px 0;
-}
-
-.reserva-dueno-contacto {
-  font-size: 14px;
-  color: #f97840;
-  margin: 4px 0;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  margin-top: 8px;
-}
-
-.status-pendiente {
-  background-color: #fef3c7;
-  color: #92400e;
-}
-
-.status-confirmada {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.status-rechazada {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-.reserva-info {
-  margin-bottom: 16px;
-}
-
-.reserva-date-range {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-
-.date-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.date-label {
-  font-size: 12px;
-  color: #999;
-  font-weight: 500;
-}
-
-.date-value {
-  font-size: 16px;
-  color: #222;
-  font-weight: 600;
-}
-
-.date-separator {
-  font-size: 20px;
-  color: #d0d0d0;
-}
-
-.reserva-price {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.price-label {
-  font-size: 12px;
-  color: #999;
-  font-weight: 500;
-}
-
-.price-value {
-  font-size: 24px;
-  color: #f97840;
-  font-weight: 700;
-}
-
-.reserva-mascotas-preview {
-  margin-bottom: 16px;
-}
-
-.reserva-mascotas-preview strong {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 14px;
-  color: #333;
-}
-
-.mascotas-thumbnails {
-  display: flex;
-  gap: 12px;
+  gap: 1rem;
+  margin-top: 1.5rem;
   flex-wrap: wrap;
 }
 
-.mascota-thumb {
+.dashboard-container .filter-btn {
+  padding: 0.875rem 1.75rem;
+  border: 2px solid var(--border-gray);
+  background: var(--white);
+  color: var(--text-dark);
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container .filter-btn:hover {
+  background: var(--bg-light);
+  border-color: var(--primary-orange);
+  color: var(--primary-orange);
+}
+
+.dashboard-container .filter-btn.active {
+  background: var(--primary-orange);
+  color: var(--white);
+  border-color: var(--primary-orange);
+  box-shadow: var(--shadow-orange);
+}
+
+.dashboard-container .reservas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 2rem;
+}
+
+.dashboard-container .reserva-card-expanded {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  border: 2px solid transparent;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-container .reserva-card-expanded:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--light-peach);
+}
+
+.dashboard-container .reserva-header-with-image {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  align-items: flex-start;
 }
 
-.mascota-thumb img,
-.mascota-thumb-placeholder {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
+.dashboard-container .reserva-publicacion-image {
+  width: 120px;
+  height: 120px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+}
+
+.dashboard-container .reserva-publicacion-image img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border: 2px solid #e5e7eb;
 }
 
-.mascota-thumb-placeholder {
+.dashboard-container .reserva-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f5f5f5;
-  font-size: 24px;
+  font-size: 3rem;
 }
 
-.mascota-thumb-name {
-  font-size: 12px;
-  color: #666;
+.dashboard-container .reserva-header-info {
+  flex: 1;
+}
+
+.dashboard-container .reserva-header-info h3 {
+  color: var(--primary-orange);
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+.dashboard-container .reserva-dueno-info,
+.dashboard-container .reserva-dueno-contacto {
+  color: var(--text-dark);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.dashboard-container .reserva-dueno-contacto {
+  color: var(--primary-orange);
+}
+
+.dashboard-container .status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+.dashboard-container .status-pendiente {
+  background: linear-gradient(135deg, #FFF3CD 0%, #FFE9A8 100%);
+  color: #DA9E00;
+}
+
+.dashboard-container .status-confirmada {
+  background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+  color: #059669;
+}
+
+.dashboard-container .status-rechazada,
+.dashboard-container .status-cancelada {
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  color: #DC2626;
+}
+
+.dashboard-container .reserva-info {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: var(--lighter-peach);
+  border-radius: var(--radius-lg);
+}
+
+.dashboard-container .reserva-date-range {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-container .date-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dashboard-container .date-label {
+  font-size: 0.85rem;
+  color: var(--text-gray);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dashboard-container .date-value {
+  font-size: 1.15rem;
+  color: var(--text-dark);
+  font-weight: 800;
+}
+
+.dashboard-container .date-separator {
+  font-size: 1.5rem;
+  color: var(--primary-orange);
+  font-weight: 700;
+}
+
+.dashboard-container .reserva-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 2px solid var(--white);
+}
+
+.dashboard-container .price-label {
+  font-size: 0.95rem;
+  color: var(--text-gray);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.dashboard-container .price-value {
+  font-size: 1.75rem;
+  color: var(--primary-orange);
+  font-weight: 800;
+}
+
+.dashboard-container .reserva-mascotas-preview {
+  margin: 1.5rem 0;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.dashboard-container .reserva-mascotas-preview strong {
+  display: block;
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+}
+
+.dashboard-container .mascotas-thumbnails {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-container .mascota-thumb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dashboard-container .mascota-thumb img,
+.dashboard-container .mascota-thumb-placeholder {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-container .mascota-thumb-placeholder {
+  background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  border: 2px solid var(--primary-orange);
+}
+
+.dashboard-container .mascota-thumb-name {
+  font-size: 0.8rem;
+  color: var(--text-gray);
+  font-weight: 600;
   max-width: 60px;
   text-align: center;
   overflow: hidden;
@@ -910,317 +1195,869 @@ main {
   white-space: nowrap;
 }
 
-.btn-expand {
+.dashboard-container .btn-expand {
   width: 100%;
-  padding: 12px;
-  background-color: #f5f5f5;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #666;
+  padding: 0.875rem;
+  background: var(--lighter-peach);
+  color: var(--primary-orange);
+  border: 2px solid var(--light-peach);
+  border-radius: var(--radius-lg);
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
-  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  font-size: 1rem;
 }
 
-.btn-expand:hover {
-  background-color: #e5e7eb;
+.dashboard-container .btn-expand:hover {
+  background: var(--light-peach);
+  border-color: var(--primary-orange);
 }
 
-.reserva-expanded-details {
-  border-top: 1px solid #e5e7eb;
-  padding-top: 16px;
+.dashboard-container .reserva-expanded-details {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--light-peach);
 }
 
-.detail-section {
-  margin-bottom: 20px;
+.dashboard-container .detail-section {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: var(--lighter-peach);
+  border-radius: var(--radius-lg);
 }
 
-.detail-section h4 {
-  font-size: 16px;
-  margin: 0 0 12px 0;
-  color: #333;
+.dashboard-container .detail-section h4 {
+  color: var(--primary-orange);
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
 }
 
-.detail-section p {
-  font-size: 14px;
-  color: #666;
-  margin: 8px 0;
+.dashboard-container .detail-section p {
+  margin: 0.5rem 0;
+  color: var(--text-dark);
+  font-weight: 600;
+  line-height: 1.6;
+  font-size: 1rem;
 }
 
-.mascotas-detail-list {
+.dashboard-container .mascotas-detail-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 }
 
-.mascota-detail-item {
+.dashboard-container .mascota-detail-item {
   display: flex;
-  gap: 16px;
-  padding: 16px;
-  background-color: #f9fafb;
-  border-radius: 8px;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
-.mascota-detail-image img,
-.mascota-detail-placeholder {
+.dashboard-container .mascota-detail-image {
   width: 80px;
   height: 80px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.dashboard-container .mascota-detail-image img,
+.dashboard-container .mascota-detail-placeholder {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
-.mascota-detail-placeholder {
+.dashboard-container .mascota-detail-placeholder {
+  background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #e5e7eb;
-  font-size: 32px;
+  font-size: 2rem;
 }
 
-.mascota-detail-info h5 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-  color: #222;
+.dashboard-container .mascota-detail-info h5 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
 }
 
-.mascota-detail-info p {
-  margin: 4px 0;
-  font-size: 14px;
-  color: #666;
+.dashboard-container .mascota-detail-info p {
+  font-size: 0.95rem;
+  color: var(--text-gray);
+  margin: 0.25rem 0;
 }
 
-.exotic-tag {
-  color: #f97840;
-  font-weight: 600;
+.dashboard-container .exotic-tag {
+  color: var(--primary-orange);
+  font-weight: 800;
+  font-size: 0.9rem;
 }
 
-.dias-reservados-list {
-  margin-top: 12px;
+.dashboard-container .dias-reservados-list {
+  margin-top: 1rem;
 }
 
-.dias-grid {
+.dashboard-container .dias-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 0.75rem;
 }
 
-.dia-badge {
-  padding: 6px 12px;
-  background-color: #f0f9ff;
-  border: 1px solid #3b82f6;
-  border-radius: 6px;
-  font-size: 13px;
+.dashboard-container .dia-badge {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
+  border: 2px solid var(--blue-primary);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
   color: #1e40af;
-  font-weight: 500;
+  font-weight: 700;
 }
 
-.no-data {
-  font-size: 14px;
-  color: #999;
+.dashboard-container .no-data {
+  font-size: 1rem;
+  color: var(--text-gray);
   font-style: italic;
+  font-weight: 600;
 }
 
-.reserva-actions {
+.dashboard-container .reserva-actions {
   display: flex;
-  gap: 12px;
+  gap: 1rem;
   justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--light-peach);
 }
 
-.btn-reject {
-  padding: 10px 20px;
-  background-color: white;
-  color: #dc2626;
-  border: 2px solid #dc2626;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
+.dashboard-container .btn-reject {
+  padding: 0.875rem 1.75rem;
+  background: var(--white);
+  color: var(--error-red);
+  border: 2px solid var(--error-red);
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
 }
 
-.btn-reject:hover {
-  background-color: #dc2626;
-  color: white;
+.dashboard-container .btn-reject:hover {
+  background: var(--error-red);
+  color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
 }
 
-.btn-accept {
-  padding: 10px 20px;
-  background-color: #10b981;
-  color: white;
+.dashboard-container .btn-accept {
+  padding: 0.875rem 1.75rem;
+  background: var(--success-green);
+  color: var(--white);
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
-.btn-accept:hover {
-  background-color: #059669;
+.dashboard-container .btn-accept:hover {
+  background: #059669;
+  transform: translateY(-2px);
 }
 
-/* ============================
-   PERFIL
-   ============================ */
-
-.perfil-container {
-  max-width: 800px;
+/* ============================================
+   PERFIL CUIDADOR
+   ============================================ */
+.dashboard-container .perfil-container {
+  max-width: 900px;
   margin: 0 auto;
 }
 
-.perfil-card {
-  background-color: white;
-  padding: 32px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.dashboard-container .perfil-card {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 3rem;
+  box-shadow: var(--shadow-md);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
 }
 
-.perfil-image-container {
+.dashboard-container .perfil-card:hover {
+  border-color: var(--light-peach);
+  box-shadow: var(--shadow-lg);
+}
+
+.dashboard-container .perfil-image-container {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 2.5rem;
 }
 
-.perfil-image {
-  width: 150px;
-  height: 150px;
+.dashboard-container .perfil-image {
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #f97840;
+  border: 5px solid var(--primary-orange);
+  box-shadow: var(--shadow-orange);
+  transition: transform 0.3s ease;
 }
 
-.perfil-placeholder {
-  width: 150px;
-  height: 150px;
+.dashboard-container .perfil-image:hover {
+  transform: scale(1.05);
+}
+
+.dashboard-container .perfil-placeholder {
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
-  background-color: #e5e7eb;
+  background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
+  color: var(--primary-orange);
+  border: 5px dashed var(--primary-orange);
+  font-size: 4rem;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
-  font-size: 48px;
+  transition: transform 0.3s ease;
 }
 
-.perfil-field {
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #e5e7eb;
+.dashboard-container .perfil-placeholder:hover {
+  transform: scale(1.05);
 }
 
-.perfil-field:last-of-type {
+.dashboard-container .perfil-field {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--light-peach);
+  transition: all 0.3s ease;
+}
+
+.dashboard-container .perfil-field:hover {
+  background: var(--lighter-peach);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  border-radius: var(--radius-md);
+}
+
+.dashboard-container .perfil-field:last-of-type {
   border-bottom: none;
 }
 
-.field-label {
+.dashboard-container .field-label {
   display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #999;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--primary-orange);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
 
-.field-value {
-  font-size: 16px;
-  color: #222;
+.dashboard-container .field-value {
+  font-size: 1.15rem;
+  color: var(--text-dark);
   margin: 0;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
-.field-description {
+.dashboard-container .field-description {
   line-height: 1.6;
-  color: #666;
+  color: var(--text-gray);
 }
 
-.perfil-image-upload {
+.dashboard-container .perfil-image-upload {
   text-align: center;
 }
 
-.profile-image-preview {
-  margin: 15px 0;
+.dashboard-container .profile-image-preview {
+  margin: 1.5rem 0;
   display: flex;
   justify-content: center;
 }
 
-/* ============================
-   ESTADOS Y MENSAJES
-   ============================ */
-
-.loading-message {
+/* ============================================
+   ESTADOS Y MENSAJES CUIDADOR
+   ============================================ */
+.dashboard-container .loading-message {
   text-align: center;
-  padding: 40px;
-  font-size: 16px;
-  color: #666;
+  padding: 4rem 2rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-gray);
+  background: var(--lighter-peach);
+  border-radius: var(--radius-xl);
+  margin: 2rem 0;
 }
 
-.error-message {
-  padding: 16px;
-  background-color: #fee2e2;
-  color: #991b1b;
+.dashboard-container .error-message {
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  color: #DC2626;
+  padding: 1.25rem 1.75rem;
+  border-radius: var(--radius-lg);
+  border-left: 5px solid #DC2626;
+  margin-bottom: 2rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-container .empty-state {
+  text-align: center;
+  padding: 5rem 2rem;
+  background: var(--lighter-peach);
+  border-radius: var(--radius-xl);
+  margin: 2rem 0;
+}
+
+.dashboard-container .empty-state>div:first-child {
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+  filter: grayscale(0.3);
+}
+
+.dashboard-container .empty-state h3 {
+  color: var(--text-dark);
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.dashboard-container .empty-state p {
+  color: var(--text-gray);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.reservas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.reservas-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border: 2px solid #e5e7eb;
+  background: white;
   border-radius: 8px;
-  margin: 16px 0;
+  font-weight: 600;
   font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.filter-btn:hover {
+  border-color: #6366f1;
+  color: #6366f1;
 }
 
-.empty-state h3 {
-  font-size: 20px;
-  color: #222;
-  margin: 0 0 8px 0;
+.filter-btn.active {
+  background: #6366f1;
+  color: white;
+  border-color: #6366f1;
 }
 
-.empty-state p {
-  font-size: 14px;
-  color: #999;
-  margin: 0;
-}
-
-/* ============================
-   RESPONSIVE
-   ============================ */
-
-@media (max-width: 1024px) {
-  .calendar-grid-container {
-    grid-template-columns: 1fr;
-  }
+.reservas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
 }
 
 @media (max-width: 768px) {
-  .navbar-buttons {
-    flex-direction: column;
-  }
-
-  .up-buttons,
-  .down-buttons {
-    width: 100%;
-  }
-
-  .nav-button {
-    flex: 1;
-  }
-
-  .form-grid {
+  .reservas-grid {
     grid-template-columns: 1fr;
   }
 
-  .publicaciones-header {
+  .reservas-header {
     flex-direction: column;
-    gap: 16px;
-    align-items: stretch;
+    align-items: flex-start;
+  }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN CUIDADOR
+   ============================================ */
+
+/* Large Desktops (1400px+) */
+@media (min-width: 1400px) {
+  .dashboard-container .reservas-grid {
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  }
+}
+
+/* Desktops (1200px - 1399px) */
+@media (max-width: 1399px) {
+  .dashboard-container .reservas-grid {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  }
+}
+
+/* Tablets grandes (1024px o menos) */
+@media (max-width: 1024px) {
+  .dashboard-container .navbar-title {
+    font-size: 1.75rem;
   }
 
-  .reserva-header-with-image {
-    flex-direction: column;
+  .dashboard-container .navbar-welcome {
+    font-size: 0.95rem;
+    padding: 0.4rem 1rem;
   }
 
-  .reserva-publicacion-image {
+  .dashboard-container .navbar-buttons {
+    grid-template-columns: 150px 1fr auto;
+    gap: 1.5rem;
+  }
+
+  .dashboard-container .nav-button,
+  .dashboard-container .btn-publicaciones-extra,
+  .dashboard-container .logout-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .dashboard-container .dashboard-main {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .dashboard-container .section-title {
+    font-size: 2rem;
+  }
+
+  .dashboard-container .publicaciones-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .dashboard-container .reservas-grid {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .dashboard-container .calendar-grid-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* Tablets (768px o menos) */
+@media (max-width: 768px) {
+  .dashboard-container .dashboard-navbar {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .dashboard-container .navbar-brand {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 0.5rem;
+  }
+
+  .dashboard-container .navbar-title {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-container .navbar-welcome {
+    font-size: 0.9rem;
+  }
+
+  .dashboard-container .navbar-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .dashboard-container .navbar-buttons::before {
+    display: none;
+  }
+
+  .dashboard-container .up-buttons {
     width: 100%;
-    height: 200px;}}
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .dashboard-container .down-buttons {
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .dashboard-container .nav-button,
+  .dashboard-container .btn-publicaciones-extra,
+  .dashboard-container .logout-button {
+    width: 100%;
+    justify-content: center;
+    padding: 0.875rem 1.25rem;
+  }
+
+  .dashboard-container .down-buttons .nav-button,
+  .dashboard-container .down-buttons .logout-button {
+    flex: 1;
+  }
+
+  .dashboard-container .dashboard-main {
+    padding: 2rem 1.25rem;
+  }
+
+  .dashboard-container .section-title {
+    font-size: 1.75rem;
+  }
+
+  .dashboard-container .publicaciones-grid,
+  .dashboard-container .reservas-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .dashboard-container .publicaciones-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+
+  .dashboard-container .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .dashboard-container .form-buttons {
+    flex-direction: column-reverse;
+    gap: 1rem;
+  }
+
+  .dashboard-container .btn-primary,
+  .dashboard-container .btn-secondary {
+    width: 100%;
+  }
+
+  .dashboard-container .perfil-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .dashboard-container .perfil-image,
+  .dashboard-container .perfil-placeholder {
+    width: 140px;
+    height: 140px;
+  }
+
+  .dashboard-container .perfil-placeholder {
+    font-size: 3.5rem;
+  }
+
+  .dashboard-container .reserva-header-with-image {
+    flex-direction: column;
+  }
+
+  .dashboard-container .reserva-publicacion-image {
+    width: 100%;
+    height: 200px;
+  }
+
+  .dashboard-container .reserva-date-range {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .dashboard-container .date-separator {
+    transform: rotate(90deg);
+  }
+
+  .dashboard-container .reserva-actions {
+    flex-direction: column;
+  }
+
+  .dashboard-container .btn-reject,
+  .dashboard-container .btn-accept {
+    width: 100%;
+  }
+
+  .dashboard-container .image-preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}
+
+/* Móviles grandes (480px o menos) */
+@media (max-width: 480px) {
+  .dashboard-container .dashboard-navbar {
+    padding: 1rem 1rem;
+  }
+
+  .dashboard-container .navbar-brand {
+    padding: 0;
+  }
+
+  .dashboard-container .navbar-title {
+    font-size: 1.35rem;
+  }
+
+  .dashboard-container .navbar-welcome {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.9rem;
+  }
+
+  .dashboard-container .nav-button,
+  .dashboard-container .btn-publicaciones-extra,
+  .dashboard-container .logout-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .dashboard-container .down-buttons {
+    flex-direction: column;
+  }
+
+  .dashboard-container .down-buttons .nav-button,
+  .dashboard-container .down-buttons .logout-button {
+    width: 100%;
+  }
+
+  .dashboard-container .dashboard-main {
+    padding: 1.5rem 1rem;
+  }
+
+  .dashboard-container .section-title {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-container .btn-primary {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .dashboard-container .btn-secondary,
+  .dashboard-container .btn-delete,
+  .dashboard-container .btn-edit {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  .dashboard-container .perfil-card,
+  .dashboard-container .form-card {
+    padding: 1.75rem 1.25rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .dashboard-container .perfil-image,
+  .dashboard-container .perfil-placeholder {
+    width: 120px;
+    height: 120px;
+    border-width: 4px;
+  }
+
+  .dashboard-container .perfil-placeholder {
+    font-size: 3rem;
+  }
+
+  .dashboard-container .form-label {
+    font-size: 1rem;
+    padding: 0.65rem 1.25rem;
+  }
+
+  .dashboard-container .form-input,
+  .dashboard-container .form-select,
+  .dashboard-container .form-textarea {
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+  }
+
+  .dashboard-container .checkbox-group {
+    font-size: 1rem;
+    padding: 0.875rem;
+  }
+
+  .dashboard-container .reserva-card-expanded {
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .dashboard-container .reserva-header-info h3 {
+    font-size: 1.35rem;
+  }
+
+  .dashboard-container .reserva-publicacion-image {
+    height: 180px;
+  }
+
+  .dashboard-container .date-value {
+    font-size: 1.05rem;
+  }
+
+  .dashboard-container .price-value {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-container .mascota-thumb img,
+  .dashboard-container .mascota-thumb-placeholder {
+    width: 50px;
+    height: 50px;
+  }
+
+  .dashboard-container .mascota-thumb-name {
+    font-size: 0.75rem;
+    max-width: 50px;
+  }
+
+  .dashboard-container .image-preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+  }
+}
+
+/* Móviles pequeños (360px o menos) */
+@media (max-width: 360px) {
+  .dashboard-container .navbar-title {
+    font-size: 1.25rem;
+  }
+
+  .dashboard-container .navbar-welcome {
+    display: none;
+  }
+
+  .dashboard-container .section-title {
+    font-size: 1.35rem;
+  }
+
+  .dashboard-container .nav-button,
+  .dashboard-container .btn-publicaciones-extra,
+  .dashboard-container .logout-button {
+    font-size: 0.85rem;
+    padding: 0.7rem 0.9rem;
+  }
+
+  .dashboard-container .dashboard-main {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .dashboard-container .btn-primary {
+    padding: 0.8rem 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  .dashboard-container .perfil-image,
+  .dashboard-container .perfil-placeholder {
+    width: 110px;
+    height: 110px;
+  }
+
+  .dashboard-container .perfil-placeholder {
+    font-size: 2.75rem;
+  }
+
+  .dashboard-container .form-label {
+    font-size: 0.95rem;
+    padding: 0.6rem 1rem;
+  }
+
+  .dashboard-container .form-input,
+  .dashboard-container .form-select {
+    padding: 0.8rem 0.9rem;
+    font-size: 0.95rem;
+  }
+
+  .dashboard-container .reserva-header-info h3 {
+    font-size: 1.25rem;
+  }
+
+  .dashboard-container .date-value {
+    font-size: 1rem;
+  }
+
+  .dashboard-container .price-value {
+    font-size: 1.35rem;
+  }
+
+  .dashboard-container .empty-state {
+    padding: 3.5rem 1.5rem;
+  }
+
+  .dashboard-container .empty-state>div:first-child {
+    font-size: 4rem;
+  }
+
+  .dashboard-container .empty-state h3 {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-container .empty-state p {
+    font-size: 1rem;
+  }
+}
+
+/* ============================================
+   ANIMACIONES Y TRANSICIONES CUIDADOR
+   ============================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-container .reserva-card-expanded,
+.dashboard-container .perfil-card,
+.dashboard-container .form-card {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mejoras de accesibilidad CUIDADOR */
+.dashboard-container .nav-button:focus,
+.dashboard-container .btn-primary:focus,
+.dashboard-container .btn-secondary:focus,
+.dashboard-container .btn-delete:focus,
+.dashboard-container .btn-edit:focus {
+  outline: 3px solid var(--primary-orange);
+  outline-offset: 2px;
+}
+
+/* Print styles CUIDADOR */
+@media print {
+
+  .dashboard-container .dashboard-navbar,
+  .dashboard-container .reserva-actions,
+  .dashboard-container .btn-primary,
+  .dashboard-container .btn-secondary,
+  .dashboard-container .btn-delete,
+  .dashboard-container .btn-edit {
+    display: none;
+  }
+
+  .dashboard-container {
+    background: white;
+  }
+
+  .dashboard-container .reserva-card-expanded {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

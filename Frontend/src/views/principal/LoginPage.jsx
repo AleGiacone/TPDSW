@@ -75,7 +75,7 @@ function LoginPage() {
                 required
                 disabled={loading}
               />
-              <label htmlFor="password">Contraseña:</label>
+              <label htmlFor="password" className="password">Contraseña:</label>
               <input
                 type="password"
                 id="password"
