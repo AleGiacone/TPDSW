@@ -260,7 +260,7 @@ async function getDiasReservados(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
     console.log("Obteniendo días reservados para la publicación:", req.params.idPublicacion);
-    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion: parseInt(req.params.idPublicacion) }, { populate: ['reservas'] });
+    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion: parseInt(req.params.idPublicacion as string) }, { populate: ['reservas'] });
       
     const reservasDeLaPublicacion = await em.find(Reserva, { publicacion:  publicacion }, { populate: ['diasReservados'] });
           
@@ -441,7 +441,7 @@ async function update(req: Request, res: Response): Promise<void> {
   const files = req.files as Express.Multer.File[] || [];
   const em = orm.em.fork();
   try {
-    const idPublicacion = Number.parseInt(req.params.idPublicacion);
+    const idPublicacion = Number.parseInt(req.params.idPublicacion as string);
     const publicacion = await em.findOneOrFail(
       Publicacion,
       { idPublicacion },
@@ -518,7 +518,7 @@ async function update(req: Request, res: Response): Promise<void> {
 async function remove(req: Request, res: Response) { 
   try {
     const em = orm.em.fork();
-    const idPublicacion = Number.parseInt(req.params.idPublicacion);
+    const idPublicacion = Number.parseInt(req.params.idPublicacion as string);
     const publicacion = await em.findOneOrFail(
       Publicacion, 
       { idPublicacion }, 

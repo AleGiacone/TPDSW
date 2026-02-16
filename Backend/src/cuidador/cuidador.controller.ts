@@ -115,7 +115,7 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-    const idUsuario = Number.parseInt(req.params.idUsuario);
+    const idUsuario = Number.parseInt(req.params.idUsuario as string);
     const cuidador = await em.findOneOrFail(Cuidador, { idUsuario: idUsuario });
     
     if (!cuidador) {
@@ -319,7 +319,7 @@ async function authenticateUpdate(req: Request, res: Response): Promise<boolean>
 async function remove(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-    const idUsuario = Number.parseInt(req.params.idUsuario);
+    const idUsuario = Number.parseInt(req.params.idUsuario as string);
     const cuidador = await em.findOneOrFail(Cuidador, { idUsuario: idUsuario });
   
     if (cuidador.perfilImage) {

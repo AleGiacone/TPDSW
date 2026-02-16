@@ -107,7 +107,7 @@ async function update(req: Request, res: Response) {
 async function remove(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-    const idUsuario = Number.parseInt(req.params.idUsuario);
+    const idUsuario = Number.parseInt(req.params.idUsuario as string);
     const usuario = await em.findOneOrFail(Usuario, { idUsuario: idUsuario });
     await em.removeAndFlush(usuario);
     res.status(200).json({ message: 'Usuario removed', data: usuario });

@@ -55,7 +55,7 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-    const idPago = Number.parseInt(req.params.idPago);
+    const idPago = Number.parseInt(req.params.idPago as string);
     const pago = await em.findOneOrFail(Pago, { idPago });
     em.assign(pago, req.body.sanitizeInput);
     await em.flush();
@@ -68,7 +68,7 @@ async function update(req: Request, res: Response) {
 async function remove(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-    const idPago = Number.parseInt(req.params.idPago);
+    const idPago = Number.parseInt(req.params.idPago as string);
     const pago = await em.findOneOrFail(Pago, { idPago });
     await em.removeAndFlush(pago);
     res.status(200).json({ message: 'Pago removed', data: pago });
