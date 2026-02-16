@@ -28,10 +28,14 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
   };
 
   const isDateDisabled = (date) => {
-    const dateStr = date.toISOString().split('T')[0];
+    // Usar año/mes/día local en vez de toISOString() para evitar el desfase UTC
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     return date < today || disabledDates.includes(dateStr);
   };
 
@@ -44,7 +48,25 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
     if (!selectedStart || selectedEnd || !hoveredDate) return false;
     const start = selectedStart < hoveredDate ? selectedStart : hoveredDate;
     const end = selectedStart < hoveredDate ? hoveredDate : selectedStart;
+
+    // ✅ No mostrar hover range si contiene fechas bloqueadas
+    if (hasDisabledDatesInRange(start, end)) return false;
+
     return date >= start && date <= end;
+  };
+
+  // Función helper para verificar si hay fechas bloqueadas en un rango
+  const hasDisabledDatesInRange = (start, end) => {
+    const current = new Date(start);
+    while (current <= end) {
+      const year = current.getFullYear();
+      const month = String(current.getMonth() + 1).padStart(2, '0');
+      const day = String(current.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+      if (disabledDates.includes(dateStr)) return true;
+      current.setDate(current.getDate() + 1);
+    }
+    return false;
   };
 
   const handleDateClick = (date) => {
@@ -55,14 +77,23 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
       setSelectedEnd(null);
       onDateChange(date, null);
     } else {
-      if (date < selectedStart) {
-        setSelectedEnd(selectedStart);
+      // Ordenar las fechas
+      const start = date < selectedStart ? date : selectedStart;
+      const end = date < selectedStart ? selectedStart : date;
+
+      // ✅ Validar que el rango no contenga fechas bloqueadas
+      if (hasDisabledDatesInRange(start, end)) {
+        alert('El rango seleccionado contiene fechas no disponibles. Por favor elegí otro rango.');
+        // Resetear selección
         setSelectedStart(date);
-        onDateChange(date, selectedStart);
-      } else {
-        setSelectedEnd(date);
-        onDateChange(selectedStart, date);
+        setSelectedEnd(null);
+        onDateChange(date, null);
+        return;
       }
+
+      setSelectedStart(start);
+      setSelectedEnd(end);
+      onDateChange(start, end);
     }
   };
 
@@ -178,11 +209,13 @@ const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
       setLoading(false);
     }
   };
-
   const fetchDiasReservados = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/publicacion/dias-reservados/${propPublicacionId}`, {
-        credentials: 'include'
+      const response = await fetch(`${API_BASE_URL}/publicacion/dias-reservados`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idPublicacion: propPublicacionId })
       });
       if (!response.ok) throw new Error('Error al cargar fechas');
       const data = await response.json();
@@ -191,7 +224,6 @@ const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
       console.error('Error fetching reserved days:', err);
     }
   };
-
   const fetchMascotas = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/mascotas/duenos/${userId}`, {
@@ -220,19 +252,21 @@ const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
 
   const calculateDias = () => {
     if (!fechaInicio || !fechaFin) return [];
-
     const dias = [];
     const current = new Date(fechaInicio);
     const end = new Date(fechaFin);
 
     while (current <= end) {
-      dias.push(current.toISOString().split('T')[0]);
+      // ANTES: current.toISOString().split('T')[0]  ← bug timezone
+      // DESPUÉS:
+      const year = current.getFullYear();
+      const month = String(current.getMonth() + 1).padStart(2, '0');
+      const day = String(current.getDate()).padStart(2, '0');
+      dias.push(`${year}-${month}-${day}`);
       current.setDate(current.getDate() + 1);
     }
-
     return dias;
   };
-
   const calculateNights = () => {
     if (!fechaInicio || !fechaFin) return 0;
     const diffTime = Math.abs(fechaFin - fechaInicio);
@@ -276,17 +310,14 @@ const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reservaData)
       });
-      const { session } = await response.json();
-
-      // Redirigir al usuario a la página de pago de Stripe
-      window.location.href = session.url;
+      const data = await response.json();
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al crear reserva');
+        throw new Error(data.message || 'Error al crear reserva');
       }
 
-      alert('¡Reserva creada exitosamente!');
+      const { session } = data;
+      window.location.href = session.url;
       // Reset form
       setFechaInicio(null);
       setFechaFin(null);

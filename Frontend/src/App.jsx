@@ -11,6 +11,8 @@ import PublicacionesView from './views/homePrivado/PrivateHomePage';
 import DuenoDashboard from './views/dashboards/DuenoDashboard';
 import CuidadorDashboard from './views/dashboards/CuidadorDashboard';
 import ReservaPageWrapper from './views/reservas/ReservaPage';
+import PaymentSuccess from './views/payment/PaymentSuccess';
+import PaymentCancel from './views/payment/PaymentCancel';
 
 const UnauthorizedPage = () => (
   <div style={{ textAlign: 'center', padding: '2rem' }}>
@@ -26,13 +28,17 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-           
+
             <Route path="/" element={<><Navbar /><PublicacionesView /></>} />
             <Route path="/nosotros" element={<><Navbar /><HomePage /></>} />
             <Route path="/login" element={<><LoginPage /></>} />
             <Route path="/register" element={<><RegisterPage /></>} />
 
             <Route path="/unauthorized" element={<><Navbar /><UnauthorizedPage /></>} />
+
+            {/* Rutas de pago */}
+            <Route path="/payment/success" element={<PaymentSuccess />} />
+            <Route path="/payment/cancel" element={<PaymentCancel />} />
 
             {/* Rutas protegidas */}
             <Route

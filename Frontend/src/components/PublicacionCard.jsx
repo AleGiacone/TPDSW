@@ -1,6 +1,6 @@
 import React from 'react';
 import ImageCarousel from './ImageCarousel';
-import '../styles/PrivateHomePage.css';
+import '../styles/PublicacionesCard.css';
 
 const PublicacionCard = ({
   publicacion,

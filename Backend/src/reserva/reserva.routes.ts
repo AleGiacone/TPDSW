@@ -12,13 +12,12 @@ reservaRouter.put("/:idReserva", update);
 reservaRouter.delete("/:idReserva", remove);
 reservaRouter.patch("/:idReserva", update);
 reservaRouter.post("/test-date", sanitizeReserva, testDate);
-reservaRouter.post("/test-pago", sanitizeReserva, testPagoStripe);
-
+reservaRouter.post("/test-pago", sanitizeReserva, verifyDate,testPagoStripe);
 
 // STRIPE 
 const webHookRouter = Router();
 
-webHookRouter.post('/',express.raw({ type: 'application/json' }), stripeWebHook);
+webHookRouter.post('/', stripeWebHook);
 
 
 export { reservaRouter, webHookRouter };

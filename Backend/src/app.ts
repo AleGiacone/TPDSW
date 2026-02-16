@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { usuarioRouter } from './usuario/usuario.routes.js';
 import 'reflect-metadata'
 import express from "express";
@@ -19,6 +20,9 @@ import cors from 'cors';
 import { reservaRouter, webHookRouter } from './reserva/reserva.routes.js';
 import { pagoRouter } from './reserva/pago.routers.js';
 import rateLimit from 'express-rate-limit';
+
+console.log('ENV:', process.env.STRIPE_SECRET_KEY)
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -33,8 +37,7 @@ declare global {
 const app = express();
 
 
-
-app.use("/webhook", webHookRouter);
+app.use("/api/webhook/stripe", express.raw({ type: 'application/json' }), webHookRouter);
 app.use(cookieParser());
 app.use(cors({ origin: ['http://localhost:3307', 'http://localhost:3308'], credentials: true }));
 app.use(express.json());
@@ -46,13 +49,18 @@ console.log('📂 Sirviendo archivos estáticos desde:', path.join(__dirname, '.
 
 
 app.use((req, res, next) => {
+  // Excluir webhook de Stripe
+  if (req.path.startsWith('/api/webhook/stripe')) {
+    return next();
+  }
+
   console.log('Token recibido:', req.cookies.access_token);
   const token = req.cookies.access_token;
   req.session = { usuario: null }
   try {
     const data = jwt.verify(token, SECRET_JWT_KEY!);
     req.session.usuario = data;
-  } catch {}
+  } catch { }
   next();
 })
 

@@ -4,6 +4,8 @@ import { Calendar, X, AlertCircle, Upload, Trash2, Home, CalendarCheck, User, Lo
 import PublicacionesGrid from '../../components/PublicacionesGrid';
 import { useAuth } from '../../hooks/useAuth';
 import '../../styles/DashboardCuidador.css';
+import { useReservas } from '../../hooks/useReservas';
+import ReservaCard from '../../components/ReservaCard';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -134,7 +136,7 @@ const DisponibilidadCalendar = ({ onDateSelect, blockedDates = [], publicacionId
                 </div>
                 <div className="legend-item">
                     <div className="legend-icon legend-icon-selected"></div>
-                    <span>Fecha bloqueada por ti</span>
+                    <span>Fecha bloqueada por vos</span>
                 </div>
                 <div className="legend-item">
                     <div className="legend-icon legend-icon-available"></div>
@@ -155,7 +157,6 @@ const CuidadorDashboard = () => {
     const navigate = useNavigate();
     const [currentView, setCurrentView] = useState('publicaciones');
     const [publicaciones, setPublicaciones] = useState([]);
-    const [reservas, setReservas] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [existingImages, setExistingImages] = useState([]);
@@ -189,6 +190,18 @@ const CuidadorDashboard = () => {
         cantAnimales: '',
         exotico: false
     });
+
+
+    const {
+        reservas,
+        loading: reservasLoading,
+        error: reservasError,
+        getReservasByEstado,
+    } = useReservas(user?.idUsuario, 'cuidador');
+
+
+    const [filterStatus, setFilterStatus] = useState('todas');
+
 
     // Estados para 2FA
     const [show2FAModal, setShow2FAModal] = useState(false);
@@ -401,33 +414,43 @@ const CuidadorDashboard = () => {
         }
     }, [user?.idUsuario]);
 
-    const fetchReservas = useCallback(async () => {
-        if (!user?.idUsuario) return;
-        try {
-            const response = await fetch(`${API_BASE_URL}/reservas`, {
-                credentials: 'include'
-            });
-            const data = await response.json();
-            const reservasCuidador = data.data.filter(r =>
-                r.publicacion?.idCuidador?.idUsuario === user.idUsuario
-            );
-            setReservas(reservasCuidador);
-        } catch (err) {
-            console.error('Error:', err);
-        }
-    }, [user?.idUsuario]);
-
     const fetchDiasReservados = async (publicacionId) => {
+        if (!publicacionId) {
+            console.warn('⚠️ No hay ID de publicación');
+            return;
+        }
+
         try {
+            console.log('📥 Cargando días no disponibles para publicación:', publicacionId);
+
+            // 🆕 Usar el nuevo endpoint POST
             const response = await fetch(
-                `${API_BASE_URL}/publicacion/dias-reservados/${publicacionId}`,
-                { credentials: 'include' }
+                `${API_BASE_URL}/publicacion/dias-reservados`,
+                {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        idPublicacion: publicacionId
+                    })
+                }
             );
-            if (!response.ok) throw new Error('Error al cargar fechas');
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}`);
+            }
+
             const data = await response.json();
-            setDiasReservados(data.data || []);
+
+            // El backend retorna todos los días (reservados + bloqueados)
+            const todosLosDias = data.data || [];
+
+            console.log(`✅ ${todosLosDias.length} días no disponibles:`, todosLosDias);
+            setDiasReservados(todosLosDias);
+
         } catch (err) {
-            console.error('Error:', err);
+            console.error('❌ Error al cargar días:', err);
+            setDiasReservados([]);
         }
     };
 
@@ -440,12 +463,6 @@ const CuidadorDashboard = () => {
             fetchPublicaciones();
         }
     }, [user?.idUsuario, fetchPublicaciones]);
-
-    useEffect(() => {
-        if (user?.id) {
-            fetchReservas();
-        }
-    }, [user?.id, fetchReservas]);
 
     useEffect(() => {
         if (editingPublicacion?.id) {
@@ -682,37 +699,49 @@ const CuidadorDashboard = () => {
 
         setLoading(true);
         try {
-            
-            const reservaBloqueo = {
-                fechaReserva: new Date().toISOString(),
-                descripcion: '🔒 Fechas bloqueadas por el cuidador',
+            const bloqueoData = {
                 idPublicacion: editingPublicacion.id,
                 dias: fechasABloquear,
-                fechaDesde: new Date(Math.min(...fechasABloquear.map(d => new Date(d)))).toISOString(),
-                fechaHasta: new Date(Math.max(...fechasABloquear.map(d => new Date(d)))).toISOString()
+                titulo: editingPublicacion.titulo,
+                descripcion: editingPublicacion.descripcion,
+                tarifaPorDia: editingPublicacion.tarifaPorDia,
+                ubicacion: editingPublicacion.ubicacion,
+                tipoAlojamiento: editingPublicacion.tipoAlojamiento,
+                cantAnimales: editingPublicacion.cantAnimales,
+                exotico: editingPublicacion.exotico
             };
 
-            const response = await fetch(`${API_BASE_URL}/reservas`, {
+            const response = await fetch(`${API_BASE_URL}/publicacion/reserva-cuidador`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(reservaBloqueo)
+                body: JSON.stringify(bloqueoData)
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Error al bloquear fechas');
+                throw new Error(errorData.message || `Error ${response.status}`);
             }
 
-            alert('✅ Fechas bloqueadas exitosamente');
+            alert(`✅ ${fechasABloquear.length} fecha(s) bloqueada(s)`);
             setFechasABloquear([]);
             await fetchDiasReservados(editingPublicacion.id);
+
         } catch (err) {
             alert('❌ Error: ' + err.message);
         } finally {
             setLoading(false);
         }
     };
+
+
+    useEffect(() => {
+        if (editingPublicacion?.id) {
+            console.log('🔄 Publicación en edición cambió, cargando días no disponibles');
+            fetchDiasReservados(editingPublicacion.id);
+        }
+    }, [editingPublicacion?.id]);
+
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -761,25 +790,6 @@ const CuidadorDashboard = () => {
         }
     };
 
-    const updateReservaEstado = async (reservaId, nuevoEstado) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/reserva/${reservaId}/estado`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ estado: nuevoEstado })
-            });
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}`);
-            }
-            setReservas(prev => prev.map(reserva =>
-                reserva.id === reservaId ? { ...reserva, estado: nuevoEstado } : reserva
-            ));
-            alert(`✅ Reserva ${nuevoEstado === 'confirmada' ? 'aceptada' : 'rechazada'} exitosamente`);
-        } catch (err) {
-            alert('❌ Error al actualizar reserva: ' + err.message);
-        }
-    };
 
     const renderPublicaciones = () => {
         const renderDashboardActions = (pub) => {
@@ -802,7 +812,8 @@ const CuidadorDashboard = () => {
         };
 
         return (
-            <div className="dashboard-main">
+            <>
+                {/* CABECERA: fuera del wrapper */}
                 <div className="publicaciones-header">
                     <h2 className="section-title">Mis Publicaciones</h2>
                     <button
@@ -813,19 +824,22 @@ const CuidadorDashboard = () => {
                     </button>
                 </div>
 
-                <PublicacionesGrid
-                    publicaciones={publicaciones}
-                    loading={loading}
-                    error={error}
-                    onRetry={fetchPublicaciones}
-                    renderCardActions={renderDashboardActions}
-                    emptyMessage="Aún no tienes publicaciones"
-                    showCuidadorInfo={false}
-                />
-            </div>
+                {/* WRAPPER MANUAL CON GRID */}
+                <div className="publicaciones-grid-wrapper">
+                    <PublicacionesGrid
+                        publicaciones={publicaciones}
+                        loading={loading}
+                        error={error}
+                        onRetry={fetchPublicaciones}
+                        renderCardActions={renderDashboardActions}
+                        emptyMessage="Aún no tienes publicaciones"
+                        showCuidadorInfo={false}
+                        isDashboard={false} // ← FALSE para evitar wrapper duplicado
+                    />
+                </div>
+            </>
         );
     };
-
     const renderNuevaPublicacion = () => (
         <div className="dashboard-main">
             <div className="form-container">
@@ -1256,20 +1270,13 @@ const CuidadorDashboard = () => {
         );
     };
 
+
     const renderReservas = () => {
-        const [expandedReserva, setExpandedReserva] = useState(null);
-        const [filterStatus, setFilterStatus] = useState('todas');
-
-        const toggleExpand = (reservaId) => {
-            setExpandedReserva(expandedReserva === reservaId ? null : reservaId);
-        };
-
-        const reservasFiltradas = filterStatus === 'todas'
-            ? reservas
-            : reservas.filter(r => (r.estado || 'pendiente') === filterStatus);
+        const reservasFiltradas = getReservasByEstado(filterStatus);
 
         return (
-            <div className="dashboard-main">
+            <>
+                {/* CABECERA */}
                 <div className="reservas-header">
                     <h2 className="section-title">Reservas Recibidas</h2>
 
@@ -1284,232 +1291,44 @@ const CuidadorDashboard = () => {
                             onClick={() => setFilterStatus('pendiente')}
                             className={`filter-btn ${filterStatus === 'pendiente' ? 'active' : ''}`}
                         >
-                            Pendientes ({reservas.filter(r => (r.estado || 'pendiente') === 'pendiente').length})
+                            Pendientes ({getReservasByEstado('pendiente').length})
                         </button>
                         <button
-                            onClick={() => setFilterStatus('confirmada')}
-                            className={`filter-btn ${filterStatus === 'confirmada' ? 'active' : ''}`}
+                            onClick={() => setFilterStatus('en_curso')}
+                            className={`filter-btn ${filterStatus === 'en_curso' ? 'active' : ''}`}
                         >
-                            Confirmadas ({reservas.filter(r => r.estado === 'confirmada').length})
+                            En curso ({getReservasByEstado('en_curso').length})
                         </button>
                     </div>
                 </div>
 
-                {loading && <div className="loading-message">Cargando reservas...</div>}
-                {error && <div className="error-message">{error}</div>}
+                {reservasLoading && <div className="loading-message">Cargando reservas...</div>}
+                {reservasError && <div className="error-message">{reservasError}</div>}
 
-                {!Array.isArray(reservasFiltradas) ? (
-                    <div className="error-message">Error: Datos de reservas inválidos.</div>
-                ) : reservasFiltradas.length === 0 && !loading ? (
-                    <div className="empty-state">
+                {reservasFiltradas.length === 0 && !reservasLoading ? (
+                    <div className="empty-state" style={{ background: 'var(--lighter-peach)', margin: '0 3rem 4rem' }}>
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
                         <h3>
-                            {filterStatus === 'todas'
-                                ? 'No has recibido reservas aún'
-                                : `No hay reservas ${filterStatus === 'pendiente' ? 'pendientes' : 'confirmadas'}`
-                            }
+                            {filterStatus === 'todas' && 'No has recibido reservas aún'}
+                            {filterStatus === 'pendiente' && 'No hay reservas pendientes'}
+                            {filterStatus === 'en_curso' && 'No hay reservas en curso'}
                         </h3>
                         <p>Tus publicaciones aparecerán en la búsqueda de los dueños</p>
                     </div>
                 ) : (
                     <div className="reservas-grid">
-                        {reservasFiltradas.map((reserva) => {
-                            const reservaId = reserva.id || reserva.idReserva;
-                            const isExpanded = expandedReserva === reservaId;
-                            const publicacion = reserva.publicacion;
-                            const dueno = reserva.dueno;
-                            const primeraImagen = publicacion?.imagenes?.[0];
-
-                            return (
-                                <div key={reservaId} className="reserva-card-expanded reserva-cuidador">
-                                    <div className="reserva-header-with-image">
-                                        {primeraImagen ? (
-                                            <div className="reserva-publicacion-image">
-                                                <img
-                                                    src={primeraImagen.url || `http://localhost:3000${primeraImagen.path}`}
-                                                    alt={publicacion?.titulo || 'Publicación'}
-                                                    onError={(e) => {
-                                                        e.target.style.display = 'none';
-                                                        e.target.nextSibling.style.display = 'flex';
-                                                    }}
-                                                />
-                                                <div className="reserva-image-placeholder" style={{ display: 'none' }}>🏠</div>
-                                            </div>
-                                        ) : (
-                                            <div className="reserva-publicacion-image">
-                                                <div className="reserva-image-placeholder">🏠</div>
-                                            </div>
-                                        )}
-
-                                        <div className="reserva-header-info">
-                                            <h3>{publicacion?.titulo || 'Sin título'}</h3>
-                                            <p className="reserva-dueno-info">
-                                                <strong>Dueño:</strong> {dueno?.nombre || 'N/A'}
-                                            </p>
-                                            {dueno?.telefono && (
-                                                <p className="reserva-dueno-contacto">📱 {dueno.telefono}</p>
-                                            )}
-                                            <span className={`status-badge status-${reserva.estado || 'pendiente'}`}>
-                                                {(reserva.estado || 'PENDIENTE').toUpperCase()}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="reserva-info">
-                                        <div className="reserva-date-range">
-                                            <div className="date-item">
-                                                <span className="date-label">Check-in</span>
-                                                <span className="date-value">
-                                                    {reserva.fechaDesde ? new Date(reserva.fechaDesde).toLocaleDateString('es-AR') : reserva.fechaInicio || 'N/A'}
-                                                </span>
-                                            </div>
-                                            <div className="date-separator">→</div>
-                                            <div className="date-item">
-                                                <span className="date-label">Check-out</span>
-                                                <span className="date-value">
-                                                    {reserva.fechaHasta ? new Date(reserva.fechaHasta).toLocaleDateString('es-AR') : reserva.fechaFin || 'N/A'}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className="reserva-price">
-                                            <span className="price-label">Ganancia estimada</span>
-                                            <span className="price-value">
-                                                ${reserva.total || (publicacion?.tarifaPorDia ? publicacion.tarifaPorDia * Math.ceil((new Date(reserva.fechaHasta) - new Date(reserva.fechaDesde)) / (1000 * 60 * 60 * 24)) : 'N/A')}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="reserva-mascotas-preview">
-                                        <strong>Mascotas a cuidar:</strong>
-                                        <div className="mascotas-thumbnails">
-                                            {reserva.mascotas && reserva.mascotas.length > 0 ? (
-                                                reserva.mascotas.map((mascota, idx) => (
-                                                    <div key={idx} className="mascota-thumb" title={`${mascota.nombre || mascota.nomMascota} - ${mascota.especie}`}>
-                                                        {mascota.imagen ? (
-                                                            <img
-                                                                src={mascota.imagen}
-                                                                alt={mascota.nombre || mascota.nomMascota}
-                                                                onError={(e) => {
-                                                                    e.target.style.display = 'none';
-                                                                    e.target.nextSibling.style.display = 'flex';
-                                                                }}
-                                                            />
-                                                        ) : null}
-                                                        <div className="mascota-thumb-placeholder" style={{ display: mascota.imagen ? 'none' : 'flex' }}>
-                                                            {mascota.exotico ? '🦎' : '🐕'}
-                                                        </div>
-                                                        <span className="mascota-thumb-name">{mascota.nombre || mascota.nomMascota}</span>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <span className="no-data">No especificado</span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        onClick={() => toggleExpand(reservaId)}
-                                        className="btn-expand"
-                                    >
-                                        {isExpanded ? '▲ Ver menos' : '▼ Ver más detalles'}
-                                    </button>
-
-                                    {isExpanded && (
-                                        <div className="reserva-expanded-details">
-                                            <div className="detail-section">
-                                                <h4>Información del Dueño</h4>
-                                                <p><strong>Nombre:</strong> {dueno?.nombre || 'N/A'}</p>
-                                                <p><strong>Email:</strong> {dueno?.email || 'N/A'}</p>
-                                                {dueno?.telefono && <p><strong>Teléfono:</strong> {dueno.telefono}</p>}
-                                            </div>
-
-                                            {reserva.descripcion && (
-                                                <div className="detail-section">
-                                                    <h4>Notas del Dueño</h4>
-                                                    <p>{reserva.descripcion}</p>
-                                                </div>
-                                            )}
-
-                                            <div className="detail-section">
-                                                <h4>Detalles de las Mascotas</h4>
-                                                <div className="mascotas-detail-list">
-                                                    {reserva.mascotas && reserva.mascotas.map((mascota, idx) => (
-                                                        <div key={idx} className="mascota-detail-item">
-                                                            <div className="mascota-detail-image">
-                                                                {mascota.imagen ? (
-                                                                    <img
-                                                                        src={mascota.imagen}
-                                                                        alt={mascota.nombre || mascota.nomMascota}
-                                                                        onError={(e) => {
-                                                                            e.target.style.display = 'none';
-                                                                            e.target.nextSibling.style.display = 'flex';
-                                                                        }}
-                                                                    />
-                                                                ) : null}
-                                                                <div className="mascota-detail-placeholder" style={{ display: mascota.imagen ? 'none' : 'flex' }}>
-                                                                    {mascota.exotico ? '🦎' : '🐕'}
-                                                                </div>
-                                                            </div>
-                                                            <div className="mascota-detail-info">
-                                                                <h5>{mascota.nombre || mascota.nomMascota}</h5>
-                                                                <p><strong>Especie:</strong> {mascota.especie}</p>
-                                                                <p><strong>Raza:</strong> {mascota.raza}</p>
-                                                                <p><strong>Edad:</strong> {mascota.edad} años</p>
-                                                                <p><strong>Sexo:</strong> {mascota.sexo === 'M' ? 'Macho' : 'Hembra'}</p>
-                                                                {mascota.exotico && (
-                                                                    <p className="exotic-tag">✨ Mascota Exótica</p>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <div className="detail-section">
-                                                <h4>Fechas Específicas Reservadas</h4>
-                                                <div className="dias-reservados-list">
-                                                    {reserva.diasReservados && reserva.diasReservados.length > 0 ? (
-                                                        <div className="dias-grid">
-                                                            {reserva.diasReservados.map((dia, idx) => (
-                                                                <span key={idx} className="dia-badge">
-                                                                    {new Date(dia).toLocaleDateString('es-AR', {
-                                                                        day: 'numeric',
-                                                                        month: 'short'
-                                                                    })}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    ) : (
-                                                        <p className="no-data">No especificado</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {(reserva.estado === 'pendiente' || !reserva.estado) && (
-                                        <div className="reserva-actions">
-                                            <button
-                                                onClick={() => updateReservaEstado(reserva.id, 'rechazada')}
-                                                className="btn-reject"
-                                            >
-                                                ✕ Rechazar
-                                            </button>
-                                            <button
-                                                onClick={() => updateReservaEstado(reservaId, 'confirmada')}
-                                                className="btn-accept"
-                                            >
-                                                ✓ Aceptar Reserva
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
+                        {reservasFiltradas.map((reserva) => (
+                            <ReservaCard
+                                key={reserva.idReserva || reserva.id}
+                                reserva={reserva}
+                                userType="cuidador"
+                            // El cuidador solo ve las reservas, no puede cancelarlas
+                            // onCancelar no se pasa → el botón no aparece en ReservaCard
+                            />
+                        ))}
                     </div>
                 )}
-            </div>
+            </>
         );
     };
 
@@ -1722,52 +1541,55 @@ const CuidadorDashboard = () => {
 
     return (
         <div className="dashboard-container">
+
+
             <nav className="dashboard-navbar">
                 <div className="navbar-brand">
-                    <h1 className="navbar-title">PetsBnB - Cuidador</h1>
-                    <span className="navbar-welcome">Bienvenido, {user?.nombre}</span>
+                    <h1 className="navbar-title">
+                        🐕 PetsBnB Cuidador
+                    </h1>
                 </div>
 
-                <div className="navbar-buttons">
-                    <div className="up-buttons">
-                        <button
-                            onClick={() => navigate('/')}
-                            className="nav-button btn-publicaciones-extra"
-                        >
-                            <Home size={18} style={{ marginRight: '5px' }} />
-                            Demás Publicaciones
-                        </button>
-                        <button
-                            onClick={() => setCurrentView('publicaciones')}
-                            className={`nav-button ${currentView === 'publicaciones' ? 'active' : ''}`}
-                        >
-                            Mis Publicaciones
-                        </button>
-                        <button
-                            onClick={() => setCurrentView('reservas')}
-                            className={`nav-button ${currentView === 'reservas' ? 'active' : ''}`}
-                        >
-                            <CalendarCheck size={18} style={{ marginRight: '5px' }} />
-                            Reservas
-                        </button>
-                    </div>
-                    <div className="down-buttons">
-                        <button
-                            onClick={() => setCurrentView('perfil')}
-                            className={`nav-button ${currentView === 'perfil' ? 'active' : ''}`}
-                        >
-                            <User size={18} style={{ marginRight: '5px' }} />
-                        </button>
-                        <button
-                            onClick={handleLogout}
-                            className="logout-button"
-                        >
-                            <LogOut size={18} style={{ marginRight: '5px' }} />
-                        </button>
-                    </div>
+                <div className="up-buttons">
+                    <button
+                        onClick={() => navigate('/')}
+                        className="nav-button btn-publicaciones-extra"
+                    >
+                        <Home size={18} />
+                        Ver Publicaciones
+                    </button>
+                    <button
+                        onClick={() => setCurrentView('publicaciones')}
+                        className={`nav-button ${currentView === 'publicaciones' ? 'active' : ''}`}
+                    >
+                        Mis Publicaciones
+                    </button>
+                    <button
+                        onClick={() => setCurrentView('reservas')}
+                        className={`nav-button ${currentView === 'reservas' ? 'active' : ''}`}
+                    >
+                        <CalendarCheck size={18} />
+                        Reservas
+                    </button>
+                </div>
+
+                <div className="down-buttons">
+                    <button
+                        onClick={() => setCurrentView('perfil')}
+                        className={`nav-button ${currentView === 'perfil' ? 'active' : ''}`}
+                    >
+                        <User size={18} />
+                        Perfil
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        className="logout-button"
+                    >
+                        <LogOut size={18} />
+                        Logout
+                    </button>
                 </div>
             </nav>
-
             <main>
                 {currentView === 'publicaciones' && renderPublicaciones()}
                 {currentView === 'reservas' && renderReservas()}
