@@ -337,7 +337,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.9rem 1.8rem;
+  padding: 1rem 1.8rem;
   background: linear-gradient(135deg, var(--primary-orange) 0%, var(--dark-orange) 100%);
   color: #fff;
   border: none;
@@ -358,7 +358,7 @@ body {
 
 .btn-edit {
   flex: 1;
-  padding: 0.75rem;
+  padding: 1rem;
   background: #3b82f6;
   color: #fff;
   border: none;
@@ -377,7 +377,7 @@ body {
 
 .btn-delete {
   flex: 1;
-  padding: 0.75rem;
+  padding: 1rem;
   background: #ef4444;
   color: #fff;
   border: none;
@@ -515,55 +515,6 @@ body {
   gap: 2rem;
   padding: 0 3rem 4rem;
   background: var(--lighter-peach);
-}
-
-/* ============================================
-   11. PERFIL
-   ============================================ */
-.perfil-container {
-  width: 100%;
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.perfil-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.perfil-header .section-title {
-  font-size: 2.5rem !important;
-  font-weight: 800 !important;
-  background: linear-gradient(135deg, var(--primary-orange) 0%, #ff6b45 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  margin: 0 !important;
-  text-align: left !important;
-}
-
-.profile-details-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 3rem;
-  background: white;
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
-}
-
-.profile-info p {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border-gray);
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--text-dark);
-  margin: 0;
 }
 
 /* ============================================
@@ -762,16 +713,46 @@ body {
     font-size: 0.95rem;
   }
 }
-/* ============================================
-   PERFIL DUEÑO - MISMO ESTILO QUE CUIDADOR
-   ============================================ */
+
+
+/* ============================================================
+   PERFIL COMPARTIDO — Cuidador & Dueño
+   Pegar al final de DashboardCuidador.css y DashboardDueno.css
+   ============================================================ */
+
+/* ── Wrapper principal ─────────────────────────────────────── */
+.perfil-container {
+  width: 100%;
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+  box-sizing: border-box;
+}
+
+.perfil-container .section-title {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin: 0 0 1.75rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid var(--light-peach);
+  text-align: center;
+}
+
+/* ============================================================
+   MODO VISTA
+   ============================================================ */
 .perfil-card {
   background: var(--white);
   border-radius: var(--radius-xl);
-  padding: 3rem;
+  padding: 2.5rem 2rem;
   box-shadow: var(--shadow-md);
   border: 2px solid transparent;
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .perfil-card:hover {
@@ -779,86 +760,580 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+/* ── Foto ── */
 .perfil-image-container {
-  text-align: center;
-  margin-bottom: 2.5rem;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
 }
 
 .perfil-image {
-  width: 180px;
-  height: 180px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   object-fit: cover;
-  border: 5px solid var(--primary-orange);
+  border: 4px solid var(--primary-orange);
   box-shadow: var(--shadow-orange);
   transition: transform 0.3s ease;
+  display: block;
 }
 
 .perfil-image:hover {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 .perfil-placeholder {
-  width: 180px;
-  height: 180px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
-  color: var(--primary-orange);
-  border: 5px dashed var(--primary-orange);
-  font-size: 4rem;
+  border: 4px dashed var(--secondary-orange);
+  font-size: 3.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
   transition: transform 0.3s ease;
 }
 
 .perfil-placeholder:hover {
-  transform: scale(1.05);
+  transform: scale(1.04);
+}
+
+/* ── Filas de datos ── */
+.perfil-fields {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 0.5rem;
 }
 
 .perfil-field {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 2px solid var(--light-peach);
-  transition: all 0.3s ease;
+  display: grid;
+  grid-template-columns: 155px 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid var(--border-gray);
+  transition: background 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.perfil-field:first-child {
+  border-top: 1px solid var(--border-gray);
 }
 
 .perfil-field:hover {
   background: var(--lighter-peach);
-  padding-left: 1rem;
-  padding-right: 1rem;
-  border-radius: var(--radius-md);
-}
-
-.perfil-field:last-of-type {
-  border-bottom: none;
+  border-radius: var(--radius-sm);
 }
 
 .field-label {
-  display: block;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 800;
   color: var(--primary-orange);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
 }
 
 .field-value {
-  font-size: 1.15rem;
+  font-size: 1rem;
   color: var(--text-dark);
-  margin: 0;
   font-weight: 600;
   line-height: 1.5;
+  margin: 0;
+  word-break: break-word;
+  min-width: 0;
 }
 
+.field-value.field-description {
+  color: var(--text-gray);
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+
+/* ── Bloque 2FA ── */
+.perfil-2fa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 0.75rem;
+  background: var(--lighter-peach);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-gray);
+  margin-top: 1.25rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.perfil-2fa-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.perfil-2fa .btn-2fa {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.1rem;
+  background: var(--primary-orange);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.perfil-2fa .btn-2fa:hover {
+  background: var(--dark-orange);
+  transform: translateY(-1px);
+}
+
+.perfil-2fa .btn-2fa:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Acciones ── */
+.perfil-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+  padding-top: 1.75rem;
+  border-top: 2px solid var(--light-peach);
+  width: 100%;
+}
+
+.perfil-actions .btn-primary {
+  width: 100%;
+  justify-content: center;
+  padding: 0.9rem;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.perfil-actions .btn-danger {
+  width: 100%;
+  justify-content: center;
+  padding: 0.9rem;
+  font-size: 1rem;
+}
+
+/* ── btn-danger (outline) ── */
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.6rem;
+  background: transparent !important;
+  color: var(--error-red) !important;
+  border: 2px solid var(--error-red) !important;
+  border-radius: var(--radius-lg);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn-danger:hover {
+  background: var(--error-red) !important;
+  color: var(--white) !important;
+}
+
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Sobrescribir btn-delete cuando está en perfil-actions ── */
+.perfil-actions .btn-delete {
+  flex: unset !important;
+  width: 100% !important;
+  background: transparent !important;
+  color: var(--error-red) !important;
+  border: 2px solid var(--error-red) !important;
+  border-radius: var(--radius-lg) !important;
+  padding: 0.9rem !important;
+  font-size: 1rem !important;
+  box-shadow: none !important;
+}
+
+.perfil-actions .btn-delete:hover {
+  background: var(--error-red) !important;
+  color: white !important;
+  transform: none !important;
+}
+
+/* ============================================================
+   MODO EDICIÓN
+   ============================================================ */
+.perfil-form-card {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Preview imagen ── */
 .perfil-image-upload {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid var(--border-gray);
+  width: 100%;
+}
+
+.perfil-image-upload .form-label {
+  align-self: flex-start;
 }
 
 .profile-image-preview {
-  margin: 1.5rem 0;
   display: flex;
   justify-content: center;
+}
+
+.perfil-image-upload input[type="file"] {
+  width: 100%;
+  max-width: 320px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  border: 2px dashed var(--border-gray);
+  border-radius: var(--radius-md);
+  background: var(--lighter-peach);
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.perfil-image-upload input[type="file"]:hover {
+  border-color: var(--primary-orange);
+}
+
+/* ── form-group dentro del form de perfil ── */
+.perfil-form-card .form-group {
+  margin-bottom: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.perfil-form-card .form-label {
+  display: block;
+  background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
+  color: var(--text-dark);
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 800;
+  font-size: 0.875rem;
+  margin-bottom: 0.6rem;
+  width: fit-content;
+  box-shadow: var(--shadow-sm);
+}
+
+.perfil-form-card .form-input,
+.perfil-form-card .form-select,
+.perfil-form-card .form-textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border-gray);
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  color: var(--text-dark);
+  background: var(--white);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.perfil-form-card .form-input:focus,
+.perfil-form-card .form-select:focus,
+.perfil-form-card .form-textarea:focus {
+  outline: none;
+  border-color: var(--primary-orange);
+  box-shadow: 0 0 0 3px rgba(249, 120, 64, 0.12);
+}
+
+.perfil-form-card .form-textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+/* ── Grid 2 columnas — CONTENIDO en el ancho del card ── */
+.perfil-form-card .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.perfil-form-card .form-grid .form-group {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.perfil-form-card .form-grid .form-select,
+.perfil-form-card .form-grid .form-input {
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* ── Botones del form ── */
+.perfil-form-card .form-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--border-gray);
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.perfil-form-card .form-buttons .btn-primary {
+  min-width: 150px;
+  justify-content: center;
+  margin: 0;
+}
+
+.perfil-form-card .form-buttons .btn-secondary {
+  min-width: 120px;
+  justify-content: center;
+}
+
+/* ── Error dentro del form ── */
+.perfil-form-card .error-message {
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  color: #DC2626;
+  padding: 0.9rem 1.25rem;
+  border-radius: var(--radius-lg);
+  border-left: 4px solid #DC2626;
+  margin-bottom: 1.25rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Botón eliminar foto dentro del form ── */
+.perfil-image-upload .btn-danger {
+  padding: 0.5rem 1.25rem !important;
+  font-size: 0.875rem !important;
+  width: auto !important;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 560px) {
+  .perfil-container {
+    padding: 1.25rem 0.75rem 3rem;
+  }
+
+  .perfil-card,
+  .perfil-form-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .perfil-field {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+    padding: 0.8rem 0.5rem;
+  }
+
+  .field-label {
+    font-size: 0.7rem;
+  }
+
+  .perfil-form-card .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .perfil-form-card .form-buttons {
+    flex-direction: column-reverse;
+  }
+
+  .perfil-form-card .form-buttons .btn-primary,
+  .perfil-form-card .form-buttons .btn-secondary {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .perfil-2fa {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ============================================================
+   2FA — Modal (DashboardDueno.css y DashboardCuidador.css)
+   Agregar al final de cada archivo
+   ============================================================ */
+
+/* ── Overlay ── */
+.twofa-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+}
+
+/* ── Card del modal ── */
+.twofa-modal-content {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem 2rem 2rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  animation: fadeInUp 0.25s ease-out both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Header ── */
+.twofa-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  position: relative;
+}
+
+.twofa-modal-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.twofa-modal-header h3 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin: 0;
+  flex: 1;
+}
+
+.twofa-modal-close {
+  position: absolute;
+  right: 0;
+  top: -0.5rem;
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--text-gray);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: color 0.2s, background 0.2s;
+  line-height: 1;
+}
+
+.twofa-modal-close:hover {
+  color: var(--text-dark);
+  background: var(--lighter-peach);
+}
+
+/* ── Descripción ── */
+.twofa-modal-desc {
+  font-size: 0.9rem;
+  color: var(--text-gray);
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ── QR ── */
+.twofa-modal-qr {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--lighter-peach);
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--border-gray);
+  overflow: hidden;
+}
+
+.twofa-modal-qr img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+}
+
+.twofa-loading {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-gray);
+  text-align: center;
+  padding: 1rem;
+}
+
+/* ── Botón cerrar ── */
+.twofa-modal-btn-close {
+  width: 100%;
+  padding: 0.9rem;
+  background: linear-gradient(135deg, var(--primary-orange) 0%, var(--dark-orange) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  box-shadow: var(--shadow-orange);
+}
+
+.twofa-modal-btn-close:hover {
+  box-shadow: 0 6px 20px rgba(249, 120, 64, 0.45);
+  transform: translateY(-1px);
 }
