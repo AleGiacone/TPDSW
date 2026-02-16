@@ -61,7 +61,7 @@ async function update(req: Request, res: Response) {
       res.status(400).json({ message: "Nombre de especie invalido" });
       return;
     }
-    const idEspecie = Number.parseInt (req.params.idEspecie);
+    const idEspecie = Number.parseInt (req.params.idEspecie as string);
     const especie = await em.findOneOrFail( Especie, {idEspecie} );
     // Traquea
     em.assign(especie, req.body.sanitizeInput)
@@ -75,8 +75,9 @@ async function update(req: Request, res: Response) {
 
 async function remove (req: Request, res: Response) {
  try {
+  console.log("Removing especie with id:", req.params.idEspecie);
    const em = orm.em.fork();
-   const idEspecie = Number.parseInt (req.params.idEspecie)
+   const idEspecie = Number.parseInt (req.params.idEspecie as string)
    const especie = await em.findOneOrFail (Especie, {idEspecie} )
    await em.removeAndFlush (especie)
    res.status(200).send ({message:"se fue"})

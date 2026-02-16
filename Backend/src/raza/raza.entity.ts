@@ -5,13 +5,13 @@ import { Mascota } from '../mascota/mascota.entity.js'
 @Entity()
 export class Raza {
   @PrimaryKey({ autoincrement: true })
-  idRaza!: number;
+  idRaza?: number;
 
   @Property({ nullable: false, unique: false })
   nomRaza!: string;
 
-  @ManyToOne(() => Especie, { nullable: false, cascade: [Cascade.PERSIST] })
-  especie!: Rel<Especie>;
+@ManyToOne(() => Especie, { nullable: false, deleteRule: 'cascade', cascade: [Cascade.PERSIST] })
+especie!: Rel<Especie>;
 
   @OneToMany(() => Mascota, mascota => mascota.raza, { cascade: [Cascade.ALL] })
   mascotas = new Collection<Mascota>(this);

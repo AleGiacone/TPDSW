@@ -7,7 +7,21 @@ import { Publicacion } from "../publicacion/publicacion.entity.js";
   discriminatorValue: 'cuidador'
 })
 export class Cuidador extends Usuario {
+  // @PrimaryKey()
+  // idUsuario!: number;
+    
+  // @Property({ nullable: false, unique: false })
+  // nombre!: string;
   
+  // @Property({ nullable: false, unique: true })
+  // email!: string;
+  
+  // @Property({ nullable: false, unique: false })
+  // password!: string;
+  
+  // @Property({ nullable: false, unique: false })
+  // tipoUsuario!: string;  
+    
   @Property({ nullable: true, unique: true })
   nroDocumento!: string;
 

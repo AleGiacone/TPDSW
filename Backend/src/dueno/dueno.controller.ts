@@ -175,7 +175,7 @@ async function findPets(req: Request, res: Response) {
 async function updateDueno(req: Request, res: Response): Promise<void> {
   try {
     const em = orm.em.fork();
-    const idUsuario = Number.parseInt(req.params.idUsuario);
+    const idUsuario = Number.parseInt(req.params.idUsuario as string);
     const dueno = await em.findOneOrFail(Dueno, { idUsuario });
 
     if (!dueno) {
@@ -199,7 +199,7 @@ async function updateDueno(req: Request, res: Response): Promise<void> {
 async function remove(req: Request, res: Response) {
   const emFork = orm.em.fork();
   try {
-    const idUsuario = Number.parseInt(req.params.idUsuario);
+    const idUsuario = Number.parseInt(req.params.idUsuario as string);
 
     
     const dueno = await emFork.findOneOrFail(Dueno, { idUsuario }, {

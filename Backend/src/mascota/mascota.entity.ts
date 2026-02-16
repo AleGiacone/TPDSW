@@ -19,10 +19,10 @@
     @Property({ nullable: false, unique: false })
     sexo!: string;
     
-    @ManyToOne( () => Especie, { nullable: false })
-    especie!: Rel<Especie>;
+    @ManyToOne(() => Especie, { nullable: true, deleteRule: 'set null' })
+    especie?: Rel<Especie>;
 
-    @ManyToOne(() => Raza, { nullable: true })
+    @ManyToOne(() => Raza, { nullable: true, deleteRule: 'set null'})
     raza?: Rel<Raza>;
   
     @Property({ type: 'boolean', default: false })
@@ -34,7 +34,7 @@
     @Property({ nullable: false, unique: false })
     descripcion?: string;
     
-    @ManyToOne({ entity: () => Dueno, nullable: false,  })
+    @ManyToOne({ entity: () => Dueno, nullable: false, cascade: [Cascade.PERSIST] })
     dueno!: Rel<Dueno>;
 
 

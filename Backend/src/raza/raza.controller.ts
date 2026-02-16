@@ -78,7 +78,7 @@ async function add(req: Request, res: Response): Promise<void> {
 async function findOne(req: Request, res: Response) {
   try{
     const em = orm.em.fork();
-    const idRaza = Number.parseInt (req.params.idRaza)
+    const idRaza = Number.parseInt (req.params.idRaza as string)
     const raza = await em.findOneOrFail (Raza , {idRaza}, {populate : ['especie']});
     res.status(200).json({ message: 'Raza found', data: raza });
   } catch (error:any){
@@ -94,7 +94,7 @@ async function update(req: Request, res: Response) {
       res.status(400).json({ message: "Nombre de raza invalido" });
       return;
     }
-    const idRaza = Number.parseInt(req.params.idRaza);
+    const idRaza = Number.parseInt(req.params.idRaza as string);
     console.log("idRaza", idRaza)
     const raza = await em.findOneOrFail(Raza, {idRaza} );
     em.assign( raza, req.body)
@@ -110,7 +110,7 @@ async function update(req: Request, res: Response) {
 async function remove (req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-    const idRaza = Number.parseInt (req.params.idRaza)
+    const idRaza = Number.parseInt (req.params.idRaza as string)
     const raza = await em.findOneOrFail (Raza, {idRaza})
     await em.removeAndFlush (raza)
     res.status(200).send ({message:"se fue"})

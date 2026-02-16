@@ -1,5 +1,0 @@
-ignoredBuiltDependencies:
-  - node
-
-onlyBuiltDependencies:
-  - bcrypt
