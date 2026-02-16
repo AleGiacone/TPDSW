@@ -165,7 +165,7 @@ async function updateProfile(req: Request, res: Response): Promise<void> {
         }
 
         const dataToUpdate = req.body.sanitizeInput || req.body;
-        const camposPermitidos = ['nombre', 'email', 'telefono', 'descripcion', 'sexoCuidador'];
+      const camposPermitidos = ['nombre', 'email', 'telefono', 'descripcion', 'sexoCuidador', 'nroDocumento', 'tipoDocumento'];
         
         if (dataToUpdate.email && dataToUpdate.email !== cuidador.email) {
             const emailExists = await em.findOne(Usuario, { email: dataToUpdate.email });

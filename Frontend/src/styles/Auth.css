@@ -1,4 +1,3 @@
-
 html,
 body {
      margin: 0;
@@ -57,7 +56,7 @@ body {
 .auth-container-register {
      margin-top: 50px;
      margin-bottom: 50px;
-    
+
 }
 
 .auth-form {
@@ -84,8 +83,8 @@ body {
 
 }
 
-.form-group{
-     display:flex;
+.form-group {
+     display: flex;
      flex-direction: column;
      width: 1450px;
      max-width: 100%;
@@ -144,7 +143,7 @@ h4 {
      margin-bottom: 20px;
      text-align: left;
      padding: 10px;
-     width:15%;
+     width: 15%;
      display: block;
      flex-direction: column;
      background: linear-gradient(145deg, #FFAD66, #FA8351);
@@ -172,16 +171,17 @@ h4 {
      align-self: flex-start;
      margin-left: 27rem;
 }
+
 .auth-container-register label {
      font-weight: bold;
-     font-size:1.3rem;
+     font-size: 1.3rem;
      margin-bottom: 20px;
      text-align: center;
      padding: 10px;
      width: 50%;
      display: block;
      flex-direction: column;
-background: linear-gradient(145deg, #FFAD66, #FA8351);
+     background: linear-gradient(145deg, #FFAD66, #FA8351);
      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
      border-radius: 20px;
      color: #fff;
@@ -264,7 +264,6 @@ background: linear-gradient(145deg, #FFAD66, #FA8351);
 .selector-tipo {
      width: 100%;
      max-width: 600px;
-     /* Limitar el ancho */
      margin-bottom: 30px;
      font-size: 1.2rem;
 }
@@ -320,40 +319,25 @@ select {
 }
 
 .mensaje-exito-redireccion {
-     /* Layout */
      padding: 15px 20px;
      margin-bottom: 20px;
      border-radius: 8px;
-
-     /* Colores y Fondo */
      background-color: #e6ffed;
-     /* Fondo verde claro */
      color: #008000;
-     /* Texto verde oscuro */
      border: 1px solid #b7eb8f;
-     /* Borde verde */
-
-     /* Tipografía y Énfasis */
      font-weight: 600;
      text-align: center;
      font-size: 16px;
-
-     /* Efecto Visual (opcional, imitando una alerta) */
      box-shadow: 0 2px 4px rgba(0, 128, 0, 0.1);
-
-     /* Animación (opcional): para que destaque al aparecer */
      animation: fadeInOut 0.5s ease-in-out;
 }
-
 
 .mensaje-error {
      padding: 15px 20px;
      margin-bottom: 20px;
      border-radius: 8px;
      background-color: #fff0f6;
-     /* Fondo rojo claro */
      color: #cf1322;
-     /* Texto rojo oscuro */
      border: 1px solid #ffa39e;
      font-weight: 500;
      text-align: center;
@@ -373,11 +357,10 @@ select {
 }
 
 /* ========================================= */
-/* RESPONSIVE: MÓVILES (Max-width 768px) */
+/* RESPONSIVE: MÓVILES (Max-width 768px)      */
 /* ========================================= */
 @media (max-width: 768px) {
 
-     /* TÍTULOS */
      h3,
      h4 {
           max-width: 90%;
@@ -386,19 +369,16 @@ select {
           margin: 15px auto 20px;
      }
 
-     /* CONTENEDOR DE LOGIN */
      .auth-container {
           max-width: 95%;
           padding: 10px;
      }
 
-     /* CONTENEDOR DE REGISTER */
      .auth-container-register {
           max-width: 95%;
           padding: 10px;
      }
 
-     /* FORMULARIO Y CAMPOS (Login y Register) */
      .auth-form {
           width: 100%;
           max-width: 90%;
@@ -414,7 +394,6 @@ select {
           margin-bottom: 15px;
      }
 
-     /* LABELS */
      label {
           width: auto;
           padding: 8px 15px;
@@ -422,7 +401,6 @@ select {
           margin-bottom: 5px;
      }
 
-     /* BOTÓN LOGIN */
      .auth-form button {
           width: 100%;
           max-width: 250px;
@@ -431,7 +409,6 @@ select {
           margin-top: 10px;
      }
 
-     /* BOTONES TIPO DE USUARIO */
      .selector-tipo {
           max-width: 100%;
           padding: 0 10px;
@@ -449,7 +426,6 @@ select {
           font-size: 0.9rem;
      }
 
-     /* BOTÓN REGISTRARSE */
      .auth-container-register form button[type="submit"] {
           max-width: 250px;
           font-size: 1.1rem;
@@ -458,9 +434,6 @@ select {
      }
 }
 
-/* ========================================= */
-/* RESPONSIVE: PANTALLAS PEQUEÑAS (Max-width 480px) */
-/* ========================================= */
 @media (max-width: 480px) {
 
      h3,
@@ -493,5 +466,223 @@ select {
           padding: 12px;
           font-size: 1rem;
      }
+}
 
+
+/* ============================================================
+   2FA — PANTALLA VERIFICACIÓN
+   Card propia que resetea TODOS los estilos globales
+   ============================================================ */
+
+/* Card centrada con ancho fijo — ignora los estilos de auth-container */
+.twofa-card {
+     width: 380px;
+     max-width: calc(100vw - 2rem);
+     background: #ffffff;
+     border-radius: 20px;
+     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+     padding: 2rem 2rem 1.75rem;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     gap: 0;
+     box-sizing: border-box;
+     /* Resetear font-size del auth-container */
+     font-size: 1rem;
+}
+
+/* Ícono */
+.twofa-card .twofa-icon {
+     font-size: 2rem;
+     line-height: 1;
+     margin-bottom: 0.75rem;
+     display: block;
+     text-align: center;
+}
+
+/* Título — resetear el h3 global (4rem, naranja, caja blanca) */
+.twofa-card .twofa-title {
+     font-family: 'Nunito', sans-serif;
+     font-size: 1.45rem !important;
+     font-weight: 800 !important;
+     color: #1f2937 !important;
+     text-align: center !important;
+     background: none !important;
+     box-shadow: none !important;
+     border-radius: 0 !important;
+     padding: 0 !important;
+     margin: 0 0 0.4rem !important;
+     width: auto !important;
+     line-height: 1.25 !important;
+}
+
+/* Subtítulo */
+.twofa-card .twofa-subtitle {
+     font-family: 'Nunito', sans-serif;
+     font-size: 0.875rem;
+     font-weight: 600;
+     color: #6b7280;
+     text-align: center;
+     line-height: 1.5;
+     margin: 0 0 1.5rem;
+     padding: 0;
+     background: none;
+     border: none;
+     width: 100%;
+}
+
+/* Formulario dentro del card */
+.twofa-card .twofa-form {
+     display: flex;
+     flex-direction: column;
+     width: 100%;
+     gap: 0;
+}
+
+/* Grupo del campo */
+.twofa-card .twofa-field {
+     display: flex;
+     flex-direction: column;
+     width: 100%;
+     margin-bottom: 0.75rem;
+}
+
+/* Label del campo — resetear el label naranja con fondo */
+.twofa-card .twofa-field .twofa-label {
+     font-family: 'Nunito', sans-serif !important;
+     font-size: 0.72rem !important;
+     font-weight: 800 !important;
+     color: #f97840 !important;
+     text-transform: uppercase !important;
+     letter-spacing: 0.6px !important;
+     margin-bottom: 0.5rem !important;
+     margin-left: 0 !important;
+     padding: 0 !important;
+     background: none !important;
+     box-shadow: none !important;
+     border-radius: 0 !important;
+     width: auto !important;
+     align-self: flex-start !important;
+     display: block !important;
+}
+
+/* Input código 6 dígitos — resetear input global */
+.twofa-card .twofa-field .twofa-input {
+     width: 100% !important;
+     max-width: 100% !important;
+     padding: 0.85rem 1rem !important;
+     font-size: 1.6rem !important;
+     font-weight: 800 !important;
+     text-align: center !important;
+     letter-spacing: 0.55rem !important;
+     border: 2px solid #e5e7eb !important;
+     border-radius: 12px !important;
+     font-family: 'Nunito', monospace, sans-serif !important;
+     background: #fafafa !important;
+     color: #1f2937 !important;
+     box-shadow: none !important;
+     margin-bottom: 0 !important;
+     transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+     box-sizing: border-box !important;
+}
+
+.twofa-card .twofa-field .twofa-input:focus {
+     outline: none !important;
+     border-color: #f97840 !important;
+     box-shadow: 0 0 0 3px rgba(249, 120, 64, 0.15) !important;
+}
+
+.twofa-card .twofa-field .twofa-input::placeholder {
+     letter-spacing: 0.4rem;
+     color: #d1d5db;
+     font-weight: 400;
+}
+
+/* Error */
+.twofa-card .twofa-error {
+     width: 100%;
+     background: #fef2f2;
+     color: #dc2626;
+     padding: 0.55rem 0.85rem;
+     border-radius: 8px;
+     border-left: 3px solid #dc2626;
+     font-size: 0.82rem;
+     font-weight: 700;
+     margin-top: 0.5rem;
+     margin-bottom: 0.25rem;
+     text-align: left;
+     box-sizing: border-box;
+     font-family: 'Nunito', sans-serif;
+}
+
+/* Botones — resetear .auth-form button global */
+.twofa-card .twofa-buttons {
+     display: flex;
+     flex-direction: column;
+     gap: 0.55rem;
+     width: 100%;
+     margin-top: 1rem;
+}
+
+.twofa-card .twofa-buttons .btn-verify {
+     width: 100% !important;
+     max-width: 100% !important;
+     padding: 0.85rem 1rem !important;
+     background: linear-gradient(135deg, #f97840 0%, #e65c2b 100%) !important;
+     color: #fff !important;
+     border: none !important;
+     border-radius: 12px !important;
+     font-family: 'Nunito', sans-serif !important;
+     font-weight: 800 !important;
+     font-size: 0.95rem !important;
+     cursor: pointer !important;
+     transition: box-shadow 0.2s ease, transform 0.15s ease !important;
+     box-shadow: 0 4px 14px rgba(249, 120, 64, 0.3) !important;
+     text-align: center !important;
+     line-height: 1.3 !important;
+     margin: 0 !important;
+}
+
+.twofa-card .twofa-buttons .btn-verify:hover:not(:disabled) {
+     box-shadow: 0 6px 20px rgba(249, 120, 64, 0.45) !important;
+     transform: translateY(-1px) !important;
+}
+
+.twofa-card .twofa-buttons .btn-verify:disabled {
+     opacity: 0.45 !important;
+     cursor: not-allowed !important;
+     transform: none !important;
+     box-shadow: none !important;
+}
+
+.twofa-card .twofa-buttons .btn-back {
+     width: 100% !important;
+     max-width: 100% !important;
+     padding: 0.7rem 1rem !important;
+     background: transparent !important;
+     color: #6b7280 !important;
+     border: 2px solid #e5e7eb !important;
+     border-radius: 12px !important;
+     font-family: 'Nunito', sans-serif !important;
+     font-weight: 700 !important;
+     font-size: 0.875rem !important;
+     cursor: pointer !important;
+     transition: border-color 0.2s, color 0.2s !important;
+     text-align: center !important;
+     line-height: 1.3 !important;
+     box-shadow: none !important;
+     margin: 0 !important;
+}
+
+.twofa-card .twofa-buttons .btn-back:hover:not(:disabled) {
+     border-color: #f97840 !important;
+     color: #f97840 !important;
+     background: transparent !important;
+     transform: none !important;
+     box-shadow: none !important;
+}
+
+.twofa-card .twofa-buttons .btn-back:disabled {
+     opacity: 0.5 !important;
+     cursor: not-allowed !important;
 }

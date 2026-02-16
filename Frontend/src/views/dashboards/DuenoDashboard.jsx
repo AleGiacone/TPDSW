@@ -81,7 +81,8 @@ const DuenoDashboard = () => {
         email: user?.email || '',
         telefono: user?.telefono || '',
         nroDocumento: user?.nroDocumento || '',
-        tipoDocumento: user?.tipoDocumento || ''
+        tipoDocumento: user?.tipoDocumento || 'DNI',
+        telefonoEmergencia: user?.telefonoEmergencia || '',  // ← agregar
     });
     const [editingPerfil, setEditingPerfil] = useState(false);
 
@@ -96,6 +97,42 @@ const DuenoDashboard = () => {
         cancelarReserva,
         getReservasByEstado,      // filtra por 'pendiente' | 'en_curso' | 'todas'
     } = useReservas(user?.idUsuario, 'dueno');
+
+
+
+    const [show2FAModal, setShow2FAModal] = useState(false);
+    const [qrCode2FA, setQrCode2FA] = useState(null);
+    const [loading2FA, setLoading2FA] = useState(false);
+
+    // ── Función activar 2FA (igual a cuidador) ──
+    const handleActivate2FA = async () => {
+        setLoading2FA(true);
+        setShow2FAModal(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/usuarios/2fa/generate`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email }),
+            });
+            const data = await response.json();
+            if (data.qrDataUrl) {
+                setQrCode2FA(data.qrDataUrl);
+            } else {
+                alert('Error al generar el código QR');
+            }
+        } catch (err) {
+            console.error('Error al generar 2FA:', err);
+            alert('Error de conexión al generar 2FA');
+        } finally {
+            setLoading2FA(false);
+        }
+    };
+
+    const close2FAModal = () => {
+        setShow2FAModal(false);
+        setQrCode2FA(null);
+    };
 
     // ─── Redirect to reservas view if coming back from a successful payment ────
     useEffect(() => {
@@ -420,7 +457,8 @@ const DuenoDashboard = () => {
                 email: user?.email || '',
                 telefono: user?.telefono || '',
                 nroDocumento: user?.nroDocumento || '',
-                tipoDocumento: user?.tipoDocumento || 'DNI'
+                tipoDocumento: user?.tipoDocumento || 'DNI',
+                telefonoEmergencia: user?.telefonoEmergencia || '',  // ← agregar
             });
         }
     }, [user]);
@@ -958,6 +996,7 @@ const DuenoDashboard = () => {
             </form>
         </div>
     );
+
     const renderPerfil = () => (
         <div className="dashboard-main">
             <div className="perfil-container">
@@ -965,7 +1004,7 @@ const DuenoDashboard = () => {
 
                 {!editingPerfil ? (
                     <div className="perfil-card">
-                        {/* ✅ Imagen centralizada igual que cuidador */}
+                        {/* ── Foto ── */}
                         <div className="perfil-image-container">
                             {user?.perfilImage ? (
                                 <img
@@ -978,159 +1017,135 @@ const DuenoDashboard = () => {
                             )}
                         </div>
 
-                        {/* ✅ Mismo formato que cuidador con .perfil-field */}
-                        <div className="perfil-field">
-                            <label className="field-label">Nombre:</label>
-                            <p className="field-value">{user?.nombre}</p>
-                        </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Email:</label>
-                            <p className="field-value">{user?.email}</p>
-                        </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Teléfono:</label>
-                            <p className="field-value">{user?.telefono || 'No especificado'}</p>
-                        </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Documento:</label>
-                            <p className="field-value">
-                                {user?.tipoDocumento || 'DNI'} {user?.nroDocumento || 'No especificado'}
-                            </p>
+                        {/* ── Campos ── */}
+                        <div className="perfil-fields">
+                            <div className="perfil-field">
+                                <span className="field-label">Nombre</span>
+                                <p className="field-value">{user?.nombre}</p>
+                            </div>
+                            <div className="perfil-field">
+                                <span className="field-label">Email</span>
+                                <p className="field-value">{user?.email}</p>
+                            </div>
+                            <div className="perfil-field">
+                                <span className="field-label">Teléfono</span>
+                                <p className="field-value">{user?.telefono || 'No especificado'}</p>
+                            </div>
+                            <div className="perfil-field">
+                                <span className="field-label">Tel. Emergencia</span>
+                                <p className="field-value">{user?.telefonoEmergencia || 'No especificado'}</p>
+                            </div>
+                            <div className="perfil-field">
+                                <span className="field-label">Documento</span>
+                                <p className="field-value">
+                                    {user?.tipoDocumento || 'DNI'} {user?.nroDocumento || 'No especificado'}
+                                </p>
+                            </div>
                         </div>
 
-                        <button
-                            onClick={() => { setEditingPerfil(true); setProfileImageFile(null); setError(''); }}
-                            className="btn-primary"
-                            style={{ marginTop: '2rem' }}
-                        >
-                            ✏️ Editar Perfil
-                        </button>
-                        <button
-                            onClick={handleDeleteUser}
-                            className="btn-delete"
-                            disabled={loading}
-                            style={{ marginTop: '1rem' }}
-                        >
-                            {loading ? 'Eliminando...' : '🗑️ Eliminar Cuenta'}
-                        </button>
+
+                        <div className="perfil-2fa">
+                            <span className="perfil-2fa-label">🔐 Verificación en dos pasos</span>
+                            <button
+                                type="button"
+                                onClick={handleActivate2FA}
+                                disabled={loading2FA}
+                                className="btn-2fa"
+                            >
+                                {loading2FA ? 'Generando...' : 'Activar 2FA'}
+                            </button>
+                        </div>
+
+                        {/* ── Acciones ── */}
+                        <div className="perfil-actions">
+                            <button
+                                onClick={() => { setEditingPerfil(true); setProfileImageFile(null); setError(''); }}
+                                className="btn-primary"
+                            >
+                                ✏️ Editar Perfil
+                            </button>
+                            <button
+                                onClick={handleDeleteUser}
+                                className="btn-danger"
+                                disabled={loading}
+                            >
+                                {loading ? 'Eliminando...' : '🗑️ Eliminar Cuenta'}
+                            </button>
+                        </div>
                     </div>
                 ) : (
-                    <form onSubmit={handlePerfilSubmit} className="form-card">
-                        {/* ✅ Mismo formato de edición que cuidador */}
-                        <div className="form-group perfil-image-upload">
+                    <form onSubmit={handlePerfilSubmit} className="perfil-form-card">
+                        {/* ── Foto ── */}
+                        <div className="perfil-image-upload">
                             <label className="form-label">Foto de perfil:</label>
                             <div className="profile-image-preview">
                                 {profileImageFile ? (
-                                    <img
-                                        src={URL.createObjectURL(profileImageFile)}
-                                        alt="Preview"
-                                        className="perfil-image"
-                                    />
+                                    <img src={URL.createObjectURL(profileImageFile)} alt="Preview" className="perfil-image" />
                                 ) : user?.perfilImage ? (
-                                    <img
-                                        src={`http://localhost:3000${user.perfilImage}`}
-                                        alt="Foto actual"
-                                        className="perfil-image"
-                                    />
+                                    <img src={`http://localhost:3000${user.perfilImage}`} alt="Foto actual" className="perfil-image" />
                                 ) : (
                                     <div className="perfil-placeholder">👤</div>
                                 )}
                             </div>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleProfileImageChange}
-                                className="form-input"
-                            />
+                            <input type="file" accept="image/*" onChange={handleProfileImageChange} />
                             {user?.perfilImage && (
-                                <button
-                                    type="button"
-                                    onClick={deleteDuenoProfileImage}
-                                    className="btn-delete"
-                                    disabled={imageUploading}
-                                    style={{ marginTop: '10px' }}
-                                >
+                                <button type="button" onClick={deleteDuenoProfileImage} className="btn-danger" disabled={imageUploading}>
                                     {imageUploading ? 'Eliminando...' : '🗑️ Eliminar Foto'}
                                 </button>
                             )}
                         </div>
 
+                        {/* ── Campos ── */}
                         <div className="form-group">
                             <label className="form-label">Nombre:</label>
-                            <input
-                                type="text"
-                                name="nombre"
-                                value={perfilForm.nombre}
-                                onChange={handlePerfilFormChange}
-                                className="form-input"
-                                required
-                            />
+                            <input type="text" name="nombre" value={perfilForm.nombre}
+                                onChange={handlePerfilFormChange} className="form-input" required />
                         </div>
 
                         <div className="form-group">
                             <label className="form-label">Email:</label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={perfilForm.email}
-                                onChange={handlePerfilFormChange}
-                                className="form-input"
-                                required
-                            />
+                            <input type="email" name="email" value={perfilForm.email}
+                                onChange={handlePerfilFormChange} className="form-input" required />
                         </div>
 
                         <div className="form-group">
                             <label className="form-label">Teléfono:</label>
-                            <input
-                                type="tel"
-                                name="telefono"
-                                value={perfilForm.telefono}
-                                onChange={handlePerfilFormChange}
-                                className="form-input"
-                            />
+                            <input type="tel" name="telefono" value={perfilForm.telefono}
+                                onChange={handlePerfilFormChange} className="form-input" />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Teléfono de emergencia:</label>
+                            <input type="tel" name="telefonoEmergencia" value={perfilForm.telefonoEmergencia || ''}
+                                onChange={handlePerfilFormChange} className="form-input" />
                         </div>
 
                         <div className="form-grid">
                             <div className="form-group">
                                 <label className="form-label">Tipo de documento:</label>
-                                <select
-                                    name="tipoDocumento"
-                                    value={perfilForm.tipoDocumento}
-                                    onChange={handlePerfilFormChange}
-                                    className="form-select"
-                                >
+                                <select name="tipoDocumento" value={perfilForm.tipoDocumento}
+                                    onChange={handlePerfilFormChange} className="form-select">
                                     <option value="DNI">DNI</option>
                                     <option value="Pasaporte">Pasaporte</option>
                                     <option value="Otro">Otro</option>
                                 </select>
                             </div>
                             <div className="form-group">
-                                <label className="form-label">Número de documento:</label>
-                                <input
-                                    type="text"
-                                    name="nroDocumento"
-                                    value={perfilForm.nroDocumento}
-                                    onChange={handlePerfilFormChange}
-                                    className="form-input"
-                                />
+                                <label className="form-label">Nro. documento:</label>
+                                <input type="text" name="nroDocumento" value={perfilForm.nroDocumento}
+                                    onChange={handlePerfilFormChange} className="form-input" />
                             </div>
                         </div>
 
                         {error && <div className="error-message">{error}</div>}
 
                         <div className="form-buttons">
-                            <button
-                                type="button"
+                            <button type="button"
                                 onClick={() => { setEditingPerfil(false); setProfileImageFile(null); setError(''); }}
-                                className="btn-secondary"
-                            >
+                                className="btn-secondary">
                                 Cancelar
                             </button>
-                            <button
-                                type="submit"
-                                disabled={loading || imageUploading}
-                                className="btn-primary"
-                            >
+                            <button type="submit" disabled={loading || imageUploading} className="btn-primary">
                                 {loading || imageUploading ? 'Guardando...' : 'Guardar Cambios'}
                             </button>
                         </div>
@@ -1139,7 +1154,6 @@ const DuenoDashboard = () => {
             </div>
         </div>
     );
-
     if (loading && !mascotas.length && currentView === 'mascotas') {
         return <div className="loading-message">Cargando...</div>;
     }
@@ -1186,7 +1200,6 @@ const DuenoDashboard = () => {
                     </button>
                     <button onClick={handleLogout} className="logout-button">
                         <LogOut size={18} />
-                        Logout
                     </button>
                 </div>
             </nav>
@@ -1197,6 +1210,37 @@ const DuenoDashboard = () => {
                 {currentView === 'perfil' && renderPerfil()}
                 {currentView === 'nueva-mascota' && renderNuevaMascota()}
             </main>
+
+
+            {show2FAModal && (
+                <div className="twofa-modal-overlay" onClick={close2FAModal}>
+                    <div className="twofa-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="twofa-modal-header">
+                            <span className="twofa-modal-icon">🔐</span>
+                            <h3>Verificación en dos pasos</h3>
+                            <button className="twofa-modal-close" onClick={close2FAModal}>✕</button>
+                        </div>
+                        <p className="twofa-modal-desc">
+                            Escaneá este código QR con Google Authenticator o cualquier app TOTP.
+                            Una vez configurado, se te pedirá el código al iniciar sesión.
+                        </p>
+                        <div className="twofa-modal-qr">
+                            {loading2FA ? (
+                                <div className="twofa-loading">Generando código QR...</div>
+                            ) : qrCode2FA ? (
+                                <img src={qrCode2FA} alt="Código QR 2FA" />
+                            ) : (
+                                <div className="twofa-loading" style={{ color: 'var(--error-red)' }}>
+                                    Error al cargar el código QR
+                                </div>
+                            )}
+                        </div>
+                        <button className="twofa-modal-btn-close" onClick={close2FAModal}>
+                            Listo, cerrar
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

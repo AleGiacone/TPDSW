@@ -317,7 +317,9 @@ const CuidadorDashboard = () => {
                         email: profileFormData.email,
                         telefono: profileFormData.telefono,
                         descripcion: profileFormData.descripcion,
-                        sexoCuidador: profileFormData.sexoCuidador
+                        sexoCuidador: profileFormData.sexoCuidador,
+                        nroDocumento: profileFormData.nroDocumento,
+                        tipoDocumento: profileFormData.tipoDocumento,
                     }),
                     credentials: 'include'
                 }
@@ -1332,6 +1334,7 @@ const CuidadorDashboard = () => {
         );
     };
 
+
     const renderPerfil = () => (
         <div className="dashboard-main">
             <div className="perfil-container">
@@ -1339,6 +1342,7 @@ const CuidadorDashboard = () => {
 
                 {!editingProfile ? (
                     <div className="perfil-card">
+                        {/* ── Foto ── */}
                         <div className="perfil-image-container">
                             {user?.perfilImage ? (
                                 <img
@@ -1351,151 +1355,118 @@ const CuidadorDashboard = () => {
                             )}
                         </div>
 
-                        <div className="perfil-field">
-                            <label className="field-label">Nombre:</label>
-                            <p className="field-value">{user?.nombre}</p>
+                        {/* ── Campos ── */}
+                        <div className="perfil-fields">
+                            <div className="perfil-field">
+                                <span className="field-label">Nombre</span>
+                                <p className="field-value">{user?.nombre}</p>
+                            </div>
+                            <div className="perfil-field">
+                                <span className="field-label">Email</span>
+                                <p className="field-value">{user?.email}</p>
+                            </div>
+                            <div className="perfil-field">
+                                <span className="field-label">Teléfono</span>
+                                <p className="field-value">{user?.telefono || 'No especificado'}</p>
+                            </div>
+                            <div className="perfil-field">
+                                <span className="field-label">Documento</span>
+                                <p className="field-value">
+                                    {user?.tipoDocumento || 'DNI'} {user?.nroDocumento || 'No especificado'}
+                                </p>
+                            </div>
+                            <div className="perfil-field">
+                                <span className="field-label">Sexo</span>
+                                <p className="field-value">{user?.sexoCuidador || 'No especificado'}</p>
+                            </div>
+                            <div className="perfil-field">
+                                <span className="field-label">Descripción</span>
+                                <p className="field-value field-description">
+                                    {user?.descripcion || 'Sin descripción personalizada'}
+                                </p>
+                            </div>
                         </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Email:</label>
-                            <p className="field-value">{user?.email}</p>
-                        </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Teléfono:</label>
-                            <p className="field-value">{user?.telefono || 'No especificado'}</p>
-                        </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Documento:</label>
-                            <p className="field-value">
-                                {user?.tipoDocumento || 'DNI'} {user?.nroDocumento || 'No especificado'}
-                            </p>
-                        </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Sexo:</label>
-                            <p className="field-value">{user?.sexoCuidador || 'No especificado'}</p>
-                        </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Descripción:</label>
-                            <p className="field-value field-description">
-                                {user?.descripcion || 'Sin descripción personalizada'}
-                            </p>
-                        </div>
-                        {/* ACTIVACION 2FA */}
-                        <div>
-                            <label className='2FA' >Activacion de 2FA:</label>
-                            <button onClick={handleActivate2FA} disabled={loading2FA}>
-                                {loading2FA ? 'Generando...' : 'Activar verificacion de dos pasos'}
+
+                        {/* ── 2FA ── */}
+                        <div className="perfil-2fa">
+                            <span className="perfil-2fa-label">🔐 Verificación en dos pasos</span>
+                            <button
+                                type="button"
+                                onClick={handleActivate2FA}
+                                disabled={loading2FA}
+                                className="btn-2fa"
+                            >
+                                {loading2FA ? 'Generando...' : 'Activar 2FA'}
                             </button>
                         </div>
-                        <button
-                            onClick={startEditProfile}
-                            className="btn-primary"
-                        >
-                            ✏️ Editar Perfil
-                        </button>
-                        <button
-                            onClick={handleDeleteUser}
-                            className="btn-delete"
-                            disabled={loading}
-                        >
-                            {loading ? 'Eliminando...' : '🗑️ Eliminar Cuenta'}
-                        </button>
+
+                        {/* ── Acciones ── */}
+                        <div className="perfil-actions">
+                            <button onClick={startEditProfile} className="btn-primary">
+                                ✏️ Editar Perfil
+                            </button>
+                            <button onClick={handleDeleteUser} className="btn-danger" disabled={loading}>
+                                {loading ? 'Eliminando...' : '🗑️ Eliminar Cuenta'}
+                            </button>
+                        </div>
                     </div>
                 ) : (
-                    <form onSubmit={handleUpdateProfile} className="form-card">
-                        <div className="form-group perfil-image-upload">
+                    <form onSubmit={handleUpdateProfile} className="perfil-form-card">
+                        {/* ── Foto ── */}
+                        <div className="perfil-image-upload">
                             <label className="form-label">Foto de perfil:</label>
                             <div className="profile-image-preview">
                                 {profileImage ? (
-                                    <img
-                                        src={URL.createObjectURL(profileImage)}
-                                        alt="Preview"
-                                        className="perfil-image"
-                                    />
+                                    <img src={URL.createObjectURL(profileImage)} alt="Preview" className="perfil-image" />
                                 ) : user?.perfilImage ? (
-                                    <img
-                                        src={`http://localhost:3000${user.perfilImage}`}
-                                        alt="Foto actual"
-                                        className="perfil-image"
-                                    />
+                                    <img src={`http://localhost:3000${user.perfilImage}`} alt="Foto actual" className="perfil-image" />
                                 ) : (
                                     <div className="perfil-placeholder">👤</div>
                                 )}
                             </div>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleProfileImageChange}
-                                className="form-input"
-                            />
+                            <input type="file" accept="image/*" onChange={handleProfileImageChange} />
                         </div>
 
+                        {/* ── Campos ── */}
                         <div className="form-group">
                             <label className="form-label">Nombre:</label>
-                            <input
-                                type="text"
-                                name="nombre"
-                                value={profileFormData.nombre}
-                                onChange={handleProfileChange}
-                                className="form-input"
-                            />
+                            <input type="text" name="nombre" value={profileFormData.nombre}
+                                onChange={handleProfileChange} className="form-input" />
                         </div>
 
                         <div className="form-group">
                             <label className="form-label">Email:</label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={profileFormData.email}
-                                onChange={handleProfileChange}
-                                className="form-input"
-                            />
+                            <input type="email" name="email" value={profileFormData.email}
+                                onChange={handleProfileChange} className="form-input" />
                         </div>
 
                         <div className="form-group">
                             <label className="form-label">Teléfono:</label>
-                            <input
-                                type="tel"
-                                name="telefono"
-                                value={profileFormData.telefono}
-                                onChange={handleProfileChange}
-                                className="form-input"
-                            />
+                            <input type="tel" name="telefono" value={profileFormData.telefono}
+                                onChange={handleProfileChange} className="form-input" />
                         </div>
 
                         <div className="form-grid">
                             <div className="form-group">
                                 <label className="form-label">Tipo de documento:</label>
-                                <select
-                                    name="tipoDocumento"
-                                    value={profileFormData.tipoDocumento}
-                                    onChange={handleProfileChange}
-                                    className="form-select"
-                                >
+                                <select name="tipoDocumento" value={profileFormData.tipoDocumento}
+                                    onChange={handleProfileChange} className="form-select">
                                     <option value="DNI">DNI</option>
                                     <option value="Pasaporte">Pasaporte</option>
                                     <option value="Otro">Otro</option>
                                 </select>
                             </div>
                             <div className="form-group">
-                                <label className="form-label">Número de documento:</label>
-                                <input
-                                    type="text"
-                                    name="nroDocumento"
-                                    value={profileFormData.nroDocumento}
-                                    onChange={handleProfileChange}
-                                    className="form-input"
-                                />
+                                <label className="form-label">Nro. documento:</label>
+                                <input type="text" name="nroDocumento" value={profileFormData.nroDocumento}
+                                    onChange={handleProfileChange} className="form-input" />
                             </div>
                         </div>
 
                         <div className="form-group">
                             <label className="form-label">Sexo:</label>
-                            <select
-                                name="sexoCuidador"
-                                value={profileFormData.sexoCuidador}
-                                onChange={handleProfileChange}
-                                className="form-select"
-                            >
+                            <select name="sexoCuidador" value={profileFormData.sexoCuidador}
+                                onChange={handleProfileChange} className="form-select">
                                 <option value="">Seleccionar...</option>
                                 <option value="Masculino">Masculino</option>
                                 <option value="Femenino">Femenino</option>
@@ -1505,31 +1476,18 @@ const CuidadorDashboard = () => {
 
                         <div className="form-group">
                             <label className="form-label">Descripción personal:</label>
-                            <textarea
-                                name="descripcion"
-                                value={profileFormData.descripcion}
-                                onChange={handleProfileChange}
-                                rows={4}
-                                className="form-textarea"
-                                placeholder="Cuéntanos sobre ti, tu experiencia con mascotas, etc."
-                            />
+                            <textarea name="descripcion" value={profileFormData.descripcion}
+                                onChange={handleProfileChange} rows={4} className="form-textarea"
+                                placeholder="Cuéntanos sobre ti, tu experiencia con mascotas, etc." />
                         </div>
 
                         {error && <div className="error-message">{error}</div>}
 
                         <div className="form-buttons">
-                            <button
-                                type="button"
-                                onClick={cancelEditProfile}
-                                className="btn-secondary"
-                            >
+                            <button type="button" onClick={cancelEditProfile} className="btn-secondary">
                                 Cancelar
                             </button>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="btn-primary"
-                            >
+                            <button type="submit" disabled={loading} className="btn-primary">
                                 {loading ? 'Guardando...' : 'Guardar Cambios'}
                             </button>
                         </div>
@@ -1586,7 +1544,7 @@ const CuidadorDashboard = () => {
                         className="logout-button"
                     >
                         <LogOut size={18} />
-                        Logout
+                        
                     </button>
                 </div>
             </nav>
@@ -1598,56 +1556,31 @@ const CuidadorDashboard = () => {
                 {currentView === 'editar-publicacion' && renderEditarPublicacion()}
             </main>
 
-            {/* Modal 2FA */}
             {show2FAModal && (
-                <div className="modal-overlay" style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    zIndex: 1000
-                }}>
-                    <div className="modal-content" style={{
-                        backgroundColor: 'white',
-                        padding: '2rem',
-                        borderRadius: '8px',
-                        maxWidth: '400px',
-                        width: '90%',
-                        textAlign: 'center'
-                    }}>
-                        <h3 style={{ marginBottom: '1rem' }}>2FA factor</h3>
-                        <p style={{ marginBottom: '1rem', color: '#666' }}>
-                            Escanea este código QR con Google Authenticator
+                <div className="twofa-modal-overlay" onClick={close2FAModal}>
+                    <div className="twofa-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="twofa-modal-header">
+                            <span className="twofa-modal-icon">🔐</span>
+                            <h3>Verificación en dos pasos</h3>
+                            <button className="twofa-modal-close" onClick={close2FAModal}>✕</button>
+                        </div>
+                        <p className="twofa-modal-desc">
+                            Escaneá este código QR con Google Authenticator o cualquier app TOTP.
+                            Una vez configurado, se te pedirá el código al iniciar sesión.
                         </p>
-                        {loading2FA ? (
-                            <p>Cargando código QR...</p>
-                        ) : qrCode2FA ? (
-                            <img 
-                                src={qrCode2FA} 
-                                alt="Código QR 2FA" 
-                                style={{ maxWidth: '200px', margin: '1rem auto' }}
-                            />
-                        ) : (
-                            <p style={{ color: 'red' }}>Error al cargar el código QR</p>
-                        )}
-                        <button 
-                            onClick={close2FAModal}
-                            style={{
-                                marginTop: '1rem',
-                                padding: '0.5rem 1.5rem',
-                                backgroundColor: '#e74c3c',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Cerrar
+                        <div className="twofa-modal-qr">
+                            {loading2FA ? (
+                                <div className="twofa-loading">Generando código QR...</div>
+                            ) : qrCode2FA ? (
+                                <img src={qrCode2FA} alt="Código QR 2FA" />
+                            ) : (
+                                <div className="twofa-loading" style={{ color: 'var(--error-red)' }}>
+                                    Error al cargar el código QR
+                                </div>
+                            )}
+                        </div>
+                        <button className="twofa-modal-btn-close" onClick={close2FAModal}>
+                            Listo, cerrar
                         </button>
                     </div>
                 </div>
