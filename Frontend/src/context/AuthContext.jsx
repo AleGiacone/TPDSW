@@ -21,6 +21,19 @@ export const AuthProvider = ({ children }) => {
     });
 
     const checkAuth = useCallback(async () => {
+        // ✅ Si ya hay usuario en localStorage, no verificar con el servidor
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+            try {
+                setUser(JSON.parse(savedUser));
+                setLoading(false);
+                return; // No hacer el fetch
+            } catch {
+                // Si el localStorage está corrupto, continuar con el fetch
+            }
+        }
+
+        // Solo hacer el fetch si NO hay usuario en localStorage
         try {
             const response = await fetch('http://localhost:3000/api/usuarios/me', {
                 credentials: 'include'
@@ -41,7 +54,6 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (error) {
             console.error('Error verificando autenticación:', error);
-            // On network error, keep whatever is in localStorage
             const savedUser = localStorage.getItem('user');
             if (savedUser) {
                 try {

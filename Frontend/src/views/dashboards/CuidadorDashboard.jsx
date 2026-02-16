@@ -136,7 +136,7 @@ const DisponibilidadCalendar = ({ onDateSelect, blockedDates = [], publicacionId
                 </div>
                 <div className="legend-item">
                     <div className="legend-icon legend-icon-selected"></div>
-                    <span>Fecha bloqueada por ti</span>
+                    <span>Fecha bloqueada por vos</span>
                 </div>
                 <div className="legend-item">
                     <div className="legend-icon legend-icon-available"></div>
@@ -191,15 +191,17 @@ const CuidadorDashboard = () => {
         exotico: false
     });
 
+
     const {
         reservas,
         loading: reservasLoading,
         error: reservasError,
-        aceptarReserva,
-        rechazarReserva,
         getReservasByEstado,
-        isReservaExpired
     } = useReservas(user?.idUsuario, 'cuidador');
+
+
+    const [filterStatus, setFilterStatus] = useState('todas');
+
 
     // Estados para 2FA
     const [show2FAModal, setShow2FAModal] = useState(false);
@@ -413,16 +415,42 @@ const CuidadorDashboard = () => {
     }, [user?.idUsuario]);
 
     const fetchDiasReservados = async (publicacionId) => {
+        if (!publicacionId) {
+            console.warn('⚠️ No hay ID de publicación');
+            return;
+        }
+
         try {
+            console.log('📥 Cargando días no disponibles para publicación:', publicacionId);
+
+            // 🆕 Usar el nuevo endpoint POST
             const response = await fetch(
-                `${API_BASE_URL}/publicacion/dias-reservados/${publicacionId}`,
-                { credentials: 'include' }
+                `${API_BASE_URL}/publicacion/dias-reservados`,
+                {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        idPublicacion: publicacionId
+                    })
+                }
             );
-            if (!response.ok) throw new Error('Error al cargar fechas');
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}`);
+            }
+
             const data = await response.json();
-            setDiasReservados(data.data || []);
+
+            // El backend retorna todos los días (reservados + bloqueados)
+            const todosLosDias = data.data || [];
+
+            console.log(`✅ ${todosLosDias.length} días no disponibles:`, todosLosDias);
+            setDiasReservados(todosLosDias);
+
         } catch (err) {
-            console.error('Error:', err);
+            console.error('❌ Error al cargar días:', err);
+            setDiasReservados([]);
         }
     };
 
@@ -435,12 +463,6 @@ const CuidadorDashboard = () => {
             fetchPublicaciones();
         }
     }, [user?.idUsuario, fetchPublicaciones]);
-
-    useEffect(() => {
-        if (user?.id) {
-            fetchReservas();
-        }
-    }, [user?.id, fetchReservas]);
 
     useEffect(() => {
         if (editingPublicacion?.id) {
@@ -677,37 +699,49 @@ const CuidadorDashboard = () => {
 
         setLoading(true);
         try {
-            
-            const reservaBloqueo = {
-                fechaReserva: new Date().toISOString(),
-                descripcion: '🔒 Fechas bloqueadas por el cuidador',
+            const bloqueoData = {
                 idPublicacion: editingPublicacion.id,
                 dias: fechasABloquear,
-                fechaDesde: new Date(Math.min(...fechasABloquear.map(d => new Date(d)))).toISOString(),
-                fechaHasta: new Date(Math.max(...fechasABloquear.map(d => new Date(d)))).toISOString()
+                titulo: editingPublicacion.titulo,
+                descripcion: editingPublicacion.descripcion,
+                tarifaPorDia: editingPublicacion.tarifaPorDia,
+                ubicacion: editingPublicacion.ubicacion,
+                tipoAlojamiento: editingPublicacion.tipoAlojamiento,
+                cantAnimales: editingPublicacion.cantAnimales,
+                exotico: editingPublicacion.exotico
             };
 
-            const response = await fetch(`${API_BASE_URL}/reservas`, {
+            const response = await fetch(`${API_BASE_URL}/publicacion/reserva-cuidador`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(reservaBloqueo)
+                body: JSON.stringify(bloqueoData)
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Error al bloquear fechas');
+                throw new Error(errorData.message || `Error ${response.status}`);
             }
 
-            alert('✅ Fechas bloqueadas exitosamente');
+            alert(`✅ ${fechasABloquear.length} fecha(s) bloqueada(s)`);
             setFechasABloquear([]);
             await fetchDiasReservados(editingPublicacion.id);
+
         } catch (err) {
             alert('❌ Error: ' + err.message);
         } finally {
             setLoading(false);
         }
     };
+
+
+    useEffect(() => {
+        if (editingPublicacion?.id) {
+            console.log('🔄 Publicación en edición cambió, cargando días no disponibles');
+            fetchDiasReservados(editingPublicacion.id);
+        }
+    }, [editingPublicacion?.id]);
+
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -756,25 +790,6 @@ const CuidadorDashboard = () => {
         }
     };
 
-    const updateReservaEstado = async (reservaId, nuevoEstado) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/reserva/${reservaId}/estado`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ estado: nuevoEstado })
-            });
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}`);
-            }
-            setReservas(prev => prev.map(reserva =>
-                reserva.id === reservaId ? { ...reserva, estado: nuevoEstado } : reserva
-            ));
-            alert(`✅ Reserva ${nuevoEstado === 'confirmada' ? 'aceptada' : 'rechazada'} exitosamente`);
-        } catch (err) {
-            alert('❌ Error al actualizar reserva: ' + err.message);
-        }
-    };
 
     const renderPublicaciones = () => {
         const renderDashboardActions = (pub) => {
@@ -797,7 +812,8 @@ const CuidadorDashboard = () => {
         };
 
         return (
-            <div className="dashboard-main">
+            <>
+                {/* CABECERA: fuera del wrapper */}
                 <div className="publicaciones-header">
                     <h2 className="section-title">Mis Publicaciones</h2>
                     <button
@@ -808,19 +824,22 @@ const CuidadorDashboard = () => {
                     </button>
                 </div>
 
-                <PublicacionesGrid
-                    publicaciones={publicaciones}
-                    loading={loading}
-                    error={error}
-                    onRetry={fetchPublicaciones}
-                    renderCardActions={renderDashboardActions}
-                    emptyMessage="Aún no tienes publicaciones"
-                    showCuidadorInfo={false}
-                />
-            </div>
+                {/* WRAPPER MANUAL CON GRID */}
+                <div className="publicaciones-grid-wrapper">
+                    <PublicacionesGrid
+                        publicaciones={publicaciones}
+                        loading={loading}
+                        error={error}
+                        onRetry={fetchPublicaciones}
+                        renderCardActions={renderDashboardActions}
+                        emptyMessage="Aún no tienes publicaciones"
+                        showCuidadorInfo={false}
+                        isDashboard={false} // ← FALSE para evitar wrapper duplicado
+                    />
+                </div>
+            </>
         );
     };
-
     const renderNuevaPublicacion = () => (
         <div className="dashboard-main">
             <div className="form-container">
@@ -1251,35 +1270,13 @@ const CuidadorDashboard = () => {
         );
     };
 
-    const renderReservas = () => {
-        const [filterStatus, setFilterStatus] = useState('todas');
 
+    const renderReservas = () => {
         const reservasFiltradas = getReservasByEstado(filterStatus);
 
-        const handleAceptar = async (reservaId) => {
-            const result = await aceptarReserva(reservaId);
-            if (result.success) {
-                alert('✅ Reserva aceptada exitosamente');
-            } else {
-                alert('❌ Error: ' + result.error);
-            }
-        };
-
-        const handleRechazar = async (reservaId) => {
-            if (!window.confirm('¿Estás seguro de rechazar esta reserva?')) {
-                return;
-            }
-
-            const result = await rechazarReserva(reservaId);
-            if (result.success) {
-                alert('✅ Reserva rechazada');
-            } else {
-                alert('❌ Error: ' + result.error);
-            }
-        };
-
         return (
-            <div className="dashboard-main">
+            <>
+                {/* CABECERA */}
                 <div className="reservas-header">
                     <h2 className="section-title">Reservas Recibidas</h2>
 
@@ -1297,10 +1294,10 @@ const CuidadorDashboard = () => {
                             Pendientes ({getReservasByEstado('pendiente').length})
                         </button>
                         <button
-                            onClick={() => setFilterStatus('confirmada')}
-                            className={`filter-btn ${filterStatus === 'confirmada' ? 'active' : ''}`}
+                            onClick={() => setFilterStatus('en_curso')}
+                            className={`filter-btn ${filterStatus === 'en_curso' ? 'active' : ''}`}
                         >
-                            Confirmadas ({getReservasByEstado('confirmada').length})
+                            En curso ({getReservasByEstado('en_curso').length})
                         </button>
                     </div>
                 </div>
@@ -1309,13 +1306,12 @@ const CuidadorDashboard = () => {
                 {reservasError && <div className="error-message">{reservasError}</div>}
 
                 {reservasFiltradas.length === 0 && !reservasLoading ? (
-                    <div className="empty-state">
+                    <div className="empty-state" style={{ background: 'var(--lighter-peach)', margin: '0 3rem 4rem' }}>
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
                         <h3>
-                            {filterStatus === 'todas'
-                                ? 'No has recibido reservas aún'
-                                : `No hay reservas ${filterStatus === 'pendiente' ? 'pendientes' : 'confirmadas'}`
-                            }
+                            {filterStatus === 'todas' && 'No has recibido reservas aún'}
+                            {filterStatus === 'pendiente' && 'No hay reservas pendientes'}
+                            {filterStatus === 'en_curso' && 'No hay reservas en curso'}
                         </h3>
                         <p>Tus publicaciones aparecerán en la búsqueda de los dueños</p>
                     </div>
@@ -1323,17 +1319,16 @@ const CuidadorDashboard = () => {
                     <div className="reservas-grid">
                         {reservasFiltradas.map((reserva) => (
                             <ReservaCard
-                                key={reserva.id || reserva.idReserva}
+                                key={reserva.idReserva || reserva.id}
                                 reserva={reserva}
                                 userType="cuidador"
-                                onAceptar={handleAceptar}
-                                onRechazar={handleRechazar}
-                                isExpired={isReservaExpired(reserva)}
+                            // El cuidador solo ve las reservas, no puede cancelarlas
+                            // onCancelar no se pasa → el botón no aparece en ReservaCard
                             />
                         ))}
                     </div>
                 )}
-            </div>
+            </>
         );
     };
 
@@ -1546,52 +1541,55 @@ const CuidadorDashboard = () => {
 
     return (
         <div className="dashboard-container">
+
+
             <nav className="dashboard-navbar">
                 <div className="navbar-brand">
-                    <h1 className="navbar-title">PetsBnB - Cuidador</h1>
-                    <span className="navbar-welcome">Bienvenido, {user?.nombre}</span>
+                    <h1 className="navbar-title">
+                        🐕 PetsBnB Cuidador
+                    </h1>
                 </div>
 
-                <div className="navbar-buttons">
-                    <div className="up-buttons">
-                        <button
-                            onClick={() => navigate('/')}
-                            className="nav-button btn-publicaciones-extra"
-                        >
-                            <Home size={18} style={{ marginRight: '5px' }} />
-                            Demás Publicaciones
-                        </button>
-                        <button
-                            onClick={() => setCurrentView('publicaciones')}
-                            className={`nav-button ${currentView === 'publicaciones' ? 'active' : ''}`}
-                        >
-                            Mis Publicaciones
-                        </button>
-                        <button
-                            onClick={() => setCurrentView('reservas')}
-                            className={`nav-button ${currentView === 'reservas' ? 'active' : ''}`}
-                        >
-                            <CalendarCheck size={18} style={{ marginRight: '5px' }} />
-                            Reservas
-                        </button>
-                    </div>
-                    <div className="down-buttons">
-                        <button
-                            onClick={() => setCurrentView('perfil')}
-                            className={`nav-button ${currentView === 'perfil' ? 'active' : ''}`}
-                        >
-                            <User size={18} style={{ marginRight: '5px' }} />
-                        </button>
-                        <button
-                            onClick={handleLogout}
-                            className="logout-button"
-                        >
-                            <LogOut size={18} style={{ marginRight: '5px' }} />
-                        </button>
-                    </div>
+                <div className="up-buttons">
+                    <button
+                        onClick={() => navigate('/')}
+                        className="nav-button btn-publicaciones-extra"
+                    >
+                        <Home size={18} />
+                        Ver Publicaciones
+                    </button>
+                    <button
+                        onClick={() => setCurrentView('publicaciones')}
+                        className={`nav-button ${currentView === 'publicaciones' ? 'active' : ''}`}
+                    >
+                        Mis Publicaciones
+                    </button>
+                    <button
+                        onClick={() => setCurrentView('reservas')}
+                        className={`nav-button ${currentView === 'reservas' ? 'active' : ''}`}
+                    >
+                        <CalendarCheck size={18} />
+                        Reservas
+                    </button>
+                </div>
+
+                <div className="down-buttons">
+                    <button
+                        onClick={() => setCurrentView('perfil')}
+                        className={`nav-button ${currentView === 'perfil' ? 'active' : ''}`}
+                    >
+                        <User size={18} />
+                        Perfil
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        className="logout-button"
+                    >
+                        <LogOut size={18} />
+                        Logout
+                    </button>
                 </div>
             </nav>
-
             <main>
                 {currentView === 'publicaciones' && renderPublicaciones()}
                 {currentView === 'reservas' && renderReservas()}

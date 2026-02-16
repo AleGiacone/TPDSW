@@ -1,4 +1,8 @@
 /* ============================================
+   DASHBOARD DUEÑO - CSS LIMPIO Y DEFINITIVO
+   ============================================ */
+
+/* ============================================
    1. VARIABLES Y RESET
    ============================================ */
 :root {
@@ -23,7 +27,6 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.15);
   --shadow-orange: 0 4px 16px rgba(249, 120, 64, 0.2);
-  --shadow-red-glow: 0 6px 16px rgba(239, 68, 68, 0.3);
 }
 
 * {
@@ -39,7 +42,7 @@ body {
 }
 
 /* ============================================
-   2. NAVBAR — ORIGINAL SIN CAMBIOS
+   2. NAVBAR
    ============================================ */
 #main-dashboard #main-navbar {
   display: flex;
@@ -51,7 +54,7 @@ body {
   z-index: 1000;
   width: 100%;
   min-height: 180px;
-  margin-bottom: 0 auto;
+  margin-bottom: 0;
 }
 
 #main-navbar .navbar-brand {
@@ -65,7 +68,7 @@ body {
   font-weight: 800;
   color: #ffffff;
   white-space: nowrap;
-  margin-top: 1.5rem;
+  margin-top: 0.2rem;
 }
 
 #main-navbar .navbar-buttons-center {
@@ -110,54 +113,56 @@ body {
 }
 
 /* ============================================
-   3. LAYOUT GENERAL
+   3. LAYOUT PRINCIPAL
    ============================================ */
-
-/* <main> transparente, sin wrapper visual */
 .dashboard-main {
   width: 100%;
   padding: 0;
   background: transparent;
-  border: none;
-  box-shadow: none;
-  border-radius: 0;
-  margin-top: 0;
+  margin: 0;
 }
 
-/* ─── Cabecera de sección (título + botón, FUERA del grid) ─── */
+/* ============================================
+   4. HEADER DE MASCOTAS (FUERA DEL WRAPPER)
+   ============================================ */
 .mascotas-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0rem 2rem 1rem;
+  padding: 2rem 3rem 1.5rem;
   gap: 2rem;
-    margin-top: 0;
+  margin: 0;
+  background: var(--lighter-peach);
 }
 
-.section-title {
-  font-size: 2.25rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--primary-orange) 0%, #ff6b45 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 0;
-  letter-spacing: -0.5px;
-  padding-top:1rem;
-  text-align: center;;
- 
+/* IMPORTANTE: Selector específico para el título de mascotas */
+.mascotas-header .section-title {
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  background: linear-gradient(135deg, var(--primary-orange) 0%, #ff6b45 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  letter-spacing: -0.5px !important;
+  text-align: left !important;
+  line-height: 1.2 !important;
 }
 
-/* ─── Contenedor del grid: ocupa todo el ancho ─── */
+/* ============================================
+   5. WRAPPER DEL GRID
+   ============================================ */
 .mascotas-grid-wrapper {
   width: 100%;
-  min-height: calc(100vh - 185px);
+  min-height: calc(100vh - 250px);
   background: var(--lighter-peach);
-  border-top: 1px solid #f0e8e4;
+  border-top: 2px solid var(--border-gray);
   padding: 2.5rem 3rem 4rem;
 }
 
 /* ============================================
-   4. GRID DE CARDS
+   6. GRID DE MASCOTAS
    ============================================ */
 .mascotas-grid {
   display: grid;
@@ -166,7 +171,7 @@ body {
 }
 
 /* ============================================
-   5. MASCOTA CARD
+   7. MASCOTA CARD
    ============================================ */
 .mascota-card {
   background: var(--white);
@@ -176,6 +181,7 @@ body {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .mascota-card:hover {
@@ -183,7 +189,7 @@ body {
   box-shadow: var(--shadow-orange), var(--shadow-lg);
 }
 
-/* ─── Imagen ─── */
+/* Imagen */
 .mascota-image-section-horizontal {
   position: relative;
   width: 100%;
@@ -217,7 +223,7 @@ body {
   background: linear-gradient(135deg, var(--light-peach), #ffe0d6);
 }
 
-/* ─── Botón cambiar foto flotante ─── */
+/* Botón cambiar foto */
 .image-upload-section {
   position: absolute;
   bottom: 10px;
@@ -247,39 +253,42 @@ body {
   background: rgba(249, 120, 64, 0.9);
 }
 
-/* ─── Detalles ─── */
+/* Detalles */
 .mascota-details-section {
-  padding: 1.5rem 1.75rem 0.75rem;
+  padding: 1.75rem;
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.mascota-header {
+.mascota-details-section .mascota-header {
   margin-bottom: 1rem;
-  color: #416948 !important;
 }
 
 .mascota-name {
-  font-size: 1.6rem !important;
-  font-weight: 1000;
-  background: #fff;;
-  color: #416948 !important;
-  padding: 1rem 1.2rem;
-  border-radius: var(--radius-lg);
-  display: inline-block;
-  margin-top:0;
-  border:#416948 !important;
+  font-size: 1.6rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #416948 0%, #2d4a34 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  line-height: 1.3;
 }
 
 .mascota-details {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.5rem;
+  flex: 1;
 }
 
 .mascota-details p {
-  font-size: 1.3rem;
+  font-size: 1rem;
   color: var(--text-gray);
   font-weight: 600;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .mascota-details p strong {
@@ -288,71 +297,77 @@ body {
 }
 
 .mascota-description {
-  margin-top: 0.75rem;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--text-gray);
-  line-height: 1.55;
+  line-height: 1.6;
+  margin-top: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--border-gray);
 }
 
 .exotic-badge {
   display: inline-block;
-  margin-top: 0.6rem;
-  background-color: #416948;
+  margin-top: 0.75rem;
+  background: linear-gradient(135deg, #416948 0%, #2d4a34 100%);
   color: #fff;
-  padding: 0.3rem 0.85rem;
+  padding: 0.4rem 0.9rem;
   border-radius: 8px;
   font-weight: 800;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: fit-content;
 }
 
-/* ─── Acciones ─── */
+/* Acciones */
 .mascota-actions {
   display: flex;
   gap: 1rem;
-  padding: 1.25rem 1.75rem 1.5rem;
+  padding: 1.25rem 1.75rem;
   background: var(--lighter-peach);
   border-top: 1px solid var(--light-peach);
+  margin-top: auto;
 }
 
 /* ============================================
-   6. BOTONES GLOBALES
+   8. BOTONES
    ============================================ */
 .btn-primary {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.7rem 1.4rem;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.8rem;
   background: linear-gradient(135deg, var(--primary-orange) 0%, var(--dark-orange) 100%);
   color: #fff;
   border: none;
   border-radius: var(--radius-lg);
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   cursor: pointer;
-  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  transition: all 0.2s ease;
   box-shadow: var(--shadow-orange);
+  white-space: nowrap;
 }
 
 .btn-primary:hover {
   box-shadow: 0 6px 20px rgba(249, 120, 64, 0.5);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .btn-edit {
   flex: 1;
-  padding: 0.65rem 0;
+  padding: 0.75rem;
   background: #3b82f6;
   color: #fff;
   border: none;
   border-radius: var(--radius-md);
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+  transition: all 0.2s ease;
 }
 
 .btn-edit:hover {
@@ -362,16 +377,16 @@ body {
 
 .btn-delete {
   flex: 1;
-  padding: 0.65rem 0;
+  padding: 0.75rem;
   background: #ef4444;
   color: #fff;
   border: none;
   border-radius: var(--radius-md);
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+  transition: all 0.2s ease;
 }
 
 .btn-delete:hover {
@@ -380,7 +395,7 @@ body {
 }
 
 .btn-secondary {
-  padding: 0.7rem 1.4rem;
+  padding: 0.75rem 1.5rem;
   background: transparent;
   color: var(--text-gray);
   border: 2px solid var(--border-gray);
@@ -389,7 +404,7 @@ body {
   font-weight: 800;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .btn-secondary:hover {
@@ -398,7 +413,7 @@ body {
 }
 
 /* ============================================
-   7. ESTADO VACÍO
+   9. ESTADOS
    ============================================ */
 .empty-state {
   display: flex;
@@ -411,14 +426,37 @@ body {
 }
 
 .empty-state h3 {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: var(--text-dark);
   margin: 0.75rem 0 0.5rem;
 }
 
+.empty-state p {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.loading-message {
+  text-align: center;
+  padding: 4rem;
+  color: var(--text-gray);
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.error-message {
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  color: #DC2626;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #DC2626;
+}
+
 /* ============================================
-   8. RESERVAS
+   10. RESERVAS
    ============================================ */
 .reservas-header {
   display: flex;
@@ -427,6 +465,18 @@ body {
   padding: 2rem 3rem 1.5rem;
   flex-wrap: wrap;
   gap: 1rem;
+  background: var(--lighter-peach);
+}
+
+.reservas-header .section-title {
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  background: linear-gradient(135deg, var(--primary-orange) 0%, #ff6b45 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  margin: 0 !important;
+  text-align: left !important;
 }
 
 .reservas-filters {
@@ -464,43 +514,17 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 2rem;
   padding: 0 3rem 4rem;
-}
-
-.status-badge {
-  padding: 0.4rem 0.9rem;
-  border-radius: var(--radius-lg);
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-}
-
-.status-confirmada {
-  background: #D1FAE5;
-  color: #059669;
-}
-
-.status-pendiente {
-  background: #FFF3CD;
-  color: #DA9E00;
-}
-
-.status-cancelada {
-  background: #FEE2E2;
-  color: #DC2626;
+  background: var(--lighter-peach);
 }
 
 /* ============================================
-   9. PERFIL
+   11. PERFIL
    ============================================ */
-.form-container .perfil-container .perfil-header .section-title {
-  margin-left: 9rem
-}
-
 .perfil-container {
   width: 100%;
   max-width: 700px;
   margin: 0 auto;
-  padding: 0;
+  padding: 2rem;
 }
 
 .perfil-header {
@@ -508,6 +532,19 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.perfil-header .section-title {
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  background: linear-gradient(135deg, var(--primary-orange) 0%, #ff6b45 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  margin: 0 !important;
+  text-align: left !important;
 }
 
 .profile-details-card {
@@ -520,79 +557,46 @@ body {
   box-shadow: var(--shadow-md);
 }
 
-.profile-image-display {
-  margin-bottom: 1.5rem;
-}
-
-.profile-display-img {
-  width: 200px;
-  height: 200px;
-  border-radius: 20%;
-  object-fit: cover;
-}
-
-.profile-placeholder-img {
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  background: var(--light-peach);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 4rem;
-  color: var(--primary-orange);
-}
-
-.profile-info {
-  width: 100%;
-  margin-top: 2rem;
-}
-
 .profile-info p {
   padding: 1rem;
   border-bottom: 1px solid var(--border-gray);
   font-weight: 600;
   font-size: 1rem;
   color: var(--text-dark);
-  /* ← esto arregla el texto invisible */
-}
-
-.delete-user-section {
-  width: 100%;
-  margin-top: 1.5rem;
+  margin: 0;
 }
 
 /* ============================================
-   10. FORMULARIOS
+   12. FORMULARIOS
    ============================================ */
 .form-container {
   width: 100%;
-  min-height: calc(100vh - 110px);
+  min-height: calc(100vh - 180px);
   background: var(--lighter-peach);
-  border-top: 1px solid #f0e8e4;
-  padding: 3rem 3rem 5rem;
-  /* Sacá el flex y align-items, usá margin auto en la card */
-  display: block;
-  /* ← cambiá flex por block */
+  padding: 3rem;
 }
 
 .form-container .section-title {
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto 2rem auto;
-  /* ← centrado con margin auto */
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  background: linear-gradient(135deg, var(--primary-orange) 0%, #ff6b45 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  margin: 0 0 2rem 0 !important;
+  max-width: 900px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: left !important;
 }
 
 .form-card {
-  width: 100%;
-  max-width: min(900px, 90vw);
+  max-width: 900px;
   margin: 0 auto;
-  /* ← centrado con margin auto */
   background: white;
-  padding: 3rem 3.5rem;
+  padding: 3rem;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
-  border: 1px solid rgba(249, 120, 64, 0.08);
 }
 
 .form-group {
@@ -601,21 +605,16 @@ body {
 
 .form-label {
   display: block;
-  /* ← faltaba */
   font-weight: 800;
-  /* ← faltaba */
   margin-bottom: 0.6rem;
-  /* ← faltaba */
   background: var(--light-peach);
-  /* ← faltaba */
   border-radius: 10px;
-  /* ← faltaba */
   width: fit-content;
-  /* ← faltaba */
   font-size: 0.95rem;
   color: var(--text-dark);
   padding: 0.5rem 1.1rem;
 }
+
 .form-input,
 .form-select,
 .form-textarea {
@@ -632,76 +631,46 @@ body {
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
-  background: #fff;
+  border-color: var(--primary-orange);
+  outline: none;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  width: 100%;
-}
-
-.form-grid .form-group {
-  min-width: 0;
-  /* ← esto es clave, evita que el grid se desborde */
-  width: 100%;
-}
-
-.form-grid .form-select,
-.form-grid .form-input {
-  width: 100%;
-  min-width: 0;
-  /* ← igual acá */
-  box-sizing: border-box;
+  gap: 1.5rem;
 }
 
 .checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   padding: 1.1rem 1.3rem;
-  transition: opacity 0.2s;
-  background-color: #416948 !important;
-}
-
-.checkbox-group:hover {
-  opacity: 0.9;
+  background: linear-gradient(135deg, #416948 0%, #2d4a34 100%);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  color: white;
+  font-weight: 700;
 }
 
 .checkbox-input {
-  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: white;
 }
+
 .form-buttons {
   display: flex;
-  /* ← faltaba */
   gap: 1rem;
-  /* ← faltaba */
   justify-content: flex-end;
-  /* ← faltaba */
   margin-top: 2.5rem;
   padding-top: 2rem;
   border-top: 1px solid var(--border-gray);
 }
 
 /* ============================================
-   11. MENSAJES
-   ============================================ */
-.loading-message {
-  text-align: center;
-  padding: 4rem;
-  color: var(--text-gray);
-  font-weight: 700;
-}
-
-.error-message {
-  background: #FEE2E2;
-  color: #DC2626;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-}
-
-/* ============================================
-   12. ANIMACIONES
+   13. ANIMACIONES
    ============================================ */
 @keyframes fadeIn {
   from {
@@ -715,43 +684,57 @@ body {
   }
 }
 
-.mascota-card,
-.form-card,
-.profile-details-card {
+.mascota-card {
   animation: fadeIn 0.35s ease-out both;
 }
 
+.mascota-card:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.mascota-card:nth-child(2) {
+  animation-delay: 0.05s;
+}
+
+.mascota-card:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+.mascota-card:nth-child(4) {
+  animation-delay: 0.15s;
+}
+
+.mascota-card:nth-child(5) {
+  animation-delay: 0.2s;
+}
+
+.mascota-card:nth-child(6) {
+  animation-delay: 0.25s;
+}
+
 /* ============================================
-   13. RESPONSIVE
+   14. RESPONSIVE
    ============================================ */
 @media (max-width: 1024px) {
   .mascotas-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
-
-  #main-navbar button span {
-    display: none;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
-  #main-navbar {
-    padding: 1rem;
-    overflow-x: auto;
-    justify-content: flex-start;
-  }
-
-  .navbar-brand,
-  .navbar-buttons-center,
-  .navbar-buttons-right {
-    flex: none;
-  }
 
   .mascotas-header,
   .reservas-header {
-    padding: 1.5rem 1.5rem 1rem;
+    padding: 1.5rem;
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .mascotas-header .section-title,
+  .reservas-header .section-title,
+  .perfil-header .section-title,
+  .form-container .section-title {
+    font-size: 2rem !important;
   }
 
   .mascotas-grid-wrapper {
@@ -762,17 +745,120 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .reservas-grid {
-    grid-template-columns: 1fr;
-    padding: 0 1.5rem 3rem;
-  }
-
   .form-grid {
     grid-template-columns: 1fr;
   }
+}
 
-  .form-container,
-  .perfil-container {
-    padding: 0 1rem 3rem;
+@media (max-width: 480px) {
+
+  .mascotas-header .section-title,
+  .reservas-header .section-title {
+    font-size: 1.75rem !important;
   }
+
+  .btn-primary {
+    padding: 0.75rem 1.4rem;
+    font-size: 0.95rem;
+  }
+}
+/* ============================================
+   PERFIL DUEÑO - MISMO ESTILO QUE CUIDADOR
+   ============================================ */
+.perfil-card {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 3rem;
+  box-shadow: var(--shadow-md);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.perfil-card:hover {
+  border-color: var(--light-peach);
+  box-shadow: var(--shadow-lg);
+}
+
+.perfil-image-container {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.perfil-image {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid var(--primary-orange);
+  box-shadow: var(--shadow-orange);
+  transition: transform 0.3s ease;
+}
+
+.perfil-image:hover {
+  transform: scale(1.05);
+}
+
+.perfil-placeholder {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
+  color: var(--primary-orange);
+  border: 5px dashed var(--primary-orange);
+  font-size: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  transition: transform 0.3s ease;
+}
+
+.perfil-placeholder:hover {
+  transform: scale(1.05);
+}
+
+.perfil-field {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--light-peach);
+  transition: all 0.3s ease;
+}
+
+.perfil-field:hover {
+  background: var(--lighter-peach);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  border-radius: var(--radius-md);
+}
+
+.perfil-field:last-of-type {
+  border-bottom: none;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--primary-orange);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.field-value {
+  font-size: 1.15rem;
+  color: var(--text-dark);
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.perfil-image-upload {
+  text-align: center;
+}
+
+.profile-image-preview {
+  margin: 1.5rem 0;
+  display: flex;
+  justify-content: center;
 }

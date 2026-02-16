@@ -142,70 +142,81 @@ const RegisterPage = () => {
           required
         />
 
-        {formData.tipoUsuario && (
-          <>
-            <label>Tipo de documento:</label>
-                <select
-                  name="Tipo de documento"
-                  value={formData.tipoDoc}
-                  onChange={handleChange}
-                >
-                  <option value="dni">DNI</option>
-                  <option value="pasaporte">Pasaporte</option>
-                  <option value="otro">Otro</option>
-                </select>
-            
-
-            <label>Número de documento:</label>
-            <input
-              type="text"
-              name="nroDocumento"
-              placeholder="Número de documento"
-              value={formData.nroDocumento}
-              onChange={handleChange}
-            />
-
-            <label>Teléfono:</label>
-            <input
-              type="text"
-              name="telefono"
-              placeholder="Teléfono"
-              value={formData.telefono}
-              onChange={handleChange}
-            />
-
-            {formData.tipoUsuario === "dueno" && (
+            {formData.tipoUsuario && (
               <>
-                <label>Teléfono de emergencia:</label>
+                <label>Tipo de documento:</label>
+                <select
+                  name="tipoDocumento"  // ✅ FIX 1: Nombre correcto (antes era "Tipo de documento")
+                  value={formData.tipoDocumento}  // ✅ FIX 1: Campo correcto
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Seleccionar...</option>  {/* ✅ Opción vacía */}
+                  <option value="DNI">DNI</option>  {/* ✅ FIX 3: Mayúscula */}
+                  <option value="Pasaporte">Pasaporte</option>
+                  <option value="Otro">Otro</option>
+                </select>
+
+                <label>Número de documento:</label>
                 <input
                   type="text"
-                  name="telefonoEmergencia"
-                  placeholder="Teléfono de emergencia"
-                  value={formData.telefonoEmergencia}
+                  name="nroDocumento"
+                  placeholder="Número de documento"
+                  value={formData.nroDocumento}
                   onChange={handleChange}
+                  required  
                 />
-              </>
-            )}
 
-            {formData.tipoUsuario === "cuidador" && (
-              <>
-                <label>Sexo:</label>
-                <select
-                  name="sexoCuidador"
-                  value={formData.sexoCuidador}
+                <label>Teléfono:</label>
+                <input
+                  type="text"
+                  name="telefono"
+                  placeholder="Teléfono"
+                  value={formData.telefono}
                   onChange={handleChange}
-                >
-                  <option value="masculino">Masculino</option>
-                  <option value="femenino">Femenino</option>
-                  <option value="otro">Otro</option>
-                </select>
+                  required  
+                />
 
-          
+                {formData.tipoUsuario === "dueno" && (
+                  <>
+                    <label>Teléfono de emergencia:</label>
+                    <input
+                      type="text"
+                      name="telefonoEmergencia"
+                      placeholder="Teléfono de emergencia"
+                      value={formData.telefonoEmergencia}
+                      onChange={handleChange}
+                    />
+                  </>
+                )}
+
+                {formData.tipoUsuario === "cuidador" && (
+                  <>
+                    <label>Sexo:</label>
+                    <select
+                      name="sexoCuidador"
+                      value={formData.sexoCuidador}
+                      onChange={handleChange}
+                      required  
+                    >
+                      <option value="">Seleccionar...</option>  {/* ✅ FIX 2: Opción vacía */}
+                      <option value="Masculino">Masculino</option>  {/* ✅ FIX 3: Mayúscula */}
+                      <option value="Femenino">Femenino</option>
+                      <option value="Otro">Otro</option>
+                    </select>
+
+                    <label>Descripción personal (opcional):</label>
+                    <textarea
+                      name="descripcion"
+                      placeholder="Contanos sobre tu experiencia con mascotas..."
+                      value={formData.descripcion}
+                      onChange={handleChange}
+                      rows={3}
+                    />
+                  </>
+                )}
               </>
             )}
-          </>
-        )}
-
         <button type="submit" disabled={loading}>
           {loading ? 'Registrando...' : 'Registrarse'}
         </button>

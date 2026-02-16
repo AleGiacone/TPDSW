@@ -10,13 +10,17 @@ import { Reserva } from '../reserva/reserva.entity.js';
 import { Temporal } from 'temporal-polyfill'
 import { DiaReservado } from '../reserva/diaReservado.entity.js';
 
+
+
 function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
   console.log("Sanitizing publicacion input", req.body);
+  console.log("Request path:", req.path); // Para debugging
+
   const precioValue = req.body.tarifaPorDia || req.body.precio;
   const precioNumerico = Number(precioValue);
 
   req.body.sanitizeInput = {
-    idUsuario: sanitizeHTML(req.body.idUsuario),
+    idUsuario: req.body.idUsuario ? sanitizeHTML(req.body.idUsuario) : undefined,
     titulo: sanitizeHTML(req.body.titulo),
     descripcion: sanitizeHTML(req.body.descripcion),
     tarifaPorDia: !isNaN(precioNumerico) ? precioNumerico : undefined,
@@ -25,20 +29,30 @@ function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
     tipoAlojamiento: req.body.tipoAlojamiento ? sanitizeHTML(req.body.tipoAlojamiento) : undefined,
     cantAnimales: req.body.cantAnimales ? parseInt(req.body.cantAnimales) : 1,
     exotico: req.body.exotico === true || req.body.exotico === 'true',
-    dias: req.body.dias,
     idPublicacion: req.body.idPublicacion
   };
 
-  if (req.body.sanitizeInput.dias != null && req.body.sanitizeInput.dias != undefined) {
+  const esEndpointConDias = req.path.includes('reserva-cuidador') ||
+    req.path.includes('dias-reservados');
+
+  if (esEndpointConDias && req.body.dias) {
+    console.log("Endpoint con días detectado, incluyendo dias en sanitizeInput");
+    req.body.sanitizeInput.dias = req.body.dias;
+
+    // Validar formato de fechas solo si hay días
+    if (req.body.sanitizeInput.dias != null && req.body.sanitizeInput.dias != undefined) {
       try {
-        for (let dias of req.body.sanitizeInput.dias) {
-          console.log("Sanitizing date:", dias);
-          Temporal.PlainDate.from(dias);
+        for (let dia of req.body.sanitizeInput.dias) {
+          console.log("Sanitizing date:", dia);
+          Temporal.PlainDate.from(dia);
         }
       } catch (error) {
         res.status(400).json({ message: "Error parsing dates", error: error });
         return;
       }
+    }
+  } else {
+    console.log("Endpoint sin días (UPDATE normal), NO incluyendo dias");
   }
   //Ver object keys borra campos
   // Object.keys(req.body.sanitizeInput).forEach((key) => {
@@ -48,6 +62,12 @@ function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
   //   }
   // });
   console.log("Sanitized input:", req.body.sanitizeInput);
+
+  if (req.method === 'PUT' || req.method === 'PATCH') {
+    delete req.body.sanitizeInput.idPublicacion;
+    delete req.body.sanitizeInput.fechaPublicacion;
+    delete req.body.sanitizeInput.idUsuario;
+  }
   
   next();
 }
@@ -80,7 +100,11 @@ async function reservaCuidador(req: Request, res: Response, next: NextFunction) 
   try {
     console.log("Verificando reserva cuidador con data:", req.body.sanitizeInput);
     const em = orm.em.fork();
-    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion: req.body.sanitizeInput.idPublicacion }, { populate: ['reservas'] });
+    const publicacion = await em.findOneOrFail(
+      Publicacion,
+      { idPublicacion: req.body.sanitizeInput.idPublicacion },
+      { populate: ['reservas', 'diasOcupados'] } // ✅ Agregado diasOcupados
+    );
     console.log("Publicacion encontrada:", publicacion);
     const reservasDeLaPublicacion = await em.find(Reserva, { publicacion: publicacion }, { populate: ['diasReservados'] });
     //Todos los dias ya reservados en esa publicacion
@@ -419,17 +443,26 @@ async function update(req: Request, res: Response): Promise<void> {
   try {
     const idPublicacion = Number.parseInt(req.params.idPublicacion);
     const publicacion = await em.findOneOrFail(
-      Publicacion, 
-      { idPublicacion }, 
+      Publicacion,
+      { idPublicacion },
       { populate: ['imagenes'] }
     );
 
-    em.assign(publicacion, req.body.sanitizeInput);
+    const { titulo, descripcion, tarifaPorDia, ubicacion, tipoAlojamiento, cantAnimales, exotico } = req.body.sanitizeInput;
+
+    if (titulo !== undefined) publicacion.titulo = titulo;
+    if (descripcion !== undefined) publicacion.descripcion = descripcion;
+    if (tarifaPorDia !== undefined) publicacion.tarifaPorDia = Number(tarifaPorDia);
+    if (ubicacion !== undefined) publicacion.ubicacion = ubicacion;
+    if (tipoAlojamiento !== undefined) publicacion.tipoAlojamiento = tipoAlojamiento;
+    if (cantAnimales !== undefined) publicacion.cantAnimales = Number(cantAnimales);
+    if (exotico !== undefined) publicacion.exotico = Boolean(exotico);
+    // fechaPublicacion NO se toca en un update
 
     if (req.body.imagesToDelete) {
       const imagesToDelete = JSON.parse(req.body.imagesToDelete);
-      const imagenesAEliminar = await em.find(Imagen, { 
-        idImagen: { $in: imagesToDelete } 
+      const imagenesAEliminar = await em.find(Imagen, {
+        idImagen: { $in: imagesToDelete }
       });
 
       for (const img of imagenesAEliminar) {
@@ -448,21 +481,20 @@ async function update(req: Request, res: Response): Promise<void> {
         imagen.publicacion = publicacion;
         return imagen;
       });
-
       em.persist(nuevasImagenes);
     }
 
     await em.flush();
     await em.refresh(publicacion, { populate: ['imagenes'] });
-    
+
     const imagenesFormateadas = publicacion.imagenes.getItems().map(img => ({
       id: img.idImagen,
       path: img.path,
       url: `http://localhost:3000${img.path}`
     }));
 
-    res.status(200).json({ 
-      message: 'Publicacion updated', 
+    res.status(200).json({
+      message: 'Publicacion updated',
       data: {
         ...publicacion,
         imagenes: imagenesFormateadas
@@ -476,10 +508,9 @@ async function update(req: Request, res: Response): Promise<void> {
         });
       });
     }
-    
-    res.status(500).json({ 
-      message: "Error updating publicacion", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error updating publicacion",
+      error: error.message
     });
   }
 }

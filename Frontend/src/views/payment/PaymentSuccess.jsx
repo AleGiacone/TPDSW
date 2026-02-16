@@ -1,45 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
 import '../../styles/PaymentPages.css';
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
-    // Contador regresivo
+    console.log('🎉 PaymentSuccess montado');
+    console.log('📦 localStorage.user:', localStorage.getItem('user'));
+    console.log('🍪 document.cookie:', document.cookie);
+
+    // Verificar si hay usuario en localStorage
+    const savedUser = localStorage.getItem('user');
+    if (!savedUser) {
+      console.error('❌ NO HAY USUARIO EN LOCALSTORAGE');
+      console.log('Redirigiendo a login en 2 segundos...');
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+      return;
+    }
+
+    console.log('✅ Usuario encontrado en localStorage:', savedUser.substring(0, 50) + '...');
+
     const interval = setInterval(() => {
       setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
+        console.log('⏱️ Countdown:', prev - 1);
+        return prev <= 1 ? 0 : prev - 1;
       });
     }, 1000);
 
-    // ✅ FIX: redirigir al dashboard con ?view=reservas para abrir la sección correcta
     const timer = setTimeout(() => {
-      if (user?.tipoUsuario?.toLowerCase() === 'dueno') {
-        navigate('/dashboards/dueno?view=reservas');
-      } else {
-        navigate('/');
-      }
-    }, 5000);
+      console.log('⏰ Timeout alcanzado, redirigiendo...');
+      console.log('📦 localStorage antes de redirigir:', localStorage.getItem('user') ? 'EXISTE' : 'NO EXISTE');
+      navigate('/dashboards/dueno?from=payment', { replace: true });
+    }, 3000);
 
     return () => {
+      console.log('🧹 PaymentSuccess desmontado');
       clearInterval(interval);
       clearTimeout(timer);
     };
-  }, [navigate, user]);
+  }, [navigate]);
 
   const handleGoToReservas = () => {
-    if (user?.tipoUsuario?.toLowerCase() === 'dueno') {
-      navigate('/dashboards/dueno?view=reservas');
+    console.log('🖱️ Click en botón');
+    const savedUser = localStorage.getItem('user');
+    console.log('📦 localStorage.user:', savedUser ? 'EXISTE' : 'NO EXISTE');
+
+    if (savedUser) {
+      navigate('/dashboards/dueno?from=payment', { replace: true });
     } else {
-      navigate('/');
+      console.error('❌ No hay usuario, redirigiendo a login');
+      navigate('/login');
     }
   };
 
@@ -52,16 +66,18 @@ const PaymentSuccess = () => {
           Tu reserva ha sido confirmada y el pago se procesó correctamente.
         </p>
         <div className="payment-details">
-          <p>Recibirás un correo electrónico con los detalles de tu reserva.</p>
           <p className="redirect-message">
-            Redirigiendo a tus reservas en <strong>{countdown} segundos</strong>...
+            Redirigiendo en <strong>{countdown} segundos</strong>...
+          </p>
+          <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
+            Debug: localStorage user = {localStorage.getItem('user') ? '✅' : '❌'}
           </p>
         </div>
         <button
           onClick={handleGoToReservas}
           className="btn-primary payment-btn"
         >
-          Ver mis reservas ahora
+          Ir al dashboard ahora
         </button>
       </div>
     </div>

@@ -37,7 +37,7 @@ declare global {
 const app = express();
 
 
-app.use("/webhook", express.raw({ type: 'application/json' }), webHookRouter);
+app.use("/api/webhook/stripe", express.raw({ type: 'application/json' }), webHookRouter);
 app.use(cookieParser());
 app.use(cors({ origin: ['http://localhost:3307', 'http://localhost:3308'], credentials: true }));
 app.use(express.json());
@@ -49,13 +49,18 @@ console.log('📂 Sirviendo archivos estáticos desde:', path.join(__dirname, '.
 
 
 app.use((req, res, next) => {
+  // Excluir webhook de Stripe
+  if (req.path.startsWith('/api/webhook/stripe')) {
+    return next();
+  }
+
   console.log('Token recibido:', req.cookies.access_token);
   const token = req.cookies.access_token;
   req.session = { usuario: null }
   try {
     const data = jwt.verify(token, SECRET_JWT_KEY!);
     req.session.usuario = data;
-  } catch {}
+  } catch { }
   next();
 })
 

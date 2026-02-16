@@ -27,190 +27,204 @@
   --shadow-orange: 0 4px 16px rgba(249, 120, 64, 0.2);
 }
 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 /* ============================================
    DASHBOARD CUIDADOR CONTAINER
    ============================================ */
 .dashboard-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #fff5f2 0%, #ffffff 100%);
+  background: var(--bg-light);
   font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 /* ============================================
-   NAVBAR CUIDADOR - ANCHO COMPLETO
+   NAVBAR CUIDADOR - IGUAL QUE DUEÑO
    ============================================ */
 .dashboard-container .dashboard-navbar {
-  background: linear-gradient(135deg, #f97840 0%, #ff6b45 100%);
-  box-shadow: 0 4px 20px rgba(249, 120, 64, 0.25);
-  padding: 1.5rem 2rem;
-  width: 100%;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  backdrop-filter: blur(10px);
-}
-
-.dashboard-container .navbar-brand {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.25rem;
+  padding: 1.4rem 2.5rem;
+  background: linear-gradient(135deg, var(--primary-orange) 0%, #ff6b45 100%);
+  top: 0;
+  z-index: 1000;
   width: 100%;
+  min-height: 180px;
+  margin-bottom: 0;
+}
+
+.dashboard-container .navbar-brand {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .dashboard-container .navbar-title {
-  font-size: 2rem;
+  font-size: 2.8rem;
   font-weight: 800;
-  color: var(--white);
+  color: #ffffff;
+  white-space: nowrap;
+  margin-top: 1.5rem;
   margin: 0;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  letter-spacing: -0.5px;
-  flex-shrink: 0;
 }
 
 .dashboard-container .navbar-welcome {
-  font-size: 1.05rem;
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 0.5rem 1.25rem;
-  border-radius: var(--radius-lg);
-  backdrop-filter: blur(10px);
-  flex-shrink: 0;
+  display: none;
 }
 
 /* SECCIÓN DE BOTONES CUIDADOR */
 .dashboard-container .navbar-buttons {
-  display: grid;
-  grid-template-columns: 200px 1fr auto;
-  align-items: flex-start;
-  gap: 2rem;
-  width: 100%;
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .dashboard-container .navbar-buttons::before {
-  content: '';
-  display: block;
+  display: none;
 }
 
 .dashboard-container .up-buttons {
   display: flex;
-  gap: 1rem;
   justify-content: center;
-  align-items: center;
+  gap: 1rem;
 }
 
 .dashboard-container .down-buttons {
+  flex: 1;
   display: flex;
-  gap: 1rem;
   justify-content: flex-end;
-  flex-shrink: 0;
-  align-items: flex-start;
+  gap: 1rem;
 }
 
 /* BOTONES DE LA NAVBAR CUIDADOR */
 .dashboard-container .nav-button,
 .dashboard-container .btn-publicaciones-extra,
 .dashboard-container .logout-button {
-  padding: 0.875rem 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.4rem;
+  background: rgba(255, 255, 255, 0.15);
   border: 2px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--white);
-  border-radius: var(--radius-lg);
-  font-size: 1rem;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 1.5rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  backdrop-filter: blur(10px);
   white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
-.dashboard-container .nav-button:hover {
-  background: var(--white);
-  color: var(--primary-orange);
-  border-color: var(--white);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
+.dashboard-container .nav-button:hover,
 .dashboard-container .nav-button.active {
-  background: var(--white);
+  background: #ffffff;
   color: var(--primary-orange);
-  border-color: var(--white);
-  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.3);
+  border-color: #ffffff;
 }
 
 .dashboard-container .btn-publicaciones-extra {
-  background: rgba(59, 130, 246, 0.3);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .dashboard-container .btn-publicaciones-extra:hover {
-  background: var(--blue-primary);
-  border-color: var(--blue-primary);
-  color: var(--white);
+  background: #ffffff;
+  color: #416948;
+  border-color: #ffffff;
 }
 
 .dashboard-container .logout-button {
-  background: rgba(239, 68, 68, 0.3);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(239, 68, 68, 0.9);
+  border-color: transparent;
 }
 
 .dashboard-container .logout-button:hover {
-  background: var(--error-red);
-  border-color: var(--error-red);
-  color: var(--white);
-  transform: translateY(-2px);
+  background: #dc2626;
+  transform: translateY(-1px);
 }
 
-/* ============================================
-   MAIN CONTENT CUIDADOR
-   ============================================ */
+/* CRITICAL: dashboard-main debe ser completamente transparente y sin padding */
 .dashboard-container .dashboard-main {
-  max-width: 1400px;
   width: 100%;
-  margin: 0 auto;
-  padding: 3rem 2rem;
+  padding: 0 !important;
+  /* ← IMPORTANTE: Sin padding */
+  margin: 0 !important;
+  /* ← IMPORTANTE: Sin margin */
+  background: transparent !important;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
 }
 
-.dashboard-container .section-title {
-  font-size: 2.25rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #f97840 0%, #ff6b45 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 2rem;
-  letter-spacing: -0.5px;
+/* El wrapper de publicaciones maneja su propio padding */
+.dashboard-container .publicaciones-grid-wrapper {
+  width: 100%;
+  min-height: calc(100vh - 185px);
+  background: var(--lighter-peach, #fffaf8);
+  border-top: 1px solid #f0e8e4;
+  padding: 2.5rem 3rem 4rem;
+  /* ← Padding solo aquí */
 }
+
+/* Header también maneja su propio padding */
+.dashboard-container .publicaciones-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 3rem 1rem;
+  /* ← Padding consistente con el wrapper */
+  gap: 2rem;
+  margin: 0;
+  background: var(--lighter-peach, #fffaf8);
+  
+}
+
+.dashboard-container .publicaciones-header .section-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+/* Grid dentro del wrapper */
+.dashboard-container .publicaciones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  /* ← Asegurar que use todo el ancho disponible */
+}
+
 
 /* ============================================
    BOTONES PRINCIPALES CUIDADOR
    ============================================ */
 .dashboard-container .btn-primary {
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, #f97840 0%, #ff6b45 100%);
-  color: var(--white);
-  border: none;
-  border-radius: var(--radius-lg);
-  font-weight: 700;
-  font-size: 1.05rem;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-orange);
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
+  gap: 0.4rem;
+  padding: 1rem 1.4rem;
+  background: linear-gradient(135deg, var(--primary-orange) 0%, var(--dark-orange) 100%);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  box-shadow: var(--shadow-orange);
+  margin: 2rem;
 }
 
 .dashboard-container .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(249, 120, 64, 0.35);
+  box-shadow: 0 6px 20px rgba(249, 120, 64, 0.5);
+  transform: translateY(-1px);
 }
 
 .dashboard-container .btn-primary:disabled {
@@ -220,178 +234,68 @@
 }
 
 .dashboard-container .btn-secondary {
-  padding: 1rem 2rem;
-  border-radius: var(--radius-lg);
-  background: var(--white);
-  color: var(--text-dark);
+  padding: 0.7rem 1.4rem;
+  background: transparent;
+  color: var(--text-gray);
   border: 2px solid var(--border-gray);
-  font-weight: 700;
-  font-size: 1.05rem;
+  border-radius: var(--radius-lg);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color 0.2s, color 0.2s;
 }
 
 .dashboard-container .btn-secondary:hover {
-  background: var(--bg-light);
   border-color: var(--primary-orange);
   color: var(--primary-orange);
-  transform: translateY(-2px);
 }
 
 .dashboard-container .btn-delete {
-  background: var(--error-red);
-  color: var(--white);
+  flex: 1;
+  padding: 0.65rem 0;
+  background: #ef4444;
+  color: #fff;
   border: none;
-  padding: 0.875rem 1.5rem;
-  border-radius: var(--radius-lg);
-  font-weight: 700;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.2s, transform 0.15s;
 }
 
 .dashboard-container .btn-delete:hover {
   background: #dc2626;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+  transform: translateY(-1px);
 }
 
 .dashboard-container .btn-edit {
-  background: var(--blue-primary);
-  color: var(--white);
+  flex: 1;
+  padding: 0.65rem 0;
+  background: #3b82f6;
+  color: #fff;
   border: none;
-  padding: 0.875rem 1.5rem;
-  border-radius: var(--radius-lg);
-  font-weight: 700;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.2s, transform 0.15s;
 }
 
 .dashboard-container .btn-edit:hover {
-  background: var(--blue-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+  background: #2563eb;
+  transform: translateY(-1px);
 }
 
 /* ============================================
-   PUBLICACIONES HEADER CUIDADOR
-   ============================================ */
-.dashboard-container .publicaciones-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2.5rem;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
-/* ============================================
-   PUBLICACIONES GRID CUIDADOR - CARDS MÁS PEQUEÑAS
-   ============================================ */
-.dashboard-container .publicaciones-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
-  max-width: 100%;
-}
-
-.dashboard-container .publicacion-card {
-  background: var(--white);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
-  border: 2px solid transparent;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  max-width: 100%;
-}
-
-.dashboard-container .publicacion-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--light-peach);
-}
-
-.dashboard-container .publicacion-image-container {
-  position: relative;
-  width: 100%;
-  padding-top: 60%;
-  overflow: hidden;
-  background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
-}
-
-.dashboard-container .publicacion-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.dashboard-container .publicacion-card:hover .publicacion-image {
-  transform: scale(1.05);
-}
-
-.dashboard-container .publicacion-details {
-  padding: 1.5rem;
-}
-
-.dashboard-container .publicacion-title {
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: var(--text-dark);
-  margin-bottom: 0.75rem;
-  line-height: 1.3;
-}
-
-.dashboard-container .publicacion-description {
-  font-size: 0.95rem;
-  color: var(--text-gray);
-  margin-bottom: 1rem;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.dashboard-container .publicacion-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-}
-
-.dashboard-container .publicacion-price {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--primary-orange);
-  margin: 1rem 0;
-}
-
-.dashboard-container .publicacion-actions {
-  display: flex;
-  gap: 0.75rem;
-  padding-top: 1rem;
-  border-top: 2px solid var(--light-peach);
-}
-
-.dashboard-container .publicacion-actions .btn-edit,
-.dashboard-container .publicacion-actions .btn-delete {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  font-size: 0.95rem;
-}
-
-/* ============================================
-   FORMULARIOS CUIDADOR
+   FORMULARIOS CUIDADOR (SIN CAMBIOS)
    ============================================ */
 .dashboard-container .form-container {
   max-width: 1000px;
   margin: 0 auto;
+  padding: 2rem;
 }
 
 .dashboard-container .form-card {
@@ -940,46 +844,62 @@
    RESERVAS CUIDADOR
    ============================================ */
 .dashboard-container .reservas-header {
-  margin-bottom: 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 3rem 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 0;
+  background: var(--lighter-peach, #fffaf8);
+}
+
+.dashboard-container .reservas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 2rem;
+  padding: 0 3rem 4rem;
+  background: var(--lighter-peach, #fffaf8);
+  width: 100%;
+}
+
+/* Empty state dentro del wrapper de reservas */
+.dashboard-container .reservas-grid+.empty-state,
+.dashboard-container .publicaciones-grid-wrapper .empty-state {
+  margin: 0;
+  background: transparent;
 }
 
 .dashboard-container .reservas-filters {
   display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
+  gap: 0.6rem;
   flex-wrap: wrap;
 }
 
 .dashboard-container .filter-btn {
-  padding: 0.875rem 1.75rem;
+  padding: 0.55rem 1.1rem;
   border: 2px solid var(--border-gray);
-  background: var(--white);
-  color: var(--text-dark);
-  border-radius: var(--radius-lg);
-  font-size: 1rem;
+  background: white;
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
   font-weight: 700;
+  font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  color: var(--text-gray);
 }
 
 .dashboard-container .filter-btn:hover {
-  background: var(--bg-light);
   border-color: var(--primary-orange);
   color: var(--primary-orange);
 }
 
 .dashboard-container .filter-btn.active {
   background: var(--primary-orange);
-  color: var(--white);
+  color: white;
   border-color: var(--primary-orange);
-  box-shadow: var(--shadow-orange);
 }
 
-.dashboard-container .reservas-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 2rem;
-}
 
 .dashboard-container .reserva-card-expanded {
   background: var(--white);
@@ -996,380 +916,28 @@
   border-color: var(--light-peach);
 }
 
-.dashboard-container .reserva-header-with-image {
-  display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-  align-items: flex-start;
-}
-
-.dashboard-container .reserva-publicacion-image {
-  width: 120px;
-  height: 120px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  flex-shrink: 0;
-  box-shadow: var(--shadow-md);
-}
-
-.dashboard-container .reserva-publicacion-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.dashboard-container .reserva-image-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-}
-
-.dashboard-container .reserva-header-info {
-  flex: 1;
-}
-
-.dashboard-container .reserva-header-info h3 {
-  color: var(--primary-orange);
-  font-size: 1.5rem;
-  font-weight: 800;
-  margin-bottom: 0.75rem;
-  line-height: 1.3;
-}
-
-.dashboard-container .reserva-dueno-info,
-.dashboard-container .reserva-dueno-contacto {
-  color: var(--text-dark);
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
-.dashboard-container .reserva-dueno-contacto {
-  color: var(--primary-orange);
-}
-
 .dashboard-container .status-badge {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.9rem;
   border-radius: var(--radius-lg);
-  font-size: 0.85rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: inline-block;
-  margin-top: 0.5rem;
-}
-
-.dashboard-container .status-pendiente {
-  background: linear-gradient(135deg, #FFF3CD 0%, #FFE9A8 100%);
-  color: #DA9E00;
+  font-size: 0.75rem;
 }
 
 .dashboard-container .status-confirmada {
-  background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+  background: #D1FAE5;
   color: #059669;
 }
 
-.dashboard-container .status-rechazada,
-.dashboard-container .status-cancelada {
-  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+.dashboard-container .status-pendiente {
+  background: #FFF3CD;
+  color: #DA9E00;
+}
+
+.dashboard-container .status-cancelada,
+.dashboard-container .status-rechazada {
+  background: #FEE2E2;
   color: #DC2626;
-}
-
-.dashboard-container .reserva-info {
-  margin: 1.5rem 0;
-  padding: 1.5rem;
-  background: var(--lighter-peach);
-  border-radius: var(--radius-lg);
-}
-
-.dashboard-container .reserva-date-range {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.dashboard-container .date-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.dashboard-container .date-label {
-  font-size: 0.85rem;
-  color: var(--text-gray);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.dashboard-container .date-value {
-  font-size: 1.15rem;
-  color: var(--text-dark);
-  font-weight: 800;
-}
-
-.dashboard-container .date-separator {
-  font-size: 1.5rem;
-  color: var(--primary-orange);
-  font-weight: 700;
-}
-
-.dashboard-container .reserva-price {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 1rem;
-  border-top: 2px solid var(--white);
-}
-
-.dashboard-container .price-label {
-  font-size: 0.95rem;
-  color: var(--text-gray);
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.dashboard-container .price-value {
-  font-size: 1.75rem;
-  color: var(--primary-orange);
-  font-weight: 800;
-}
-
-.dashboard-container .reserva-mascotas-preview {
-  margin: 1.5rem 0;
-  font-weight: 700;
-  color: var(--text-dark);
-}
-
-.dashboard-container .reserva-mascotas-preview strong {
-  display: block;
-  margin-bottom: 1rem;
-  font-size: 1.05rem;
-}
-
-.dashboard-container .mascotas-thumbnails {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-  flex-wrap: wrap;
-}
-
-.dashboard-container .mascota-thumb {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.dashboard-container .mascota-thumb img,
-.dashboard-container .mascota-thumb-placeholder {
-  width: 60px;
-  height: 60px;
-  border-radius: var(--radius-md);
-  object-fit: cover;
-  box-shadow: var(--shadow-sm);
-}
-
-.dashboard-container .mascota-thumb-placeholder {
-  background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-  border: 2px solid var(--primary-orange);
-}
-
-.dashboard-container .mascota-thumb-name {
-  font-size: 0.8rem;
-  color: var(--text-gray);
-  font-weight: 600;
-  max-width: 60px;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dashboard-container .btn-expand {
-  width: 100%;
-  padding: 0.875rem;
-  background: var(--lighter-peach);
-  color: var(--primary-orange);
-  border: 2px solid var(--light-peach);
-  border-radius: var(--radius-lg);
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 1rem;
-  font-size: 1rem;
-}
-
-.dashboard-container .btn-expand:hover {
-  background: var(--light-peach);
-  border-color: var(--primary-orange);
-}
-
-.dashboard-container .reserva-expanded-details {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 2px solid var(--light-peach);
-}
-
-.dashboard-container .detail-section {
-  margin-bottom: 1.5rem;
-  padding: 1.25rem;
-  background: var(--lighter-peach);
-  border-radius: var(--radius-lg);
-}
-
-.dashboard-container .detail-section h4 {
-  color: var(--primary-orange);
-  font-size: 1.15rem;
-  font-weight: 800;
-  margin-bottom: 1rem;
-}
-
-.dashboard-container .detail-section p {
-  margin: 0.5rem 0;
-  color: var(--text-dark);
-  font-weight: 600;
-  line-height: 1.6;
-  font-size: 1rem;
-}
-
-.dashboard-container .mascotas-detail-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.dashboard-container .mascota-detail-item {
-  display: flex;
-  gap: 1rem;
-  padding: 1rem;
-  background: var(--white);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-}
-
-.dashboard-container .mascota-detail-image {
-  width: 80px;
-  height: 80px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.dashboard-container .mascota-detail-image img,
-.dashboard-container .mascota-detail-placeholder {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.dashboard-container .mascota-detail-placeholder {
-  background: linear-gradient(135deg, var(--light-peach) 0%, var(--lighter-peach) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-}
-
-.dashboard-container .mascota-detail-info h5 {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--text-dark);
-  margin-bottom: 0.5rem;
-}
-
-.dashboard-container .mascota-detail-info p {
-  font-size: 0.95rem;
-  color: var(--text-gray);
-  margin: 0.25rem 0;
-}
-
-.dashboard-container .exotic-tag {
-  color: var(--primary-orange);
-  font-weight: 800;
-  font-size: 0.9rem;
-}
-
-.dashboard-container .dias-reservados-list {
-  margin-top: 1rem;
-}
-
-.dashboard-container .dias-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.dashboard-container .dia-badge {
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
-  border: 2px solid var(--blue-primary);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  color: #1e40af;
-  font-weight: 700;
-}
-
-.dashboard-container .no-data {
-  font-size: 1rem;
-  color: var(--text-gray);
-  font-style: italic;
-  font-weight: 600;
-}
-
-.dashboard-container .reserva-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 2px solid var(--light-peach);
-}
-
-.dashboard-container .btn-reject {
-  padding: 0.875rem 1.75rem;
-  background: var(--white);
-  color: var(--error-red);
-  border: 2px solid var(--error-red);
-  border-radius: var(--radius-lg);
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.dashboard-container .btn-reject:hover {
-  background: var(--error-red);
-  color: var(--white);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
-}
-
-.dashboard-container .btn-accept {
-  padding: 0.875rem 1.75rem;
-  background: var(--success-green);
-  color: var(--white);
-  border: none;
-  border-radius: var(--radius-lg);
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-.dashboard-container .btn-accept:hover {
-  background: #059669;
-  transform: translateY(-2px);
 }
 
 /* ============================================
@@ -1537,480 +1105,13 @@
   margin-bottom: 1.5rem;
 }
 
-.reservas-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.reservas-filters {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.filter-btn {
-  padding: 8px 16px;
-  border: 2px solid #e5e7eb;
-  background: white;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #6b7280;
-}
-
-.filter-btn:hover {
-  border-color: #6366f1;
-  color: #6366f1;
-}
-
-.filter-btn.active {
-  background: #6366f1;
-  color: white;
-  border-color: #6366f1;
-}
-
-.reservas-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 24px;
-}
-
-@media (max-width: 768px) {
-  .reservas-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .reservas-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
 /* ============================================
-   RESPONSIVE DESIGN CUIDADOR
-   ============================================ */
-
-/* Large Desktops (1400px+) */
-@media (min-width: 1400px) {
-  .dashboard-container .reservas-grid {
-    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-  }
-}
-
-/* Desktops (1200px - 1399px) */
-@media (max-width: 1399px) {
-  .dashboard-container .reservas-grid {
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  }
-}
-
-/* Tablets grandes (1024px o menos) */
-@media (max-width: 1024px) {
-  .dashboard-container .navbar-title {
-    font-size: 1.75rem;
-  }
-
-  .dashboard-container .navbar-welcome {
-    font-size: 0.95rem;
-    padding: 0.4rem 1rem;
-  }
-
-  .dashboard-container .navbar-buttons {
-    grid-template-columns: 150px 1fr auto;
-    gap: 1.5rem;
-  }
-
-  .dashboard-container .nav-button,
-  .dashboard-container .btn-publicaciones-extra,
-  .dashboard-container .logout-button {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.95rem;
-  }
-
-  .dashboard-container .dashboard-main {
-    padding: 2.5rem 1.5rem;
-  }
-
-  .dashboard-container .section-title {
-    font-size: 2rem;
-  }
-
-  .dashboard-container .publicaciones-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.25rem;
-  }
-
-  .dashboard-container .reservas-grid {
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .dashboard-container .calendar-grid-container {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-}
-
-/* Tablets (768px o menos) */
-@media (max-width: 768px) {
-  .dashboard-container .dashboard-navbar {
-    padding: 1.25rem 1.5rem;
-  }
-
-  .dashboard-container .navbar-brand {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-    gap: 0.5rem;
-  }
-
-  .dashboard-container .navbar-title {
-    font-size: 1.5rem;
-  }
-
-  .dashboard-container .navbar-welcome {
-    font-size: 0.9rem;
-  }
-
-  .dashboard-container .navbar-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .dashboard-container .navbar-buttons::before {
-    display: none;
-  }
-
-  .dashboard-container .up-buttons {
-    width: 100%;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .dashboard-container .down-buttons {
-    width: 100%;
-    flex-direction: row;
-    justify-content: center;
-    gap: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 2px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .dashboard-container .nav-button,
-  .dashboard-container .btn-publicaciones-extra,
-  .dashboard-container .logout-button {
-    width: 100%;
-    justify-content: center;
-    padding: 0.875rem 1.25rem;
-  }
-
-  .dashboard-container .down-buttons .nav-button,
-  .dashboard-container .down-buttons .logout-button {
-    flex: 1;
-  }
-
-  .dashboard-container .dashboard-main {
-    padding: 2rem 1.25rem;
-  }
-
-  .dashboard-container .section-title {
-    font-size: 1.75rem;
-  }
-
-  .dashboard-container .publicaciones-grid,
-  .dashboard-container .reservas-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .dashboard-container .publicaciones-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1.5rem;
-  }
-
-  .dashboard-container .form-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .dashboard-container .form-buttons {
-    flex-direction: column-reverse;
-    gap: 1rem;
-  }
-
-  .dashboard-container .btn-primary,
-  .dashboard-container .btn-secondary {
-    width: 100%;
-  }
-
-  .dashboard-container .perfil-card {
-    padding: 2rem 1.5rem;
-  }
-
-  .dashboard-container .perfil-image,
-  .dashboard-container .perfil-placeholder {
-    width: 140px;
-    height: 140px;
-  }
-
-  .dashboard-container .perfil-placeholder {
-    font-size: 3.5rem;
-  }
-
-  .dashboard-container .reserva-header-with-image {
-    flex-direction: column;
-  }
-
-  .dashboard-container .reserva-publicacion-image {
-    width: 100%;
-    height: 200px;
-  }
-
-  .dashboard-container .reserva-date-range {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .dashboard-container .date-separator {
-    transform: rotate(90deg);
-  }
-
-  .dashboard-container .reserva-actions {
-    flex-direction: column;
-  }
-
-  .dashboard-container .btn-reject,
-  .dashboard-container .btn-accept {
-    width: 100%;
-  }
-
-  .dashboard-container .image-preview-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  }
-}
-
-/* Móviles grandes (480px o menos) */
-@media (max-width: 480px) {
-  .dashboard-container .dashboard-navbar {
-    padding: 1rem 1rem;
-  }
-
-  .dashboard-container .navbar-brand {
-    padding: 0;
-  }
-
-  .dashboard-container .navbar-title {
-    font-size: 1.35rem;
-  }
-
-  .dashboard-container .navbar-welcome {
-    font-size: 0.85rem;
-    padding: 0.35rem 0.9rem;
-  }
-
-  .dashboard-container .nav-button,
-  .dashboard-container .btn-publicaciones-extra,
-  .dashboard-container .logout-button {
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
-  }
-
-  .dashboard-container .down-buttons {
-    flex-direction: column;
-  }
-
-  .dashboard-container .down-buttons .nav-button,
-  .dashboard-container .down-buttons .logout-button {
-    width: 100%;
-  }
-
-  .dashboard-container .dashboard-main {
-    padding: 1.5rem 1rem;
-  }
-
-  .dashboard-container .section-title {
-    font-size: 1.5rem;
-  }
-
-  .dashboard-container .btn-primary {
-    padding: 0.875rem 1.5rem;
-    font-size: 1rem;
-  }
-
-  .dashboard-container .btn-secondary,
-  .dashboard-container .btn-delete,
-  .dashboard-container .btn-edit {
-    padding: 0.75rem 1.25rem;
-    font-size: 0.95rem;
-  }
-
-  .dashboard-container .perfil-card,
-  .dashboard-container .form-card {
-    padding: 1.75rem 1.25rem;
-    border-radius: var(--radius-lg);
-  }
-
-  .dashboard-container .perfil-image,
-  .dashboard-container .perfil-placeholder {
-    width: 120px;
-    height: 120px;
-    border-width: 4px;
-  }
-
-  .dashboard-container .perfil-placeholder {
-    font-size: 3rem;
-  }
-
-  .dashboard-container .form-label {
-    font-size: 1rem;
-    padding: 0.65rem 1.25rem;
-  }
-
-  .dashboard-container .form-input,
-  .dashboard-container .form-select,
-  .dashboard-container .form-textarea {
-    padding: 0.875rem 1rem;
-    font-size: 1rem;
-  }
-
-  .dashboard-container .checkbox-group {
-    font-size: 1rem;
-    padding: 0.875rem;
-  }
-
-  .dashboard-container .reserva-card-expanded {
-    padding: 1.5rem;
-    border-radius: var(--radius-lg);
-  }
-
-  .dashboard-container .reserva-header-info h3 {
-    font-size: 1.35rem;
-  }
-
-  .dashboard-container .reserva-publicacion-image {
-    height: 180px;
-  }
-
-  .dashboard-container .date-value {
-    font-size: 1.05rem;
-  }
-
-  .dashboard-container .price-value {
-    font-size: 1.5rem;
-  }
-
-  .dashboard-container .mascota-thumb img,
-  .dashboard-container .mascota-thumb-placeholder {
-    width: 50px;
-    height: 50px;
-  }
-
-  .dashboard-container .mascota-thumb-name {
-    font-size: 0.75rem;
-    max-width: 50px;
-  }
-
-  .dashboard-container .image-preview-grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 1rem;
-  }
-}
-
-/* Móviles pequeños (360px o menos) */
-@media (max-width: 360px) {
-  .dashboard-container .navbar-title {
-    font-size: 1.25rem;
-  }
-
-  .dashboard-container .navbar-welcome {
-    display: none;
-  }
-
-  .dashboard-container .section-title {
-    font-size: 1.35rem;
-  }
-
-  .dashboard-container .nav-button,
-  .dashboard-container .btn-publicaciones-extra,
-  .dashboard-container .logout-button {
-    font-size: 0.85rem;
-    padding: 0.7rem 0.9rem;
-  }
-
-  .dashboard-container .dashboard-main {
-    padding: 1.25rem 0.75rem;
-  }
-
-  .dashboard-container .btn-primary {
-    padding: 0.8rem 1.25rem;
-    font-size: 0.95rem;
-  }
-
-  .dashboard-container .perfil-image,
-  .dashboard-container .perfil-placeholder {
-    width: 110px;
-    height: 110px;
-  }
-
-  .dashboard-container .perfil-placeholder {
-    font-size: 2.75rem;
-  }
-
-  .dashboard-container .form-label {
-    font-size: 0.95rem;
-    padding: 0.6rem 1rem;
-  }
-
-  .dashboard-container .form-input,
-  .dashboard-container .form-select {
-    padding: 0.8rem 0.9rem;
-    font-size: 0.95rem;
-  }
-
-  .dashboard-container .reserva-header-info h3 {
-    font-size: 1.25rem;
-  }
-
-  .dashboard-container .date-value {
-    font-size: 1rem;
-  }
-
-  .dashboard-container .price-value {
-    font-size: 1.35rem;
-  }
-
-  .dashboard-container .empty-state {
-    padding: 3.5rem 1.5rem;
-  }
-
-  .dashboard-container .empty-state>div:first-child {
-    font-size: 4rem;
-  }
-
-  .dashboard-container .empty-state h3 {
-    font-size: 1.5rem;
-  }
-
-  .dashboard-container .empty-state p {
-    font-size: 1rem;
-  }
-}
-
-/* ============================================
-   ANIMACIONES Y TRANSICIONES CUIDADOR
+   ANIMACIONES
    ============================================ */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(16px);
   }
 
   to {
@@ -2019,45 +1120,130 @@
   }
 }
 
+.dashboard-container .publicacion-card,
 .dashboard-container .reserva-card-expanded,
 .dashboard-container .perfil-card,
 .dashboard-container .form-card {
-  animation: fadeIn 0.4s ease-out;
+  animation: fadeIn 0.35s ease-out both;
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
+/* ============================================
+   RESPONSIVE DESIGN CUIDADOR
+   ============================================ */
+@media (max-width: 1024px) {
+  .dashboard-container .dashboard-navbar {
+    padding: 1rem;
+  }
+
+  .dashboard-container .navbar-title {
+    font-size: 2rem;
+  }
+
+  .dashboard-container .nav-button,
+  .dashboard-container .btn-publicaciones-extra,
+  .dashboard-container .logout-button {
+    padding: 0.75rem 1.2rem;
+    font-size: 1.2rem;
+  }
+
+  .dashboard-container .publicaciones-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  .dashboard-container .calendar-grid-container {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* Mejoras de accesibilidad CUIDADOR */
-.dashboard-container .nav-button:focus,
-.dashboard-container .btn-primary:focus,
-.dashboard-container .btn-secondary:focus,
-.dashboard-container .btn-delete:focus,
-.dashboard-container .btn-edit:focus {
-  outline: 3px solid var(--primary-orange);
-  outline-offset: 2px;
-}
+@media (max-width: 768px) {
+  .dashboard-container .dashboard-navbar {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    min-height: auto;
+  }
 
-/* Print styles CUIDADOR */
-@media print {
+  .dashboard-container .navbar-brand {
+    width: 100%;
+    justify-content: center;
+  }
 
-  .dashboard-container .dashboard-navbar,
-  .dashboard-container .reserva-actions,
+  .dashboard-container .navbar-title {
+    font-size: 1.8rem;
+    margin-top: 0;
+  }
+
+  .dashboard-container .navbar-buttons {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .dashboard-container .up-buttons,
+  .dashboard-container .down-buttons {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .dashboard-container .nav-button,
+  .dashboard-container .btn-publicaciones-extra,
+  .dashboard-container .logout-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dashboard-container .publicaciones-header,
+  .dashboard-container .reservas-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem 1.5rem 1rem;
+  }
+
+  .dashboard-container .publicaciones-grid-wrapper,
+  .dashboard-container .reservas-grid {
+    padding: 1.5rem;
+  }
+
+  .dashboard-container .publicaciones-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-container .reservas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-container .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-container .form-buttons {
+    flex-direction: column-reverse;
+  }
+
   .dashboard-container .btn-primary,
-  .dashboard-container .btn-secondary,
-  .dashboard-container .btn-delete,
-  .dashboard-container .btn-edit {
-    display: none;
+  .dashboard-container .btn-secondary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container .navbar-title {
+    font-size: 1.5rem;
   }
 
-  .dashboard-container {
-    background: white;
+  .dashboard-container .nav-button,
+  .dashboard-container .btn-publicaciones-extra,
+  .dashboard-container .logout-button {
+    padding: 0.65rem 1rem;
+    font-size: 1rem;
   }
 
-  .dashboard-container .reserva-card-expanded {
-    break-inside: avoid;
-    page-break-inside: avoid;
+  .dashboard-container .section-title {
+    font-size: 1.75rem;
+  }
+
+  .dashboard-container .publicaciones-grid-wrapper {
+    padding: 1rem;
   }
 }

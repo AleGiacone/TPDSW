@@ -37,22 +37,8 @@ function App() {
             <Route path="/unauthorized" element={<><Navbar /><UnauthorizedPage /></>} />
 
             {/* Rutas de pago */}
-            <Route
-              path="/payment/success"
-              element={
-                <ProtectedRoute requiredUserType="dueno">
-                  <PaymentSuccess />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payment/cancel"
-              element={
-                <ProtectedRoute requiredUserType="dueno">
-                  <PaymentCancel />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/payment/success" element={<PaymentSuccess />} />
+            <Route path="/payment/cancel" element={<PaymentCancel />} />
 
             {/* Rutas protegidas */}
             <Route

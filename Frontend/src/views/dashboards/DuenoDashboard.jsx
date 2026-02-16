@@ -88,21 +88,24 @@ const DuenoDashboard = () => {
     // ─── FIX: filterStatus moved here, out of renderReservas ───────────────────
     const [filterStatus, setFilterStatus] = useState('todas');
 
+
     const {
         reservas,
         loading: reservasLoading,
         error: reservasError,
         cancelarReserva,
-        getReservasByEstado,
-        isReservaExpired
+        getReservasByEstado,      // filtra por 'pendiente' | 'en_curso' | 'todas'
     } = useReservas(user?.idUsuario, 'dueno');
 
     // ─── Redirect to reservas view if coming back from a successful payment ────
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        if (params.get('from') === 'payment') {
+        const fromPayment = params.get('from');
+
+        // Si viene del pago, abrir reservas
+        if (fromPayment === 'payment') {
             setCurrentView('reservas');
-            // Clean up the URL without reloading
+            // Limpiar la URL
             window.history.replaceState({}, '', window.location.pathname);
         }
     }, []);
@@ -517,14 +520,15 @@ const DuenoDashboard = () => {
     };
 
     // ─── renderReservas: NO hooks inside, uses filterStatus from component scope ─
+
     const renderReservas = () => {
         const reservasFiltradas = getReservasByEstado(filterStatus);
 
         const handleCancelarReserva = async (reservaId) => {
-            if (!window.confirm('¿Estás seguro de cancelar esta reserva?')) return;
+            if (!window.confirm('¿Estás seguro de cancelar esta reserva? Esta acción no se puede deshacer.')) return;
             const result = await cancelarReserva(reservaId);
             if (result.success) alert('✅ Reserva cancelada exitosamente');
-            else alert('❌ Error: ' + result.error);
+            else alert('❌ Error al cancelar: ' + result.error);
         };
 
         return (
@@ -546,16 +550,10 @@ const DuenoDashboard = () => {
                             Pendientes ({getReservasByEstado('pendiente').length})
                         </button>
                         <button
-                            onClick={() => setFilterStatus('confirmada')}
-                            className={`filter-btn ${filterStatus === 'confirmada' ? 'active' : ''}`}
+                            onClick={() => setFilterStatus('en_curso')}
+                            className={`filter-btn ${filterStatus === 'en_curso' ? 'active' : ''}`}
                         >
-                            Confirmadas ({getReservasByEstado('confirmada').length})
-                        </button>
-                        <button
-                            onClick={() => setFilterStatus('cancelada')}
-                            className={`filter-btn ${filterStatus === 'cancelada' ? 'active' : ''}`}
-                        >
-                            Canceladas ({getReservasByEstado('cancelada').length})
+                            En curso ({getReservasByEstado('en_curso').length})
                         </button>
                     </div>
                 </div>
@@ -566,9 +564,17 @@ const DuenoDashboard = () => {
                 {reservasFiltradas.length === 0 && !reservasLoading ? (
                     <div className="empty-state">
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>📅</div>
-                        <h3>No tienes reservas {filterStatus !== 'todas' ? filterStatus + 's' : ''}</h3>
-                        <p>Explora las publicaciones disponibles y haz tu primera reserva</p>
-                        <button onClick={() => navigate('/')} className="btn-primary" style={{ marginTop: '16px' }}>
+                        <h3>
+                            {filterStatus === 'todas' && 'No tenés reservas todavía'}
+                            {filterStatus === 'pendiente' && 'No tenés reservas pendientes'}
+                            {filterStatus === 'en_curso' && 'No tenés reservas en curso'}
+                        </h3>
+                        <p>Explorá las publicaciones disponibles y hacé tu primera reserva</p>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="btn-primary"
+                            style={{ marginTop: '16px' }}
+                        >
                             Ver Publicaciones
                         </button>
                     </div>
@@ -576,11 +582,12 @@ const DuenoDashboard = () => {
                     <div className="reservas-grid">
                         {reservasFiltradas.map((reserva) => (
                             <ReservaCard
-                                key={reserva.id || reserva.idReserva}
+                                key={reserva.idReserva || reserva.id}
                                 reserva={reserva}
                                 userType="dueno"
                                 onCancelar={handleCancelarReserva}
-                                isExpired={isReservaExpired(reserva)}
+                            // isExpired y onAceptar/onRechazar eliminados:
+                            // el estado lo calcula la card desde reserva.estadoCalculado
                             />
                         ))}
                     </div>
@@ -588,7 +595,6 @@ const DuenoDashboard = () => {
             </div>
         );
     };
-
 
 
     const renderMascotas = () => (
@@ -952,75 +958,183 @@ const DuenoDashboard = () => {
             </form>
         </div>
     );
-
     const renderPerfil = () => (
-        <div className="form-container">
+        <div className="dashboard-main">
             <div className="perfil-container">
-                <div className="perfil-header">
-                    <h2 className="section-title">Mi Perfil</h2>
-                    <button onClick={() => { setEditingPerfil(!editingPerfil); setProfileImageFile(null); setError(''); if (editingPerfil) { setPerfilForm({ nombre: user?.nombre || '', email: user?.email || '', telefono: user?.telefono || '', nroDocumento: user?.nroDocumento || '', tipoDocumento: user?.tipoDocumento || '' }); } }} className="btn-primary">
-                        {editingPerfil ? 'Cancelar Edición' : 'Editar Perfil'}
-                    </button>
-                </div>
-                {error && <p className="error-message">{error}</p>}
-                {editingPerfil ? (
+                <h2 className="section-title">Mi Perfil</h2>
+
+                {!editingPerfil ? (
+                    <div className="perfil-card">
+                        {/* ✅ Imagen centralizada igual que cuidador */}
+                        <div className="perfil-image-container">
+                            {user?.perfilImage ? (
+                                <img
+                                    src={`http://localhost:3000${user.perfilImage}`}
+                                    alt="Foto de perfil"
+                                    className="perfil-image"
+                                />
+                            ) : (
+                                <div className="perfil-placeholder">👤</div>
+                            )}
+                        </div>
+
+                        {/* ✅ Mismo formato que cuidador con .perfil-field */}
+                        <div className="perfil-field">
+                            <label className="field-label">Nombre:</label>
+                            <p className="field-value">{user?.nombre}</p>
+                        </div>
+                        <div className="perfil-field">
+                            <label className="field-label">Email:</label>
+                            <p className="field-value">{user?.email}</p>
+                        </div>
+                        <div className="perfil-field">
+                            <label className="field-label">Teléfono:</label>
+                            <p className="field-value">{user?.telefono || 'No especificado'}</p>
+                        </div>
+                        <div className="perfil-field">
+                            <label className="field-label">Documento:</label>
+                            <p className="field-value">
+                                {user?.tipoDocumento || 'DNI'} {user?.nroDocumento || 'No especificado'}
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={() => { setEditingPerfil(true); setProfileImageFile(null); setError(''); }}
+                            className="btn-primary"
+                            style={{ marginTop: '2rem' }}
+                        >
+                            ✏️ Editar Perfil
+                        </button>
+                        <button
+                            onClick={handleDeleteUser}
+                            className="btn-delete"
+                            disabled={loading}
+                            style={{ marginTop: '1rem' }}
+                        >
+                            {loading ? 'Eliminando...' : '🗑️ Eliminar Cuenta'}
+                        </button>
+                    </div>
+                ) : (
                     <form onSubmit={handlePerfilSubmit} className="form-card">
-                        <div className="form-group" style={{ textAlign: 'center', marginBottom: '30px' }}>
+                        {/* ✅ Mismo formato de edición que cuidador */}
+                        <div className="form-group perfil-image-upload">
                             <label className="form-label">Foto de perfil:</label>
-                            <div style={{ margin: '15px 0' }}>
+                            <div className="profile-image-preview">
                                 {profileImageFile ? (
-                                    <img src={URL.createObjectURL(profileImageFile)} alt="Preview" style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #f97840' }} />
+                                    <img
+                                        src={URL.createObjectURL(profileImageFile)}
+                                        alt="Preview"
+                                        className="perfil-image"
+                                    />
                                 ) : user?.perfilImage ? (
-                                    <img src={`http://localhost:3000${user.perfilImage}`} alt="Foto actual" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #3b82f6' }} />
+                                    <img
+                                        src={`http://localhost:3000${user.perfilImage}`}
+                                        alt="Foto actual"
+                                        className="perfil-image"
+                                    />
                                 ) : (
-                                    <div style={{ width: '150px', height: '150px', borderRadius: '50%', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontSize: '48px', color: '#6b7280' }}>👤</div>
+                                    <div className="perfil-placeholder">👤</div>
                                 )}
                             </div>
-                            <input type="file" accept="image/*" onChange={handleProfileImageChange} className="form-input" style={{ marginTop: '10px' }} />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleProfileImageChange}
+                                className="form-input"
+                            />
                             {user?.perfilImage && (
-                                <button type="button" onClick={deleteDuenoProfileImage} className="btn-delete" disabled={imageUploading} style={{ marginTop: '10px' }}>
-                                    {imageUploading ? 'Eliminando...' : 'Eliminar Foto Actual'}
+                                <button
+                                    type="button"
+                                    onClick={deleteDuenoProfileImage}
+                                    className="btn-delete"
+                                    disabled={imageUploading}
+                                    style={{ marginTop: '10px' }}
+                                >
+                                    {imageUploading ? 'Eliminando...' : '🗑️ Eliminar Foto'}
                                 </button>
                             )}
                         </div>
-                        <div className="form-group"><label>Nombre:</label><input type="text" name="nombre" value={perfilForm.nombre} onChange={handlePerfilFormChange} required /></div>
-                        <div className="form-group"><label>Email:</label><input type="email" name="email" value={perfilForm.email} onChange={handlePerfilFormChange} required /></div>
-                        <div className="form-group"><label>Teléfono:</label><input type="text" name="telefono" value={perfilForm.telefono} onChange={handlePerfilFormChange} /></div>
-                        <div className="form-group"><label>Número de Documento:</label><input type="text" name="nroDocumento" value={perfilForm.nroDocumento} onChange={handlePerfilFormChange} /></div>
+
                         <div className="form-group">
-                            <label>Tipo de Documento:</label>
-                            <select name="tipoDocumento" value={perfilForm.tipoDocumento} onChange={handlePerfilFormChange}>
-                                <option value="">Selecciona tipo</option>
-                                <option value="DNI">DNI</option>
-                                <option value="Pasaporte">Pasaporte</option>
-                                <option value="Libreta Civica">Libreta Cívica</option>
-                            </select>
+                            <label className="form-label">Nombre:</label>
+                            <input
+                                type="text"
+                                name="nombre"
+                                value={perfilForm.nombre}
+                                onChange={handlePerfilFormChange}
+                                className="form-input"
+                                required
+                            />
                         </div>
-                        <button type="submit" className="btn-primary" disabled={loading || imageUploading}>
-                            {loading || imageUploading ? 'Guardando...' : 'Guardar Cambios'}
-                        </button>
-                    </form>
-                ) : (
-                    <div className="profile-details-card">
-                        <div className="profile-image-display">
-                            {user?.perfilImage ? (
-                                <img src={`http://localhost:3000${user.perfilImage}`} alt="Foto de perfil" className="profile-display-img" />
-                            ) : (
-                                <div className="profile-placeholder-img">👤</div>
-                            )}
+
+                        <div className="form-group">
+                            <label className="form-label">Email:</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={perfilForm.email}
+                                onChange={handlePerfilFormChange}
+                                className="form-input"
+                                required
+                            />
                         </div>
-                        <div className="profile-info">
-                            <p><strong>Nombre:</strong> {user?.nombre}</p>
-                            <p><strong>Email:</strong> {user?.email}</p>
-                            <p><strong>Teléfono:</strong> {user?.telefono || 'N/A'}</p>
-                            <p><strong>Documento:</strong> {user?.tipoDocumento} {user?.nroDocumento || 'N/A'}</p>
+
+                        <div className="form-group">
+                            <label className="form-label">Teléfono:</label>
+                            <input
+                                type="tel"
+                                name="telefono"
+                                value={perfilForm.telefono}
+                                onChange={handlePerfilFormChange}
+                                className="form-input"
+                            />
                         </div>
-                        <div className="delete-user-section">
-                            <button onClick={handleDeleteUser} className="btn-delete" disabled={loading} style={{ width: '100%', padding: '10px', marginTop: '20px' }}>
-                                {loading ? 'Eliminando Cuenta...' : '🗑️ Eliminar Cuenta Definitivamente'}
+
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label className="form-label">Tipo de documento:</label>
+                                <select
+                                    name="tipoDocumento"
+                                    value={perfilForm.tipoDocumento}
+                                    onChange={handlePerfilFormChange}
+                                    className="form-select"
+                                >
+                                    <option value="DNI">DNI</option>
+                                    <option value="Pasaporte">Pasaporte</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Número de documento:</label>
+                                <input
+                                    type="text"
+                                    name="nroDocumento"
+                                    value={perfilForm.nroDocumento}
+                                    onChange={handlePerfilFormChange}
+                                    className="form-input"
+                                />
+                            </div>
+                        </div>
+
+                        {error && <div className="error-message">{error}</div>}
+
+                        <div className="form-buttons">
+                            <button
+                                type="button"
+                                onClick={() => { setEditingPerfil(false); setProfileImageFile(null); setError(''); }}
+                                className="btn-secondary"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={loading || imageUploading}
+                                className="btn-primary"
+                            >
+                                {loading || imageUploading ? 'Guardando...' : 'Guardar Cambios'}
                             </button>
                         </div>
-                    </div>
+                    </form>
                 )}
             </div>
         </div>
