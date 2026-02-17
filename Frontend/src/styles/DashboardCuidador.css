@@ -606,6 +606,7 @@
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
+  border-radius: 5px;
 }
 
 .dashboard-container .disponibilidad-header h3 {
@@ -613,6 +614,8 @@
   margin: 0;
   color: var(--text-dark);
   font-weight: 800;
+  border-radius: 15px;
+  margin-left: 2rem;
 }
 
 .dashboard-container .icon-calendar {
