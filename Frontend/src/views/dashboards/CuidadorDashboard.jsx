@@ -98,6 +98,7 @@ const DisponibilidadCalendar = ({ onDateSelect, blockedDates = [], publicacionId
         <div className="disponibilidad-calendar">
             <div className="calendar-header">
                 <button
+                    type="button"   
                     onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
                     className="calendar-nav-btn"
                 >
@@ -107,6 +108,7 @@ const DisponibilidadCalendar = ({ onDateSelect, blockedDates = [], publicacionId
                     {months[currentMonth.getMonth()]} {currentMonth.getFullYear()}
                 </span>
                 <button
+                    type="button"   
                     onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
                     className="calendar-nav-btn"
                 >
@@ -1214,8 +1216,7 @@ const CuidadorDashboard = () => {
                         {/* Sección de Disponibilidad */}
                         <div className="disponibilidad-section">
                             <div className="disponibilidad-header">
-                                <Calendar size={20} className="icon-calendar" />
-                                <h3>Gestionar Disponibilidad</h3>
+                                <h3> <Calendar size={20} className="icon-calendar" />  Gestionar Disponibilidad</h3>
                             </div>
                             <p className="disponibilidad-description">
                                 Bloquea fechas en las que no puedas recibir mascotas

@@ -71,7 +71,7 @@ const ReservaCard = ({ reserva, userType, onCancelar }) => {
   })();
 
   const tarifaPorDia = publicacion?.tarifaPorDia ?? 0;
-  const total = cantidadDias * tarifaPorDia;
+  const total = (cantidadDias-1) * tarifaPorDia;
 
   return (
     <div className={`reserva-card-modern ${borderClass}`}>
