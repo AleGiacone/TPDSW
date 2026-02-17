@@ -19,16 +19,15 @@ import sanitizeHTML from 'sanitize-html';
 //Agrego campos sanitizados
 function sanitizeReserva(req: Request, res: Response, next: NextFunction) {
     console.log("Sanitizing reserva with data:", req.body);
-  req.body.sanitizeInput = {
+    req.body.sanitizeInput = {
     idReserva: req.body.idReserva,
     fechaReserva: req.body.fechaReserva ? sanitizeHTML(String(req.body.fechaReserva)) : undefined,
     descripcion: req.body.descripcion ? sanitizeHTML(String(req.body.descripcion)) : undefined,
+  
     idDueno: req.body.idDueno,
     idMascotas: req.body.idMascotas,
     idPublicacion: req.body.idPublicacion,
     dias: req.body.dias,
-    fechaDesde: req.body.fechaDesde ? new Date(req.body.fechaDesde) : undefined,  
-    fechaHasta: req.body.fechaHasta ? new Date(req.body.fechaHasta) : undefined, 
     //agregar sanitizacion de los campos que se necesiten
   };
   Object.keys(req.body.sanitizeInput).forEach((key) => {
@@ -116,6 +115,10 @@ async function verifyDate(req: Request, res: Response, next: NextFunction) {
         return;
       }
     }
+     if(publicacion.exotico != mascota.exotico){ 
+      res.status(400).json({ message: `La mascota no coincide con el tipo de alojamiento de la publicación.` });
+      return;
+      }
 
     const diasOcupados = publicacion.diasOcupados.getItems().map(d => d.fechaReservada);
     for (let dia of req.body.sanitizeInput.dias) {
@@ -293,8 +296,11 @@ async function testPagoStripe(req: Request, res: Response) {
   console.log("Iniciando test de pago con Stripe");
   // La session de stripe la pedimos con el middleware
   try {
+  const em = orm.em.fork();
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-  
+  const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion: req.body.sanitizeInput.idPublicacion });
+  const cant = (req.body.sanitizeInput.dias.length) - 1 ;
+  const total = publicacion.tarifaPorDia * cant;
   const session = await stripe.checkout.sessions.create({
     line_items: [
       {
@@ -303,7 +309,7 @@ async function testPagoStripe(req: Request, res: Response) {
           product_data: {
             name: 'Test Product',
           },
-          unit_amount: 2000,
+          unit_amount: total * 100, // Stripe trabaja en centavos
         },
         quantity: 1,
       },
