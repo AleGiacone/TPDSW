@@ -211,7 +211,7 @@ const PublicacionesView = () => {
                                 onChange={handleInputChange}
                                 className="checkbox-input"
                             />
-                            <span className="checkbox-text">🦎 Exóticos</span>
+                            <span className="checkbox-text">Exóticos</span>
                         </label>
                     </div>
 

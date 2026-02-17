@@ -36,7 +36,7 @@ const PaymentCancel = () => {
         <div className="payment-icon cancel-icon">
           <span className="cross-mark">✕</span>
         </div>
-        <h1>Pago Cancelado</h1>
+        <h1>Pago cancelado</h1>
         <p className="payment-message">
           Se ha cancelado el proceso de pago. No se va a realizar ningún cargo.
         </p>

@@ -842,6 +842,7 @@ const CuidadorDashboard = () => {
             </>
         );
     };
+
     const renderNuevaPublicacion = () => (
         <div className="dashboard-main">
             <div className="form-container">
@@ -857,6 +858,7 @@ const CuidadorDashboard = () => {
                             onChange={handleChange}
                             required
                             className="form-input"
+                            placeholder="Ej: Cuidado de mascotas en casa amplia con jardín"
                         />
                     </div>
 
@@ -869,6 +871,7 @@ const CuidadorDashboard = () => {
                             rows={4}
                             required
                             className="form-textarea"
+                            placeholder="Describe tu espacio, experiencia y lo que ofreces..."
                         />
                     </div>
 
@@ -884,6 +887,7 @@ const CuidadorDashboard = () => {
                                 step="0.01"
                                 required
                                 className="form-input"
+                                placeholder="0.00"
                             />
                         </div>
                         <div className="form-group">
@@ -896,6 +900,7 @@ const CuidadorDashboard = () => {
                                 min="1"
                                 required
                                 className="form-input"
+                                placeholder="¿Cuántos podés cuidar?"
                             />
                         </div>
                     </div>
@@ -909,6 +914,7 @@ const CuidadorDashboard = () => {
                             onChange={handleChange}
                             required
                             className="form-input"
+                            placeholder="Ej: Rosario, Barrio Alberdi"
                         />
                     </div>
 
@@ -922,9 +928,9 @@ const CuidadorDashboard = () => {
                             className="form-select"
                         >
                             <option value="">Seleccionar...</option>
-                            <option value="casa">En mi casa</option>
-                            <option value="domicilio">En casa del dueño</option>
-                            <option value="ambos">Ambos</option>
+                            <option value="casa">🏠 En mi casa</option>
+                            <option value="domicilio">🚪 En casa del dueño</option>
+                            <option value="ambos">✅ Ambos</option>
                         </select>
                     </div>
 
@@ -937,13 +943,13 @@ const CuidadorDashboard = () => {
                                 onChange={handleChange}
                                 className="checkbox-input"
                             />
-                            <span>Acepto mascotas exóticas</span>
+                            <span>🦜 Acepto mascotas exóticas</span>
                         </label>
                     </div>
 
                     <div className="form-group file-upload-group">
                         <label className="form-label">
-                            Fotos de la Publicación (Máx. 5):
+                            📸 Fotos de la Publicación (Máx. 5):
                         </label>
 
                         <div className="file-input-wrapper">
@@ -957,7 +963,8 @@ const CuidadorDashboard = () => {
                                 id="file-input"
                             />
                             <label htmlFor="file-input" className="file-input-label">
-                                📁 Seleccionar imágenes
+                                <Upload size={18} />
+                                Seleccionar imágenes
                             </label>
                         </div>
 
@@ -1008,7 +1015,7 @@ const CuidadorDashboard = () => {
                             disabled={loading}
                             className="btn-primary"
                         >
-                            {loading ? 'Creando...' : 'Crear Publicación'}
+                            {loading ? 'Creando...' : '✨ Crear Publicación'}
                         </button>
                     </div>
                 </form>
@@ -1280,7 +1287,7 @@ const CuidadorDashboard = () => {
             <>
                 {/* CABECERA */}
                 <div className="reservas-header">
-                    <h2 className="section-title">Reservas Recibidas</h2>
+                    <h2 className="section-title">Reservas recibidas</h2>
 
                     <div className="reservas-filters">
                         <button
@@ -1544,7 +1551,7 @@ const CuidadorDashboard = () => {
                         className="logout-button"
                     >
                         <LogOut size={18} />
-                        
+
                     </button>
                 </div>
             </nav>

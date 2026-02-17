@@ -4,7 +4,7 @@ import 'reflect-metadata'
 import express from "express";
 import {especieRouter} from "./especie/especie.routes.js";
 import { razaRouter } from './raza/raza.routes.js';
-import { orm, syncSchema } from "./shared/db/orm.js";
+//import { orm, syncSchema } from "./shared/db/orm.js";
 import { RequestContext } from '@mikro-orm/core';
 import cookieParser from 'cookie-parser';
 import { SECRET_JWT_KEY } from './config.js';
@@ -64,11 +64,11 @@ app.use((req, res, next) => {
   next();
 })
 
-
+/*
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next)
 });
-
+*/
 
 // Rate limiter general
 const generalLimiter = rateLimit({
@@ -145,7 +145,7 @@ app.use((_, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-await syncSchema(); // Never in production
+//await syncSchema(); // Never in production
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import '../styles/Navbar.css';
+import { Calendar, X, AlertCircle, Upload, Trash2, Home, CalendarCheck, User, LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -52,7 +53,7 @@ export default function Navbar() {
               </li>
               <li>
                 <button onClick={handleLogout} className="link-logout-btn">
-                  Cerrar Sesión
+                  <LogOut size={20}></LogOut>
                 </button>
               </li>
             </div>

@@ -251,48 +251,91 @@
   box-shadow: 0 8px 20px rgba(255, 107, 78, 0.3);
 }
 
-/* Responsive */
+/* ============================================
+   RESPONSIVE — PaymentPages
+   ============================================ */
+
 @media (max-width: 600px) {
+  .payment-page-container {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: 40px;
+  }
+
   .payment-card {
-    padding: 40px 24px;
+    padding: 36px 22px;
+    border-radius: 20px;
   }
 
   .payment-card h1 {
-    font-size: 26px;
+    font-size: 24px;
   }
 
   .payment-message {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .payment-icon {
-    width: 80px;
-    height: 80px;
+    width: 76px;
+    height: 76px;
   }
 
-  .checkmark {
-    font-size: 44px;
+  .checkmark,
+  .cross-mark {
+    font-size: 42px;
+  }
+
+  .payment-details {
+    padding: 18px 16px;
+    border-radius: 12px;
   }
 
   .detail-item .emoji {
     font-size: 20px;
   }
 
+  .detail-item p {
+    font-size: 14px;
+  }
+
   .payment-actions {
     flex-direction: column;
+    gap: 10px;
   }
 
   .payment-btn {
     width: 100%;
+    padding: 14px 20px;
+    font-size: 15px;
   }
 }
 
 @media (max-width: 400px) {
+  .payment-page-container {
+    padding: 12px;
+    padding-top: 30px;
+  }
+
   .payment-card {
-    padding: 32px 20px;
+    padding: 28px 16px;
+    border-radius: 16px;
+  }
+
+  .payment-card h1 {
+    font-size: 21px;
   }
 
   .payment-details {
-    padding: 20px;
+    padding: 16px 12px;
+  }
+
+  .payment-icon {
+    width: 68px;
+    height: 68px;
+  }
+
+  .checkmark,
+  .cross-mark {
+    font-size: 36px;
   }
 }

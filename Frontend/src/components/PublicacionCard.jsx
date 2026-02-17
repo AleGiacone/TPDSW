@@ -1,6 +1,7 @@
 import React from 'react';
 import ImageCarousel from './ImageCarousel';
 import '../styles/PublicacionesCard.css';
+import { Calendar, X, AlertCircle, Upload, Trash2, Home, CalendarCheck, User, LogOut, Cat, Dog } from 'lucide-react';
 
 const PublicacionCard = ({
   publicacion,
@@ -50,20 +51,19 @@ const PublicacionCard = ({
         {/* Detalles de la publicación */}
         <div className="card-details">
           <div className="detail-item">
-            <span className="detail-label">📍 Ubicación:</span>
-            <span>{publicacion.ubicacion}</span>
+            <div style={{color: '#222', fontWeight: 700}}>{publicacion.ubicacion}</div>
           </div>
           <div className="detail-item">
-            <span className="detail-label">🏠 Tipo:</span>
+            <span className="detail-label"><Home size={20} /> Tipo de alojamiento:</span>
             <span>{publicacion.tipoAlojamiento}</span>
           </div>
           <div className="detail-item">
-            <span className="detail-label">🐕 Max animales:</span>
+            <span className="detail-label"><Dog size={20} /> Max animales:</span>
             <span>{publicacion.cantAnimales}</span>
           </div>
           {publicacion.exotico && (
             <div className="exotic-badge">
-              🦎 Acepta exóticas
+              Acepta exóticas
             </div>
           )}
         </div>

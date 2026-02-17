@@ -22,8 +22,6 @@ const PaymentSuccess = () => {
       return;
     }
 
-    console.log('✅ Usuario encontrado en localStorage:', savedUser.substring(0, 50) + '...');
-
     const interval = setInterval(() => {
       setCountdown(prev => {
         console.log('⏱️ Countdown:', prev - 1);
@@ -61,16 +59,13 @@ const PaymentSuccess = () => {
     <div className="payment-page-container">
       <div className="payment-card success">
         <div className="payment-icon success-icon">✓</div>
-        <h1>¡Pago Exitoso!</h1>
+        <h1>¡Pago exitoso!</h1>
         <p className="payment-message">
           Tu reserva ha sido confirmada y el pago se procesó correctamente.
         </p>
         <div className="payment-details">
           <p className="redirect-message">
             Redirigiendo en <strong>{countdown} segundos</strong>...
-          </p>
-          <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
-            Debug: localStorage user = {localStorage.getItem('user') ? '✅' : '❌'}
           </p>
         </div>
         <button

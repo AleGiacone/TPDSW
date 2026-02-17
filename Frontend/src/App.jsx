@@ -17,7 +17,7 @@ import PaymentCancel from './views/payment/PaymentCancel';
 const UnauthorizedPage = () => (
   <div style={{ textAlign: 'center', padding: '2rem' }}>
     <h2>No autorizado</h2>
-    <p>No tienes permisos para acceder a esta página</p>
+    <p>No teenes permisos para acceder a esta página</p>
     <a href="/">Volver al inicio</a>
   </div>
 );

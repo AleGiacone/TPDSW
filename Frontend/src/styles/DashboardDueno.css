@@ -48,13 +48,14 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.4rem 2.5rem;
-  background: linear-gradient(135deg, var(--primary-orange) 0%, #ff6b45 100%);
+  padding: 30px 25px;
+   background: linear-gradient(135deg, var(--primary-orange) 0%, #ff6b45 100%);
   top: 0;
   z-index: 1000;
   width: 100%;
-  min-height: 180px;
   margin-bottom: 0;
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  
 }
 
 #main-navbar .navbar-brand {
@@ -64,43 +65,42 @@ body {
 }
 
 #main-navbar #main-title {
-  font-size: 2.8rem;
-  font-weight: 800;
+  font-size: 2rem;
+   font-weight: 800;
   color: #ffffff;
   white-space: nowrap;
-  margin-top: 0.2rem;
+  margin: 0;
 }
 
 #main-navbar .navbar-buttons-center {
   flex: 2;
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: 10px;
 }
 
 #main-navbar .navbar-buttons-right {
   flex: 1;
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
+  gap: 10px;
 }
 
 #main-navbar button {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.85rem 1.4rem;
+  gap: 0.4rem;
+  padding: 8px 14px;
   background: rgba(255, 255, 255, 0.15);
   border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  color: #ffffff;
-  font-size: 1.5rem;
-  font-weight: 700;
+  border-radius: 10px;
+   color: #ffffff;
+  font-size: 1.2rem;
+   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
 }
-
 #main-navbar button:hover,
 #main-navbar button.active {
   background: #ffffff;
@@ -137,9 +137,9 @@ body {
 
 /* IMPORTANTE: Selector específico para el título de mascotas */
 .mascotas-header .section-title {
-  font-size: 2.5rem !important;
+  font-size: 1.8rem !important;
   font-weight: 800 !important;
-  background: linear-gradient(135deg, var(--primary-orange) 0%, #ff6b45 100%) !important;
+  background: #222;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
@@ -469,9 +469,9 @@ body {
 }
 
 .reservas-header .section-title {
-  font-size: 2.5rem !important;
+  font-size: 1.8rem !important;
   font-weight: 800 !important;
-  background: linear-gradient(135deg, var(--primary-orange) 0%, #ff6b45 100%) !important;
+  background: #222;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
@@ -1149,17 +1149,402 @@ body {
   width: auto !important;
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+/* ============================================
+   14. RESPONSIVE — TODAS LAS MEDIA QUERIES
+   ============================================ */
+
+/* ── 1100px : navbar se compacta levemente ── */
+@media (max-width: 1100px) {
+  #main-dashboard #main-navbar {
+    padding: 22px 20px;
+  }
+
+  #main-navbar #main-title {
+    font-size: 1.7rem;
+  }
+
+  #main-navbar button {
+    font-size: 1.05rem;
+    padding: 7px 12px;
+  }
+
+  .mascotas-header,
+  .reservas-header {
+    padding: 1.75rem 2rem 1.25rem;
+  }
+
+  .mascotas-grid-wrapper {
+    padding: 2rem 2rem 3rem;
+  }
+
+  .reservas-grid {
+    padding: 0 2rem 3rem;
+  }
+
+  .form-container {
+    padding: 2.5rem 2rem;
+  }
+}
+
+/* ── 1024px : laptops ── */
+@media (max-width: 1024px) {
+  #main-navbar #main-title {
+    font-size: 1.5rem;
+  }
+
+  #main-navbar button {
+    font-size: 1rem;
+    padding: 7px 10px;
+  }
+
+  .mascotas-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .reservas-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .form-card {
+    padding: 2.5rem 2rem;
+  }
+}
+
+/* ── 900px : navbar sigue en 1 fila, más compacta ── */
+@media (max-width: 900px) {
+  #main-dashboard #main-navbar {
+    padding: 16px 14px;
+  }
+
+  #main-navbar #main-title {
+    font-size: 1.3rem;
+  }
+
+  #main-navbar .navbar-buttons-center {
+    gap: 6px;
+  }
+
+  #main-navbar button {
+    font-size: 0.85rem;
+    padding: 6px 9px;
+  }
+}
+
+/* ── 768px : navbar rompe en 2 filas ── */
+@media (max-width: 768px) {
+  #main-dashboard #main-navbar {
+    padding: 12px 14px;
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  #main-navbar .navbar-brand {
+    flex: 1 1 auto;
+    order: 1;
+  }
+
+  #main-navbar .navbar-buttons-right {
+    flex: 0 0 auto;
+    order: 2;
+    gap: 6px;
+  }
+
+  #main-navbar .navbar-buttons-center {
+    flex: 0 0 100%;
+    order: 3;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  #main-navbar #main-title {
+    font-size: 1.1rem;
+  }
+
+  #main-navbar button {
+    font-size: 0.82rem;
+    padding: 6px 8px;
+    border-radius: 8px;
+  }
+
+  .mascotas-header,
+  .reservas-header {
+    padding: 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .mascotas-header .section-title,
+  .reservas-header .section-title,
+  .perfil-container .section-title,
+  .form-container .section-title {
+    font-size: 2rem !important;
+  }
+
+  .mascotas-grid-wrapper {
+    padding: 1.5rem 1.25rem 3rem;
+  }
+
+  .mascotas-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .reservas-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    padding: 0 1.25rem 3rem;
+  }
+
+  .reservas-filters {
+    width: 100%;
+  }
+
+  .filter-btn {
+    flex: 1;
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.6rem;
+  }
+
+  .form-container {
+    padding: 2rem 1.25rem;
+  }
+
+  .form-card {
+    padding: 2rem 1.25rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .form-buttons {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .form-buttons .btn-primary,
+  .form-buttons .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mascota-image-section-horizontal {
+    height: 220px;
+  }
+
+  .perfil-container {
+    padding: 1.75rem 1.25rem 3rem;
+  }
+
+  .perfil-card,
+  .perfil-form-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .perfil-image {
+    width: 130px;
+    height: 130px;
+  }
+
+  .perfil-placeholder {
+    width: 130px;
+    height: 130px;
+    font-size: 2.8rem;
+  }
+}
+
+/* ── 600px : móviles grandes ── */
+@media (max-width: 600px) {
+  #main-dashboard #main-navbar {
+    padding: 10px 12px;
+    row-gap: 8px;
+  }
+
+  #main-navbar #main-title {
+    font-size: 1.05rem;
+  }
+
+  #main-navbar .navbar-buttons-center button {
+    font-size: 0.8rem;
+    padding: 6px 8px;
+    gap: 0.3rem;
+  }
+
+  #main-navbar .navbar-buttons-right button {
+    padding: 7px 9px;
+  }
+
+  .mascotas-header,
+  .reservas-header {
+    padding: 1.25rem 1rem;
+  }
+
+  .mascotas-header .section-title,
+  .reservas-header .section-title {
+    font-size: 1.3rem !important;
+  }
+
+  .mascotas-grid-wrapper {
+    padding: 1.25rem 1rem 2.5rem;
+  }
+
+  .reservas-grid {
+    padding: 0 1rem 2.5rem;
+  }
+
+  .form-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .form-container .section-title {
+    font-size: 1.6rem !important;
+  }
+
+  .form-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .mascota-image-section-horizontal {
+    height: 200px;
+  }
+
+  .mascota-name {
+    font-size: 1.3rem;
+  }
+
+  .mascota-details-section {
+    padding: 1.25rem;
+  }
+
+  .mascota-actions {
+    padding: 1rem 1.25rem;
+    gap: 0.75rem;
+  }
+
+  .btn-edit,
+  .btn-delete {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .empty-state {
+    padding: 3rem 1.5rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.2rem;
+  }
+}
+
+/* ── 480px : solo iconos en botones de nav ── */
+@media (max-width: 480px) {
+  #main-dashboard #main-navbar {
+    padding: 10px;
+    row-gap: 7px;
+  }
+
+  #main-navbar #main-title {
+    font-size: 0.95rem;
+  }
+
+  #main-navbar .navbar-buttons-center button {
+    font-size: 0;
+    padding: 8px;
+    min-width: 38px;
+    min-height: 38px;
+    justify-content: center;
+    gap: 0;
+    border-radius: 9px;
+  }
+
+  #main-navbar .navbar-buttons-center button svg {
+    width: 19px;
+    height: 19px;
+    flex-shrink: 0;
+  }
+
+  #main-navbar .navbar-buttons-right button {
+    padding: 8px;
+    min-width: 38px;
+    min-height: 38px;
+    justify-content: center;
+  }
+
+  #main-navbar .navbar-buttons-right button svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .mascotas-header .section-title,
+  .reservas-header .section-title {
+    font-size: 1.2rem !important;
+  }
+
+  .btn-primary {
+    padding: 0.75rem 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  .mascota-no-image {
+    font-size: 3.5rem;
+  }
+
+  .mascota-card:hover {
+    transform: none;
+  }
+
+  .filter-btn {
+    font-size: 0.75rem;
+    padding: 0.45rem 0.4rem;
+  }
+
+  /* 2FA modal */
+  .twofa-modal-content {
+    padding: 2rem 1.25rem 1.5rem;
+    gap: 1rem;
+  }
+
+  .twofa-modal-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .twofa-modal-qr {
+    width: 170px;
+    height: 170px;
+  }
+}
+
+/* ── 560px : perfil responsive ── */
 @media (max-width: 560px) {
   .perfil-container {
     padding: 1.25rem 0.75rem 3rem;
   }
 
+  .perfil-container .section-title {
+    font-size: 1.4rem;
+  }
+
   .perfil-card,
   .perfil-form-card {
     padding: 1.5rem 1rem;
+  }
+
+  .perfil-image {
+    width: 110px;
+    height: 110px;
+  }
+
+  .perfil-placeholder {
+    width: 110px;
+    height: 110px;
+    font-size: 2.4rem;
   }
 
   .perfil-field {
@@ -1190,8 +1575,68 @@ body {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .perfil-2fa .btn-2fa {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
+/* ── 380px : móviles muy pequeños ── */
+@media (max-width: 380px) {
+  #main-navbar #main-title {
+    font-size: 0.875rem;
+  }
+
+  #main-navbar .navbar-buttons-center button,
+  #main-navbar .navbar-buttons-right button {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 7px;
+  }
+
+  #main-navbar .navbar-buttons-center button svg,
+  #main-navbar .navbar-buttons-right button svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .form-container {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .form-card {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .form-label {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .mascota-details-section {
+    padding: 1rem 0.875rem;
+  }
+
+  .mascota-actions {
+    flex-direction: column;
+    padding: 0.875rem;
+    gap: 0.5rem;
+  }
+
+  .btn-edit,
+  .btn-delete {
+    flex: unset;
+    width: 100%;
+  }
+}
 /* ============================================================
    2FA — Modal (DashboardDueno.css y DashboardCuidador.css)
    Agregar al final de cada archivo

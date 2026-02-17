@@ -199,8 +199,8 @@ const RegisterPage = () => {
                       onChange={handleChange}
                       required  
                     >
-                      <option value="">Seleccionar...</option>  {/* ✅ FIX 2: Opción vacía */}
-                      <option value="Masculino">Masculino</option>  {/* ✅ FIX 3: Mayúscula */}
+                      <option value="">Seleccionar...</option>  
+                      <option value="Masculino">Masculino</option>  
                       <option value="Femenino">Femenino</option>
                       <option value="Otro">Otro</option>
                     </select>
