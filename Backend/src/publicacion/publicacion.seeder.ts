@@ -37,7 +37,9 @@ export const seedPublicaciones = async (em: EntityManager): Promise<void> => {
       const cuidador = await em.findOne(Cuidador, { idUsuario: data.idCuidador });
       if (existe || !cuidador) continue;
       const nuevaPublicacion = em.create(Publicacion, { ...data, idCuidador: cuidador });
+      nuevaPublicacion.idCuidador = cuidador;
       await em.persistAndFlush(nuevaPublicacion);
+
     }
   } catch (error) {
     console.error("Error al cargar las publicaciones:", error);

@@ -146,7 +146,7 @@ async function verifyDate(req: Request, res: Response, next: NextFunction) {
 async function add(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-
+    console.log("Creando reserva")
     let fechaDesde = req.body.sanitizeInput.fechaDesde;
     let fechaHasta = req.body.sanitizeInput.fechaHasta;
 
@@ -290,8 +290,6 @@ import Stripe from 'stripe';
 
 async function testPagoStripe(req: Request, res: Response) {
   console.log("Iniciando test de pago con Stripe");
-  console.log("Datos recibidos para el pago:", req.body.sanitizeInput.dias);
-  console.log("Datos recibido del id de las mascotas", req.body.sanitizeInput.idMascotas);
   // La session de stripe la pedimos con el middleware
   try {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
@@ -351,7 +349,9 @@ async function testPagoStripe(req: Request, res: Response) {
 
 // Webhook de stripe
 // La llave la pedimos cuando iniciamos el middleware del webhook
-const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET;
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || process.env.STRIPE_ENDPOINT_SECRET;
+
+console.log('🔧 Webhook Stripe configurado con secret:', endpointSecret ? '✅ Presente' : '❌ NO CONFIGURADO');
 
 // // ─── Reemplazar SOLO la función stripeWebHook en reserva.controller.ts ───────
 // // El resto del archivo queda igual.
@@ -444,35 +444,53 @@ const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET;
 
 
 async function stripeWebHook(req: Request, res: Response) {
+  console.log('🎯 [WEBHOOK] Solicitud recibida en /api/webhook/stripe');
+  console.log('📋 Headers:', {
+    signature: req.headers['stripe-signature'] ? req.headers['stripe-signature'].toString().substring(0, 20) + '...' : 'AUSENTE',
+    contentType: req.headers['content-type']
+  });
+  console.log('📦 Body type:', typeof req.body, 'Is Buffer:', Buffer.isBuffer(req.body));
+  
   if (!endpointSecret) {
     console.error("❌ CRITICAL: STRIPE_WEBHOOK_SECRET not configured in .env");
+    console.error("📍 Búsqueda fallida en: process.env.STRIPE_WEBHOOK_SECRET o process.env.STRIPE_ENDPOINT_SECRET");
     res.status(500).json({ error: 'Webhook secret not configured' });
     return;
   }
 
   const signature = req.headers['stripe-signature'];
   if (!signature) {
-    console.error("❌ No signature found");
+    console.error("❌ No signature found en headers");
+    console.error("📍 Headers disponibles:", Object.keys(req.headers));
     res.status(400).json({ error: 'No signature found' });
     return;
   }
 
   let event;
   try {
+    console.log('🔐 Verificando firma Stripe...');
     event = Stripe.webhooks.constructEvent(req.body, signature, endpointSecret);
-    console.log("✅ Evento Stripe verificado:", event.type);
+    console.log("✅ Evento Stripe verificado correctamente. Tipo:", event.type);
   } catch (err: any) {
     console.error("❌ Error verifying signature:", err.message);
+    console.error("📍 Detalles:", err);
     res.status(400).json({ error: `Webhook Error: ${err.message}` });
     return;
   }
 
   // ⭐ RESPONDER INMEDIATAMENTE
+  console.log('📤 Respondiendo con { received: true } al webhook');
   res.json({ received: true });
 
   // Procesar en segundo plano
+  console.log('🔍 Procesando evento:', event.type);
+  
   if (event.type === 'checkout.session.completed') {
+    console.log('✅ Evento checkout.session.completed detectado');
     const session = event.data.object;
+    
+    console.log('💳 Metadata de la sesión:', session.metadata);
+    console.log('💰 Payment status:', session.payment_status);
 
     if (session.payment_status !== 'paid') {
       console.log("⚠️ Pago no completado, status:", session.payment_status);
@@ -496,13 +514,17 @@ async function stripeWebHook(req: Request, res: Response) {
       } = session.metadata || {};
 
       if (!idPublicacion || !idDueno || !dias) {
-        console.error('❌ Metadata incompleta');
+        console.error('❌ Metadata incompleta en webhook');
+        console.error('📍 Valores recibidos:', { idPublicacion, idDueno, dias, idMascotas });
         return;
       }
 
       // ✅ 1. PRIMERO parsear los arrays
+      console.log('📊 Parseando datos...');
       const diasArray = JSON.parse(dias);
       const mascotasArray = idMascotas ? JSON.parse(idMascotas) : [];
+      console.log('📅 Días a reservar:', diasArray);
+      console.log('🐾 Mascotas:', mascotasArray);
 
       // ✅ 2. SEGUNDO buscar las entidades
       const publi = await emWebhook.findOneOrFail(Publicacion, {
@@ -552,7 +574,10 @@ async function stripeWebHook(req: Request, res: Response) {
     } catch (error: any) {
       console.error("❌ Error creando reserva:", error.message);
       console.error("Stack:", error.stack);
+      console.error("Error completo:", error);
     }
+  } else {
+    console.log('⏭️ Evento no procesado (tipo:', event.type, '). Solo se procesan: checkout.session.completed');
   }
 }
 

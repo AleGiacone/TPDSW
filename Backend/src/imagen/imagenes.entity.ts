@@ -15,10 +15,10 @@ export class Imagen {
 { nullable: true })
   publicacion?: Rel<Publicacion>;
 
-  @OneToOne(() => Usuario, usuario => usuario.imagen, { nullable: true, deleteRule: 'set null' }) 
+  @OneToOne(() => Usuario, usuario => usuario.imagen, { nullable: true, cascade: [Cascade.ALL] }) 
   usuario?: Rel<Usuario>;
 
-  @OneToOne(() => Mascota, mascota => mascota.imagen, { nullable: true, deleteRule: 'set null' }) 
+  @OneToOne(() => Mascota, mascota => mascota.imagen, { nullable: true, cascade: [Cascade.PERSIST] }) 
   mascota?: Rel<Mascota>;
 
 
