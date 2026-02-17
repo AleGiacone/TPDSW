@@ -351,7 +351,7 @@ async function testPagoStripe(req: Request, res: Response) {
 
 // Webhook de stripe
 // La llave la pedimos cuando iniciamos el middleware del webhook
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET;
 
 // // ─── Reemplazar SOLO la función stripeWebHook en reserva.controller.ts ───────
 // // El resto del archivo queda igual.
