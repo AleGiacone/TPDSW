@@ -5,6 +5,7 @@ import { seedCuidadores } from "../../cuidador/cuidador.seeder.js";
 import { seedMascotas } from "../../mascota/mascota.seeder.js";
 import { seedPublicaciones } from "../../publicacion/publicacion.seeder.js";
 import { seedReservas } from "../../reserva/reserva.seeder.js";
+import { seedAdmins } from "../../admin/admin.seeder.js";
 
 
 export const runSeeders = async (em: EntityManager): Promise<void> => {
@@ -21,4 +22,7 @@ export const runSeeders = async (em: EntityManager): Promise<void> => {
   console.log("🌱 Seeders Publicaciones");
   await seedReservas(em);
   console.log("🌱 Seeders Reservas");
+  await seedAdmins(em);
+  console.log("🌱 Seeders Admins");
+  console.log("✅ Seeders ejecutados correctamente");
 };

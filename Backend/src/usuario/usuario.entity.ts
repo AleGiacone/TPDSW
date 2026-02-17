@@ -15,7 +15,7 @@ export abstract class Usuario {
   @Property({ nullable: false, unique: true })
   email!: string;
 
-  @Property({ nullable: false, unique: false })
+  @Property({ nullable: false, unique: false, hidden: true })
   password!: string;
 
   @Property({ nullable: false, unique: false })
@@ -35,6 +35,6 @@ export abstract class Usuario {
   @Property({ nullable: true, unique: false })
   perfilImage?: string;
 
-  @Property({ nullable: true, unique: false })
+  @Property({ nullable: true, unique: false, hidden: true })
   twoFactorSecret?: string;
 }

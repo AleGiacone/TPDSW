@@ -43,7 +43,7 @@ function sanitizeReserva(req: Request, res: Response, next: NextFunction) {
         Temporal.PlainDate.from(dias);
       }
     } catch (error) {
-      res.status(400).json({ message: "Error parsing dates", error: error });
+      res.status(400).json({ message: "Error parsing dates" });
       return;
     }
   }
@@ -71,7 +71,7 @@ async function findAll(req: Request, res: Response) {
 
     res.status(200).json({ message: "finded all reservas", data: reservas });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving reservas", error: error.message });
+    res.status(500).json({ message: "Error retrieving reservas" });
   }
 }
 
@@ -83,7 +83,7 @@ async function findOne(req: Request, res: Response) {
     const reserva = await em.findOneOrFail(Reserva, { idReserva }, { populate: ["dueno", "mascotas", "publicacion"] });
     res.status(200).json({ message: "Reserva found", data: reserva });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving reserva", error: error.message });
+    res.status(500).json({ message: "Error retrieving reserva" });
   }
 }
 
@@ -135,7 +135,7 @@ async function verifyDate(req: Request, res: Response, next: NextFunction) {
       }
     }
   } catch (error: any) {
-    res.status(500).json({ message: "Error verifying dates", error: error.message });
+    res.status(500).json({ message: "Error verifying dates" });
     return;
   }
   next();
@@ -185,7 +185,7 @@ async function add(req: Request, res: Response) {
     await em.flush();
     res.status(200).json({ message: "Reserva created", data: reserva });
   } catch (error: any) {
-    res.status(500).json({ message: "Error creating reserva", error: error.message });
+    res.status(500).json({ message: "Error creating reserva" });
   }
 }
 
@@ -215,7 +215,7 @@ async function authenticateAdd(req: Request, res: Response, next: NextFunction) 
     }
     next();
   } catch (error: any) {
-    res.status(500).json({ message: "Error authenticating reserva", error: error.message });
+    res.status(500).json({ message: "Error authenticating reserva" });
   }
 }
 
@@ -230,7 +230,7 @@ async function update(req: Request, res: Response) {
     await em.flush();
     res.status(200).json({ message: "Reserva updated", data: reserva });
   } catch (error: any) {
-    res.status(500).json({ message: "Error updating reserva", error: error.message });
+    res.status(500).json({ message: "Error updating reserva" });
   }
 }
 
@@ -254,7 +254,7 @@ async function remove(req: Request, res: Response) {
 
     res.status(200).json({ message: 'Reserva removed', data: { idReserva } });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error removing reserva', error: error.message });
+    res.status(500).json({ message: 'Error removing reserva' });
   }
 }
 
@@ -276,7 +276,7 @@ async function testDate(req: Request, res: Response) {
       console.log("Fecha desde es mayor que fecha hasta");
     }
   } catch (error: any) {
-    res.status(500).json({ message: "Error testing dates", error: error.message });
+    res.status(500).json({ message: "Error testing dates" });
   }
 }
 
@@ -343,7 +343,7 @@ async function testPagoStripe(req: Request, res: Response) {
   res.status(200).json({ session });
   } catch (error) {
     console.error("Error initializing Stripe:", error);
-    res.status(500).json({ message: "Error initializing Stripe", error });
+    res.status(500).json({ message: "Error initializing Stripe" });
     return;
   }
   return;
@@ -446,14 +446,14 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 async function stripeWebHook(req: Request, res: Response) {
   if (!endpointSecret) {
     console.error("❌ CRITICAL: STRIPE_WEBHOOK_SECRET not configured in .env");
-    res.status(500).json({ error: 'Webhook secret not configured' });
+    res.status(500).json({ message: 'Webhook secret not configured' });
     return;
   }
 
   const signature = req.headers['stripe-signature'];
   if (!signature) {
     console.error("❌ No signature found");
-    res.status(400).json({ error: 'No signature found' });
+    res.status(400).json({ message: 'No signature found' });
     return;
   }
 
@@ -463,7 +463,7 @@ async function stripeWebHook(req: Request, res: Response) {
     console.log("✅ Evento Stripe verificado:", event.type);
   } catch (err: any) {
     console.error("❌ Error verifying signature:", err.message);
-    res.status(400).json({ error: `Webhook Error: ${err.message}` });
+    res.status(400).json({ message: 'Webhook Error' });
     return;
   }
 
@@ -555,73 +555,5 @@ async function stripeWebHook(req: Request, res: Response) {
     }
   }
 }
-
-// async function addWebHook(fechaReserva: string, descripcion: string, horaReserva: string, idDueno: string, idMascotas: any, idPublicacion: string, dias: any) {
-
-//   try {
-//     let reserva = {
-//             idReserva: undefined,
-//             fechaReserva: fechaReserva,
-//             descripcion: descripcion,
-//             horaReserva: Date(now()),
-//             idDueno: undefined,
-//             idMascotas: idMascotas,
-//             idPublicacion: Number(idPublicacion),
-//             dias: dias,
-//           }
-//     console.log("Creating reserva from webhook with data:", reserva);
-//     console.log("Parametros", fechaReserva, descripcion, horaReserva, idDueno, idMascotas, idPublicacion, dias);
-
-//     //Agregar dueno - permitir Dueno o null para bloqueos
-//       const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion: Number(idPublicacion) });
-//       const dueno = await em.findOneOrFail(Dueno, { idUsuario: Number(idDueno) }, { populate: ['mascotas', 'reservas'] });
-//       const reservaEntity = em.create(Reserva, {
-//         fechaReserva,      // String o convertir: new Date(fechaReserva)
-//         descripcion,
-//         publicacion,       // ✅ Entidad completa
-//         dueno,            // ✅ Entidad completa
-//         dias: dias
-//         // NO incluir idReserva
-//         // NO incluir idDueno, idPublicacion (ya están en las relaciones)
-//       });
-//     console.log("Agregar dias reservados")
-//     //Agregar dias reservados
-//     dias.forEach(async (dia: any) => {
-//       const diaReservado = em.create(DiaReservado, { fechaReservada: dia, reserva: reserva },);
-//       reservaEntity.diasReservados.add(diaReservado);
-//     })
-
-//     console.log("Agregar mascotas")
-//     //Agregar mascotas - solo si se proporcionan
-//     if (req.body.sanitizeInput.idMascotas && req.body.sanitizeInput.idMascotas.length > 0) {
-//       req.body.sanitizeInput.idMascotas.forEach(async (idMascota: number) => {
-//         const mascota = await em.findOneOrFail(Mascota, { idMascota: idMascota, dueno: req.body.sanitizeInput.idDueno });
-//         reserva.mascotas.add(mascota);
-//       })
-//     }
-
-//     console.log("Agregar publicacion")
-//     //Agregar publicacion
-    
-//     reserva.publicacion = publi;
-//     publi.reservas.add(reserva)
-
-//     console.log("Agregar dueno")
-    
-//     console.log("Adding reserva with data:", reserva);
-
-//     console.log("Finalizando reserva");
-//     await em.flush();
-//     res.status(200).json({ message: "Reserva created", data: reserva });
-//   } catch (error: any) {
-//     res.status(500).json({ message: "Error creating reserva", error: error.message });
-//   }
-// }
-
-
-
-
-
-
 
 export { sanitizeReserva, findAll, findOne, add, update, remove, authenticateAdd, testDate, verifyDate, stripeWebHook, testPagoStripe };

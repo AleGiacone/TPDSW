@@ -46,8 +46,7 @@ async function findAll(req: Request, res: Response) {
     });
   } catch (error: any) {
     res.status(500).json({ 
-      message: "Error retrieving razas", 
-      error: error.message 
+      message: "Error retrieving razas"
     });
   }
 }
@@ -71,7 +70,7 @@ async function add(req: Request, res: Response): Promise<void> {
     await em.populate(raza, ['especie']);
     res.status(201).json({ message: 'Raza created', data: raza });
   } catch (error: any) {
-    res.status(500).json({ message: "Error creating raza", error: error.message });
+    res.status(500).json({ message: "Error creating raza" });
   }
 }
 
@@ -82,7 +81,7 @@ async function findOne(req: Request, res: Response) {
     const raza = await em.findOneOrFail (Raza , {idRaza}, {populate : ['especie']});
     res.status(200).json({ message: 'Raza found', data: raza });
   } catch (error:any){
-    res.status(500).json({ message: "Error retrieving raza", error: error.message });
+    res.status(500).json({ message: "Error retrieving raza" });
   } 
 }
   
@@ -103,7 +102,7 @@ async function update(req: Request, res: Response) {
   } catch (error:any){
     console.error(error.stack);
 
-    res.status(500).json({ message: "Error updating raza", error: error.message });
+    res.status(500).json({ message: "Error updating raza" });
   }
 }
 
@@ -116,7 +115,7 @@ async function remove (req: Request, res: Response) {
     res.status(200).send ({message:"se fue"})
     //em.nativeDelete(raza , {idRaza})
   } catch (error:any){
-  res.status(500).json ({message: error.message})
+    res.status(500).json ({message: "Error removing raza"})
   }
  }
  

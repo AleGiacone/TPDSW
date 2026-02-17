@@ -20,6 +20,7 @@ import cors from 'cors';
 import { reservaRouter, webHookRouter } from './reserva/reserva.routes.js';
 import { pagoRouter } from './reserva/pago.routers.js';
 import rateLimit from 'express-rate-limit';
+import { adminRouter } from './admin/admin.routes.js';
 
 console.log('ENV:', process.env.STRIPE_SECRET_KEY)
 
@@ -73,11 +74,11 @@ app.use((req, res, next) => {
 // Rate limiter general
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100,                  // 100 requests por IP
+  max: 500,                  // 100 requests por IP
   standardHeaders: true,     // Devuelve info en headers `RateLimit-*`
   legacyHeaders: false,      // Deshabilita headers `X-RateLimit-*`
   handler: (req, res) => {
-    res.status(429).json({ error: 'Demasiadas solicitudes, intenta más tarde' });
+    res.status(429).json({ message: 'Demasiadas solicitudes, intenta más tarde' });
   }
 });
 
@@ -85,6 +86,7 @@ const generalLimiter = rateLimit({
 
 app.use(generalLimiter); 
 
+app.use("/api/admin", adminRouter);
 app.use("/api/usuarios", usuarioRouter);
 app.use("/api/mascotas", mascotaRouter);
 app.use("/api/especies", especieRouter);
