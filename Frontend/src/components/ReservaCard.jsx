@@ -46,13 +46,17 @@ const ReservaCard = ({ reserva, userType, onCancelar }) => {
   const dueno = reserva.dueno;
   const cuidador = publicacion?.idCuidador || publicacion?.cuidador;
   const primeraImg = publicacion?.imagenes?.[0];
-  const estado = reserva.estadoCalculado || 'pendiente';
-  const { label, badgeClass, borderClass } = ESTADO_CONFIG[estado] ?? ESTADO_CONFIG.pendiente;
 
   // ── Fechas ────────────────────────────────────────────────────────────────
   // Estrategia: usar fechaDesde/fechaHasta si existen,
   // si no, derivarlas del min/max de diasReservados (que siempre están)
   const diasStrings = getDiasStrings(reserva.diasReservados);
+
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const estadoCalculado = diasStrings.length > 0 && diasStrings.includes(todayStr) ? 'en_curso' : null;
+  const estado = estadoCalculado || reserva.estadoCalculado || 'pendiente';
+  const { label, badgeClass, borderClass } = ESTADO_CONFIG[estado] ?? ESTADO_CONFIG.pendiente;
 
   const fechaDesdeStr = toDateStr(reserva.fechaDesde) ?? diasStrings[0] ?? null;
   const fechaHastaStr = toDateStr(reserva.fechaHasta) ?? diasStrings[diasStrings.length - 1] ?? null;
@@ -71,7 +75,7 @@ const ReservaCard = ({ reserva, userType, onCancelar }) => {
   })();
 
   const tarifaPorDia = publicacion?.tarifaPorDia ?? 0;
-  const total = (cantidadDias-1) * tarifaPorDia;
+  const total = (cantidadDias - 1) * tarifaPorDia;
 
   return (
     <div className={`reserva-card-modern ${borderClass}`}>

@@ -173,13 +173,29 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-
+    console.log("Updating mascota with data:", req.body.sanitizeInput);
     const idMascota = Number(req.params.idMascota);
+    console.log("Parsed idMascota:", idMascota);
+    const raza = req.body.sanitizeInput.raza ? parseInt(req.body.sanitizeInput.raza) : null;
+    if (raza) {
+      const razaEntity = await em.findOne(Raza, { idRaza: raza });
+      if (!razaEntity) {
+        res.status(404).json({ message: 'Raza not found' });
+        return;
+      }
+    }
+    const especie = await em.findOne(Especie, { idEspecie: req.body.sanitizeInput.especie });
+    if (!especie) {
+      res.status(404).json({ message: 'Especie not found' });
+      return;
+    }
+
     const mascota = await em.findOneOrFail(
       Mascota,
       { idMascota: idMascota },
       { populate: ['dueno', 'especie', 'raza', 'imagen'] }
     );
+    console.log("Mascota found for update:", mascota);
     em.assign(mascota, req.body.sanitizeInput);
     await em.flush();
     await em.populate(mascota, ['dueno', 'especie', 'raza', 'imagen']);
@@ -194,7 +210,7 @@ async function findByOwner(req: Request, res: Response) {
     const em = orm.em.fork();
 
     const idDueno = Number(req.params.id);
-
+    
     const mascotas = await em.find(
       Mascota,
       { dueno: { idUsuario: idDueno } },

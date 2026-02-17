@@ -6,7 +6,7 @@ import { seedMascotas } from "../../mascota/mascota.seeder.js";
 import { seedPublicaciones } from "../../publicacion/publicacion.seeder.js";
 import { seedReservas } from "../../reserva/reserva.seeder.js";
 
-/*
+
 export const runSeeders = async (em: EntityManager): Promise<void> => {
   console.log("🌱 Ejecutando seeders...");
   await seedEspecies(em);
@@ -21,4 +21,4 @@ export const runSeeders = async (em: EntityManager): Promise<void> => {
   console.log("🌱 Seeders Publicaciones");
   await seedReservas(em);
   console.log("🌱 Seeders Reservas");
-};*/
+};

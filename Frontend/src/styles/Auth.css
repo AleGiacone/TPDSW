@@ -127,7 +127,7 @@ h4 {
      font-weight: bold;
      margin-bottom: 10px;
      text-align: left;
-     padding: 10px 10px;
+     padding: 20px 18px;
      display: block;
      background: linear-gradient(145deg, #FFAD66, #FA8351);
      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
@@ -198,13 +198,13 @@ h4 {
 /* Labels del register */
 .auth-container-register label {
      font-weight: bold;
-     font-size: 1.3rem;
+     font-size: 1.1rem;
      margin-bottom: 10px;
-     text-align:left;
+     text-align: left;
      padding: 10px 18px;
      width: auto;
      min-width: 200px;
-     max-width: 219px;
+     max-width: 200px;
      display: block;
      background: linear-gradient(145deg, #FFAD66, #FA8351);
      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);

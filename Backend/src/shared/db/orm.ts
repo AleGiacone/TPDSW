@@ -1,7 +1,7 @@
 import { MikroORM } from "@mikro-orm/core";
 import { SqlHighlighter } from "@mikro-orm/sql-highlighter";
 import { MySqlDriver } from "@mikro-orm/mysql";
-//import { runSeeders } from "./seeder.js";
+import { runSeeders } from "./seeder.js";
 
 export const orm = await MikroORM.init({
   entities: ['dist/**/*.entity.js'],
@@ -16,7 +16,7 @@ export const orm = await MikroORM.init({
     ignoreSchema: []
   }
 })
-/*
+
 export const syncSchema = async () => {
   console.log("🔄 Sincronizando esquema de la base de datos...");
   const generator = orm.getSchemaGenerator();
@@ -25,4 +25,4 @@ export const syncSchema = async () => {
   const em = orm.em.fork();
   await runSeeders(em);
 
-};*/
+}

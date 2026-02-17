@@ -6,10 +6,10 @@ import { Publicacion } from "../publicacion/publicacion.entity.js";
 
 const reservasData = [
   {
-    idReserva: 1,
-    fechaReserva: new Date('2024-07-01'),
-    fechaDesde: new Date('2024-07-10'),
-    fechaHasta: new Date('2024-07-15'),
+    idReserva: 2,
+    fechaReserva: new Date('2026-03-01'),
+    fechaDesde: new Date('2026-03-10'),
+    fechaHasta: new Date('2026-03-15'),
     descripcion: 'Reserva para cuidar a mi perro durante mis vacaciones.',
     idPublicacion: 1,
     idDueno: 3,
@@ -26,7 +26,23 @@ export const seedReservas = async (em: EntityManager): Promise<void> => {
       const mascota = await em.findOne(Mascota, { idMascota: data.mascota });
       console.log('Mascota encontrada:', mascota);
       const publicacion = await em.findOne(Publicacion, { idPublicacion: data.idPublicacion });
-      if (existe || !dueno || !mascota || !publicacion) continue;
+      if(existe) {
+        console.log('La reserva ya existe, saltando:', data.descripcion);
+      }
+      if (!dueno) {
+        console.log('Dueño encontrado para id:', );
+        return; 
+      }
+      if (!mascota) {
+        console.log('Mascota encontrada para id:', );
+        return;
+      }
+      if (!publicacion) {
+        console.log('Publicación encontrada para id:', );
+        return;
+      }
+
+      console.log('Creando reserva con datos:', data);
       const nuevaReserva = em.create(Reserva, { ...data, dueno: dueno, publicacion: publicacion })
       console.log('Reserva creada:', nuevaReserva);
       console.log('Agregando mascota a la reserva:', mascota);
