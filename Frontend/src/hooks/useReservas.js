@@ -3,28 +3,26 @@ import { useState, useEffect, useCallback } from 'react';
 const API_BASE_URL = 'http://localhost:3000/api';
 
 const calcularEstado = (reserva) => {
-  // ✅ Si no hay fechas, es pendiente (reservas viejas o mal formadas)
-  if (!reserva.fechaDesde || !reserva.fechaHasta) {
-    console.warn('⚠️ Reserva sin fechas:', reserva.idReserva);
-    return 'pendiente';
-  }
+  console.log('FECHAS RAW:', reserva.idReserva, reserva.fechaDesde, reserva.fechaHasta);
+  if (!reserva.fechaDesde || !reserva.fechaHasta) return 'pendiente';
+
+  // 👇 AGREGÁ ESTO TEMPORALMENTE
+  console.log('RAW fechaDesde:', reserva.fechaDesde);
+  console.log('RAW fechaHasta:', reserva.fechaHasta);
 
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
 
-  // ✅ Parsear las fechas correctamente
-  const desde = new Date(reserva.fechaDesde);
-  desde.setHours(0, 0, 0, 0);
+  const desdeStr = reserva.fechaDesde.split('T')[0];
+  const [dy, dm, dd] = desdeStr.split('-').map(Number);
+  const desde = new Date(dy, dm - 1, dd);
 
-  const hasta = new Date(reserva.fechaHasta);
-  hasta.setHours(0, 0, 0, 0);
+  const hastaStr = reserva.fechaHasta.split('T')[0];
+  const [hy, hm, hd] = hastaStr.split('-').map(Number);
+  const hasta = new Date(hy, hm - 1, hd);
 
-  // ✅ Debug para ver qué está pasando
-  console.log('📅 Calculando estado para reserva', reserva.idReserva, {
-    hoy: hoy.toISOString().split('T')[0],
-    desde: desde.toISOString().split('T')[0],
-    hasta: hasta.toISOString().split('T')[0]
-  });
+  console.log('hoy:', hoy, 'desde:', desde, 'hasta:', hasta);
+  console.log('hoy < desde?', hoy < desde, '| hoy > hasta?', hoy > hasta);
 
   if (hoy < desde) return 'pendiente';
   if (hoy > hasta) return 'finalizada';

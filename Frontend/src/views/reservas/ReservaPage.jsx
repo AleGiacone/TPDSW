@@ -23,17 +23,14 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-
     return { daysInMonth, startingDayOfWeek };
   };
 
   const isDateDisabled = (date) => {
-    // Usar año/mes/día local en vez de toISOString() para evitar el desfase UTC
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const dateStr = `${year}-${month}-${day}`;
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return date < today || disabledDates.includes(dateStr);
@@ -48,14 +45,10 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
     if (!selectedStart || selectedEnd || !hoveredDate) return false;
     const start = selectedStart < hoveredDate ? selectedStart : hoveredDate;
     const end = selectedStart < hoveredDate ? hoveredDate : selectedStart;
-
-    // ✅ No mostrar hover range si contiene fechas bloqueadas
     if (hasDisabledDatesInRange(start, end)) return false;
-
     return date >= start && date <= end;
   };
 
-  // Función helper para verificar si hay fechas bloqueadas en un rango
   const hasDisabledDatesInRange = (start, end) => {
     const current = new Date(start);
     while (current <= end) {
@@ -71,41 +64,51 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
 
   const handleDateClick = (date) => {
     if (isDateDisabled(date)) return;
-
     if (!selectedStart || selectedEnd) {
       setSelectedStart(date);
       setSelectedEnd(null);
       onDateChange(date, null);
     } else {
-      // Ordenar las fechas
       const start = date < selectedStart ? date : selectedStart;
       const end = date < selectedStart ? selectedStart : date;
-
-      // ✅ Validar que el rango no contenga fechas bloqueadas
       if (hasDisabledDatesInRange(start, end)) {
         alert('El rango seleccionado contiene fechas no disponibles. Por favor elegí otro rango.');
-        // Resetear selección
         setSelectedStart(date);
         setSelectedEnd(null);
         onDateChange(date, null);
         return;
       }
-
       setSelectedStart(start);
       setSelectedEnd(end);
       onDateChange(start, end);
     }
   };
 
+  const goToPrevMonth = (e) => {
+    e.stopPropagation();
+    const today = new Date();
+    const prevMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+    const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    if (prevMonth >= thisMonth) setCurrentMonth(prevMonth);
+  };
+
+  const goToNextMonth = (e) => {
+    e.stopPropagation();
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+  };
+
+  const getMonthLabel = (offset) => {
+    const d = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + offset, 1);
+    return `${months[d.getMonth()]} ${d.getFullYear()}`;
+  };
+
   const renderCalendar = (monthOffset = 0) => {
     const displayMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + monthOffset, 1);
     const { daysInMonth, startingDayOfWeek } = getDaysInMonth(displayMonth);
     const days = [];
-
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
     }
-
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(displayMonth.getFullYear(), displayMonth.getMonth(), day);
       const disabled = isDateDisabled(date);
@@ -113,7 +116,6 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
       const isEnd = selectedEnd && date.toDateString() === selectedEnd.toDateString();
       const inRange = isDateInRange(date);
       const inHoverRange = isDateInHoverRange(date);
-
       days.push(
         <div
           key={day}
@@ -125,42 +127,51 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
         </div>
       );
     }
-
     return days;
   };
 
+  // ¿Podemos ir atrás? Solo si el mes anterior >= mes actual real
+  const today = new Date();
+  const canGoPrev = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1)
+    >= new Date(today.getFullYear(), today.getMonth(), 1);
+
   return (
     <div className="date-picker-container">
-      <div className="calendar-navigation">
-        <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}>
-          ←
-        </button>
-        <span>{months[currentMonth.getMonth()]} {currentMonth.getFullYear()}</span>
-        <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}>
-          →
-        </button>
-      </div>
-
       <div className="calendars-wrapper">
+
+        {/* MES IZQUIERDO */}
         <div className="calendar-grid">
+          <div className="calendar-month-header">
+            <button type="button" onClick={goToPrevMonth} disabled={!canGoPrev}
+              style={{ opacity: canGoPrev ? 1 : 0.2, cursor: canGoPrev ? 'pointer' : 'default' }}>
+              &#8249;
+            </button>
+            <span>{getMonthLabel(0)}</span>
+            <span style={{ width: '36px', display: 'inline-block' }} />
+          </div>
           <div className="calendar-header">
             <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div>
             <div>Jue</div><div>Vie</div><div>Sáb</div>
           </div>
-          <div className="calendar-days">
-            {renderCalendar(0)}
-          </div>
+          <div className="calendar-days">{renderCalendar(0)}</div>
         </div>
 
+        {/* MES DERECHO */}
         <div className="calendar-grid">
+          <div className="calendar-month-header">
+            <span style={{ width: '36px', display: 'inline-block' }} />
+            <span>{getMonthLabel(1)}</span>
+            <button type="button" onClick={goToNextMonth}>
+              &#8250;
+            </button>
+          </div>
           <div className="calendar-header">
             <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div>
             <div>Jue</div><div>Vie</div><div>Sáb</div>
           </div>
-          <div className="calendar-days">
-            {renderCalendar(1)}
-          </div>
+          <div className="calendar-days">{renderCalendar(1)}</div>
         </div>
+
       </div>
 
       <div className="calendar-info">
@@ -170,7 +181,6 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
     </div>
   );
 };
-
 // Componente Principal de Reserva
 const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
   const [publicacion, setPublicacion] = useState(null);
@@ -257,8 +267,6 @@ const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
     const end = new Date(fechaFin);
 
     while (current <= end) {
-      // ANTES: current.toISOString().split('T')[0]  ← bug timezone
-      // DESPUÉS:
       const year = current.getFullYear();
       const month = String(current.getMonth() + 1).padStart(2, '0');
       const day = String(current.getDate()).padStart(2, '0');

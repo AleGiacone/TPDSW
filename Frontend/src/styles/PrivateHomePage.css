@@ -1,4 +1,4 @@
-::root {
+:root {
   --primary-orange: #f97840;
   --secondary-orange: #ff8f73;
   --dark-orange: #e65c2b;
@@ -67,6 +67,8 @@
   transition: box-shadow 0.3s ease;
   width: fit-content;
   max-width: 100%;
+  overflow-x: auto;
+  text-overflow: ellipsis;
 }
 
 .search-filters:hover {
@@ -74,10 +76,10 @@
 }
 
 .filter-group {
-  flex: 0 1 auto;
-  min-width: 300px;
-  max-width: 180px;
-  padding: 10px 30px;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
+  padding: 10px 16px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -151,7 +153,8 @@
   margin: 0;
   min-width: auto;
   background-color: transparent;
-  padding: 0;
+  padding: 10px 20px;
+  border-radius: 32px;;
 }
 
 .tipo-alojamiento-group {
@@ -522,8 +525,9 @@
   }
 
   .filter-label {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     margin-top: 18px;
+    white-space: normal;
   }
 
   .filter-input-field,
@@ -559,8 +563,10 @@
   }
 
   .filter-label {
-    font-size: 1rem;
+    font-size: 0.85rem;
     margin-top: 14px;
+    white-space: normal;
+    line-height: 1.2;
   }
 
   .filter-input-field,
@@ -602,7 +608,6 @@
     padding: 1rem 10px;
   }
 
-  /* search bar: pila vertical, sin desbordamiento */
   .search-container {
     position: relative;
     padding: 10px 0;
@@ -675,17 +680,19 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+   
   }
 
   .checkbox-label {
     width: 100%;
     margin-right: 0;
     justify-content: space-between;
+  
   }
 
   .checkbox-text {
     font-size: 1rem;
-    color: #222;
+    color: #fff;
     margin-right: 0;
     order: -1;
   }
