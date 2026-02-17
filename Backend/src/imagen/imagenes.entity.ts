@@ -21,6 +21,4 @@ export class Imagen {
   @OneToOne(() => Mascota, mascota => mascota.imagen, { nullable: true, cascade: [Cascade.PERSIST] }) 
   mascota?: Rel<Mascota>;
 
-
-
 }

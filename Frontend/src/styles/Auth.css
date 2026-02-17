@@ -123,7 +123,7 @@ h4 {
 
 /* Labels del login */
 .auth-form .form-group label {
-     width:10px !important;
+     width:200px!important;
      font-weight: bold;
      margin-bottom: 10px;
      text-align: left;

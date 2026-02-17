@@ -515,15 +515,16 @@ async function update(req: Request, res: Response): Promise<void> {
   }
 }
 
-async function remove(req: Request, res: Response) { 
+async function remove(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
     const idPublicacion = Number.parseInt(req.params.idPublicacion as string);
     const publicacion = await em.findOneOrFail(
-      Publicacion, 
-      { idPublicacion }, 
-      { populate: ['imagenes'] }
+      Publicacion,
+      { idPublicacion },
+      { populate: ['imagenes', 'diasOcupados', 'reservas', 'reservas.diasReservados'] }  // ← agregar todo
     );
+
 
     const imagenes = publicacion.imagenes.getItems();
     for (const img of imagenes) {
@@ -533,11 +534,21 @@ async function remove(req: Request, res: Response) {
       }
     }
 
+    for (const dia of publicacion.diasOcupados.getItems()) {
+      em.remove(dia);
+    }
+
+
+    for (const reserva of publicacion.reservas.getItems()) {
+      for (const dia of reserva.diasReservados.getItems()) {
+        em.remove(dia);
+      }
+    }
+
     await em.removeAndFlush(publicacion);
     res.status(200).json({ message: 'Publicacion removed', data: publicacion });
   } catch (error: any) {
     res.status(500).json({ message: "Error removing publicacion", error: error.message });
   }
 }
-
 export { sanitizePublicacion, findAll, findOne, findByCuidador, add, update, remove, getDiasReservados, reservaCuidador, diasReservados};
