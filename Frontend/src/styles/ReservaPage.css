@@ -809,3 +809,40 @@
   font-size: 18px;
   color: #717171;
 }
+.calendar-month-header {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.calendar-month-header>span {
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+  text-align: center;
+  flex: 1;
+}
+
+.calendar-month-header>button {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  background: #f0f0f0 !important;
+  border: none !important;
+  border-radius: 50%;
+  font-size: 22px;
+  color: #222 !important;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  visibility: visible !important;
+  opacity: 1;
+}
+
+.calendar-month-header>button:hover:not(:disabled) {
+  background: #e0e0e0 !important;
+}

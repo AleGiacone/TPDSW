@@ -23,11 +23,12 @@ function sanitizeReserva(req: Request, res: Response, next: NextFunction) {
     idReserva: req.body.idReserva,
     fechaReserva: req.body.fechaReserva ? sanitizeHTML(String(req.body.fechaReserva)) : undefined,
     descripcion: req.body.descripcion ? sanitizeHTML(String(req.body.descripcion)) : undefined,
-
     idDueno: req.body.idDueno,
     idMascotas: req.body.idMascotas,
     idPublicacion: req.body.idPublicacion,
     dias: req.body.dias,
+    fechaDesde: req.body.fechaDesde ? new Date(req.body.fechaDesde) : undefined,  
+    fechaHasta: req.body.fechaHasta ? new Date(req.body.fechaHasta) : undefined, 
     //agregar sanitizacion de los campos que se necesiten
   };
   Object.keys(req.body.sanitizeInput).forEach((key) => {
