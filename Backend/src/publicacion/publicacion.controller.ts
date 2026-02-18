@@ -538,7 +538,7 @@ async function remove(req: Request, res: Response) {
       em.remove(dia);
     }
 
-
+    // Eliminar diasReservados de cada reserva
     for (const reserva of publicacion.reservas.getItems()) {
       for (const dia of reserva.diasReservados.getItems()) {
         em.remove(dia);

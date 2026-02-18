@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import PublicacionesGrid from '../../components/PublicacionesGrid';
 import '../../styles/PrivateHomePage.css';
+import { Calendar, X, AlertCircle, Upload, Trash2, Home, CalendarCheck, User, LogOut, Cat, Dog, DollarSign, MapPin } from 'lucide-react';
 
 
 const PublicacionesView = () => {
@@ -151,7 +152,7 @@ const PublicacionesView = () => {
 
                 <div className="search-filters ">
                     <div className="filter-group">
-                        <label className="filter-label">Lugar</label>
+                        <label className="filter-label"><MapPin size={18} /> Lugar</label>
                         <input
                             type="text"
                             placeholder="Explorar destinos"
@@ -163,7 +164,7 @@ const PublicacionesView = () => {
                     </div>
 
                     <div className="filter-group">
-                        <label className="filter-label">Tipo de alojamiento</label>
+                        <label className="filter-label"> <Home size={18} /> Tipo de alojamiento</label>
                         <select
                             name="tipoAlojamiento"
                             value={formValues.tipoAlojamiento}
@@ -178,7 +179,7 @@ const PublicacionesView = () => {
                     </div>
 
                     <div className="filter-group">
-                        <label className="filter-label">💰 Tarifa máxima</label>
+                        <label className="filter-label"><DollarSign size={18} /> Tarifa máxima</label>
                         <input
                             type="number"
                             placeholder="Precio máximo"
@@ -190,7 +191,7 @@ const PublicacionesView = () => {
                     </div>
 
                     <div className="filter-group">
-                        <label className="filter-label">🐕 Cantidad animales</label>
+                        <label className="filter-label"><Dog size={18} /> Cantidad animales</label>
                         <input
                             type="number"
                             placeholder="¿Cuántos?"

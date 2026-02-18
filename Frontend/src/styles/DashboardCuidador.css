@@ -338,6 +338,7 @@
   margin-bottom: 0.65rem;
   width: fit-content;
   box-shadow: var(--shadow-sm);
+  margin-top: 1rem;
 }
 
 .dashboard-container .form-input,

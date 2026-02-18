@@ -123,18 +123,18 @@ h4 {
 
 /* Labels del login */
 .auth-form .form-group label {
-     width:200px!important;
+     width:auto!important;
      font-weight: bold;
      margin-bottom: 10px;
      text-align: left;
-     padding: 20px 18px;
+     padding: 10px 18px;
      display: block;
      background: linear-gradient(145deg, #FFAD66, #FA8351);
      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-     border-radius: 20px;
+     border-radius: 10px;
      color: #fff;
      align-self: flex-start;
-     font-size: 1.1rem;
+     font-size: 1.3rem;
      white-space: nowrap;
 }
 
@@ -183,34 +183,34 @@ h4 {
 /* REGISTER - CONTENEDOR                     */
 /* ========================================= */
 .auth-container-register {
-     max-width: 900px;
+     max-width: 640px;
      width: 100%;
      margin: 30px auto;
      border-radius: 20px;
      font-family: "Nunito", sans-serif;
      display: flex;
      flex-direction: column;
-     align-items: center;
+     align-items: stretch;
      box-sizing: border-box;
      padding: 0 20px;
 }
 
 /* Labels del register */
 .auth-container-register label {
+     width: fit-content;
+     max-width: 270px;
      font-weight: bold;
-     font-size: 1.1rem;
      margin-bottom: 10px;
      text-align: left;
      padding: 10px 18px;
-     width: auto;
-     min-width: 200px;
-     max-width: 200px;
      display: block;
      background: linear-gradient(145deg, #FFAD66, #FA8351);
      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-     border-radius: 20px;
+     border-radius: 10px;
      color: #fff;
-     align-self: center;
+     align-self: flex-start;
+     font-size: 1.3rem;
+     white-space: nowrap;
 }
 
 /* Inputs y selects del register */
