@@ -3,13 +3,9 @@ import { useState, useEffect, useCallback } from 'react';
 const API_BASE_URL = 'http://localhost:3000/api';
 
 const calcularEstado = (reserva) => {
-  console.log('FECHAS RAW:', reserva.idReserva, reserva.fechaDesde, reserva.fechaHasta);
   if (!reserva.fechaDesde || !reserva.fechaHasta) return 'pendiente';
 
-  // 👇 AGREGÁ ESTO TEMPORALMENTE
-  console.log('RAW fechaDesde:', reserva.fechaDesde);
-  console.log('RAW fechaHasta:', reserva.fechaHasta);
-
+ 
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
 
@@ -20,9 +16,6 @@ const calcularEstado = (reserva) => {
   const hastaStr = reserva.fechaHasta.split('T')[0];
   const [hy, hm, hd] = hastaStr.split('-').map(Number);
   const hasta = new Date(hy, hm - 1, hd);
-
-  console.log('hoy:', hoy, 'desde:', desde, 'hasta:', hasta);
-  console.log('hoy < desde?', hoy < desde, '| hoy > hasta?', hoy > hasta);
 
   if (hoy < desde) return 'pendiente';
   if (hoy > hasta) return 'finalizada';
@@ -43,7 +36,7 @@ export const useReservas = (userId, userType) => {
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
       const data = await response.json();
-      console.log('📦 Reservas recibidas del backend:', data.data?.length || 0);
+    
 
       let filtradas = [];
 
@@ -51,7 +44,6 @@ export const useReservas = (userId, userType) => {
         filtradas = data.data.filter(r =>
           r.dueno?.idUsuario === userId || r.dueno === userId
         );
-        console.log(`🐕 Reservas filtradas para dueño ${userId}:`, filtradas.length);
       } else if (userType === 'cuidador') {
         filtradas = data.data.filter(r =>
           r.publicacion?.idCuidador?.idUsuario === userId
@@ -59,15 +51,14 @@ export const useReservas = (userId, userType) => {
         console.log(`👤 Reservas filtradas para cuidador ${userId}:`, filtradas.length);
       }
 
-      // ✅ Agregar estado calculado
+      //  estado calculado
       const conEstado = filtradas.map(r => {
         const estado = calcularEstado(r);
-        console.log(`📌 Reserva ${r.idReserva} → ${estado}`);
         return { ...r, estadoCalculado: estado };
       });
 
-      // ✅ NO FILTRAR las finalizadas aquí - dejar que las tabs lo hagan
-      // Esto permite que veas TODAS tus reservas en la tab "Todas"
+      // 
+      //"Todas"
       setReservas(conEstado);
 
       console.log('✅ Reservas cargadas:', {
@@ -87,7 +78,6 @@ export const useReservas = (userId, userType) => {
 
   const cancelarReserva = async (reservaId) => {
     try {
-      console.log('🗑️ Cancelando reserva:', reservaId);
       const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}`, {
         method: 'DELETE',
         credentials: 'include',
@@ -106,9 +96,8 @@ export const useReservas = (userId, userType) => {
     }
   };
 
-  // ✅ Filtrar por estado para las tabs
+  //  Filtrar por estado para las tabs
   const getReservasByEstado = useCallback((estado) => {
-    console.log(`🔍 Filtrando por estado: ${estado}`);
     if (estado === 'todas') return reservas;
     const filtradas = reservas.filter(r => r.estadoCalculado === estado);
     console.log(`   → ${filtradas.length} reservas encontradas`);
@@ -117,7 +106,6 @@ export const useReservas = (userId, userType) => {
 
   useEffect(() => {
     if (userId) {
-      console.log('🔄 useEffect ejecutado - cargando reservas');
       fetchReservas();
       const interval = setInterval(fetchReservas, 5 * 60 * 1000);
       return () => clearInterval(interval);

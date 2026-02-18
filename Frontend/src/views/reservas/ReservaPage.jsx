@@ -130,7 +130,7 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
     return days;
   };
 
-  // ¿Podemos ir atrás? Solo si el mes anterior >= mes actual real
+  //  Solo si el mes anterior >= mes actual real
   const today = new Date();
   const canGoPrev = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1)
     >= new Date(today.getFullYear(), today.getMonth(), 1);

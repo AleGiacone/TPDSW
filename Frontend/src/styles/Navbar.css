@@ -1,5 +1,5 @@
 /* ========================================= */
-/* ESTILOS BASE - NAVBAR UNIFICADA */
+/* NAVBAR UNIFICADA */
 /* ========================================= */
 .page-wrapper-login {
   background-color: transparent;
@@ -11,8 +11,6 @@
   margin: 0;
   width: 100%;
 }
-
-/* NAVBAR PRINCIPAL - IGUAL QUE DASHBOARDS */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -58,7 +56,6 @@
   justify-content: flex-end;
 }
 
-/* Links normales - estilo dashboard */
 .navbar .nav-link {
   display: inline-flex;
   align-items: center;
@@ -88,7 +85,7 @@
   border-color: #ffffff;
 }
 
-/* Wrapper de usuario autenticado */
+
 .wrap-authenticated-user {
   display: flex;
   gap: 10px;
@@ -98,7 +95,6 @@
   padding: 0;
 }
 
-/* Botón Dashboard */
 .wrap-authenticated-user .link-dashboard {
   display: inline-flex;
   align-items: center;
@@ -122,7 +118,7 @@
   transform: translateY(-1px);
 }
 
-/* Botón Logout */
+
 .wrap-authenticated-user .link-logout-btn {
   display: inline-flex;
   align-items: center;
@@ -145,7 +141,6 @@
   transform: translateY(-1px);
 }
 
-/* Botón de Registrarse - destacado en blanco */
 .nav-link-register {
   display: inline-flex;
   align-items: center;
@@ -169,7 +164,7 @@
 }
 
 /* ========================================= */
-/* ESTILOS PARA PÁGINAS DE AUTH */
+/* ESTILOS AUTH */
 /* ========================================= */
 .auth-navbar {
   background: linear-gradient(135deg, #f97136 0%, #ff6b45 100%);
@@ -183,7 +178,7 @@
 /* ========================================= */
 /* NAVBAR PARA DASHBOARDS */
 /* ========================================= */
-/* Estilos específicos cuando se usa en dashboards */
+
 #main-dashboard #main-navbar,
 .dashboard-container .dashboard-navbar {
   display: flex;
@@ -214,7 +209,6 @@
   margin: 0;
 }
 
-/* Botones centrales en dashboard */
 .dashboard-container .up-buttons,
 .dashboard-container .navbar-buttons-center,
 #main-navbar .navbar-buttons-center {
@@ -224,7 +218,6 @@
   gap: 10px;
 }
 
-/* Botones derecha en dashboard */
 .dashboard-container .down-buttons,
 .dashboard-container .navbar-buttons-right,
 #main-navbar .navbar-buttons-right {
@@ -234,7 +227,7 @@
   gap: 10px;
 }
 
-/* Botones de dashboard */
+
 .dashboard-container .nav-button,
 .dashboard-container .btn-publicaciones-extra,
 .dashboard-container .logout-button,
@@ -286,7 +279,7 @@
 }
 
 /* ========================================= */
-/* RESPONSIVE - MÓVILES (max 767px)          */
+/* RESPONSIVE (max 767px)          */
 /* ========================================= */
 @media (max-width: 767px) {
 
@@ -309,7 +302,7 @@
     font-size: 1.4rem;
   }
 
-  /* Los links se quedan en fila a la derecha, reducidos */
+
   .navbar-links {
     flex-direction: row;
     flex-wrap: wrap;
@@ -327,7 +320,7 @@
     white-space: nowrap;
   }
 
-  /* Logout: solo ícono, compacto */
+  
   .wrap-authenticated-user .link-logout-btn {
     padding: 7px 10px;
     font-size: 0.85rem;
@@ -339,14 +332,14 @@
     align-items: center;
   }
 
-  /* Auth navbar (login/register): centrada y más pequeña */
+
   .auth-navbar {
     max-width: 95%;
     border-radius: 14px;
     margin: 10px auto;
   }
 
-  /* ── Dashboard navbar ── */
+ 
   .dashboard-container .dashboard-navbar,
   #main-dashboard #main-navbar {
     flex-direction: column;
@@ -381,7 +374,7 @@
 }
 
 /* ========================================= */
-/* RESPONSIVE - MÓVILES PEQUEÑOS (max 480px) */
+/* RESPONSIVE - (max 480px) */
 /* ========================================= */
 @media (max-width: 480px) {
   .logo-link {
@@ -413,7 +406,7 @@
 }
 
 /* ========================================= */
-/* RESPONSIVE - MUY PEQUEÑOS (max 360px)     */
+/* RESPONSIVE -(max 360px)     */
 /* ========================================= */
 @media (max-width: 360px) {
   .navbar {

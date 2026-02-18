@@ -1,10 +1,7 @@
 /* ============================================
-   ESTILOS UNIFICADOS PARA PUBLICACION CARD
+   PUBLICACION CARD
    ============================================ */
 
-/* ============================================
-   ESTRUCTURA BASE DE LA CARD
-   ============================================ */
 .publicacion-card {
   background: var(--white, #ffffff);
   border-radius: 20px;
@@ -29,7 +26,6 @@
 .publicacion-card .card-image-wrapper {
   position: relative;
   width: 100%;
-  /* Alto automático: se adapta a la imagen, con tope máximo */
   height: auto;
   max-height: 320px;
   min-height: 200px;
@@ -41,7 +37,6 @@
   justify-content: center;
 }
 
-/* ─── CAROUSEL CONTAINER ─── */
 .publicacion-card .card-image-wrapper .carousel-container {
   position: relative;
   width: 100%;
@@ -56,7 +51,6 @@
 /* ─── IMAGEN DEL CARRUSEL ─── */
 .publicacion-card .card-image-wrapper .carousel-image {
   width: 100%;
-  /* La imagen define su propia altura, respetando el max del wrapper */
   height: auto;
   max-height: 320px;
   min-height: 200px;

@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import ReservaCard from '../components/ReservaCard';
 
-// ── Datos de prueba (mock) ───────────────────────────────────────────────────
+//  (mock) 
 const reservaMock = {
   idReserva: 1,
   descripcion: 'Por favor cuiden bien a Firulais',
@@ -36,7 +36,7 @@ const reservaMock = {
   },
 };
 
-// ── Tests ────────────────────────────────────────────────────────────────────
+// ── Tests 
 describe('ReservaCard', () => {
 
   it('muestra el título de la publicación', () => {
@@ -76,7 +76,7 @@ describe('ReservaCard', () => {
   });
 
   it('llama a onCancelar con el id correcto al cancelar', () => {
-    const onCancelarMock = vi.fn(); // función espía
+    const onCancelarMock = vi.fn(); // funció
     render(<ReservaCard reserva={reservaMock} userType="dueno" onCancelar={onCancelarMock} />);
 
     fireEvent.click(screen.getByText('Cancelar Reserva'));

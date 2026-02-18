@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import '../styles/Navbar.css';
-import { Calendar, X, AlertCircle, Upload, Trash2, Home, CalendarCheck, User, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -58,7 +58,7 @@ export default function Navbar() {
               </li>
             </div>
           ) : (
-            // Solo mostrar los botones si NO estamos en la homepage
+            // Solo mostrar los botones si NO homepage
             !isHomePage && (
               <>
                 <li>

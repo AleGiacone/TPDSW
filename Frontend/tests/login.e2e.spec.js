@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-// URL base de tu app (debe estar corriendo con npm run dev)
-const BASE_URL = 'http://localhost:3308'; // tu puerto es 3307
+const BASE_URL = 'http://localhost:3308'; 
 
 // ── Tests E2E de LoginPage ───────────────────────────────────────────────────
 test.describe('LoginPage - Flujo de inicio de sesión', () => {
@@ -46,17 +45,14 @@ test.describe('LoginPage - Flujo de inicio de sesión', () => {
 
     await page.getByRole('button', { name: 'Ingresar' }).click();
 
-    // En el momento justo después del click, el botón dice "Iniciando..."
-    // (puede ser muy rápido, por eso buscamos cualquiera de los dos estados)
     const btn = page.getByRole('button', { name: /Ingresar|Iniciando/ });
     await expect(btn).toBeVisible();
   });
 
   // ── Test 5: Flujo completo con login exitoso ───────────────────────────
-  // ⚠️ Reemplazá estas credenciales con unas válidas de tu sistema
   test('redirige al dashboard tras login exitoso', async ({ page }) => {
-    const EMAIL_VALIDO = 'hagrid@Hogwarts.edu';       // ← cambiá esto
-    const PASSWORD_VALIDO = 'magic123';        // ← cambiá esto
+    const EMAIL_VALIDO = 'hagrid@Hogwarts.edu';       
+    const PASSWORD_VALIDO = 'magic123';     
 
     await page.locator('#email').fill(EMAIL_VALIDO);
     await page.locator('#password').fill(PASSWORD_VALIDO);

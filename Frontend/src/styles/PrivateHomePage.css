@@ -447,8 +447,7 @@
 }
 
 /* ========================================= */
-/* RESPONSIVE — solo media queries, sin      */
-/* tocar ningún estilo base de arriba        */
+/* RESPONSIVE     */
 /* ========================================= */
 
 @media (max-width: 1400px) {

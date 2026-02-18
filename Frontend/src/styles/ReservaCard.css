@@ -1,4 +1,4 @@
-/* ── Card base ──────────────────────────────────────────────────────────────── */
+
 .reserva-card-modern {
   background: white;
   border-radius: 16px;
@@ -15,7 +15,6 @@
   transform: translateY(-2px);
 }
 
-/* Estados — solo los dos que existen ahora */
 .reserva-card-modern.pendiente {
   border-color: #fbbf24;
 }
@@ -24,7 +23,6 @@
   border-color: #6366f1;
 }
 
-/* ── Header ─────────────────────────────────────────────────────────────────── */
 .reserva-header-modern {
   display: flex;
   gap: 16px;
@@ -60,8 +58,6 @@
   font-size: 40px;
   background: #f3f4f6;
 }
-
-/* min-width: 0 es CRÍTICO — sin esto el texto largo desborda y desplaza toda la card */
 .reserva-info-principal {
   flex: 1;
   min-width: 0;
@@ -94,7 +90,7 @@
   margin: 1px 0;
 }
 
-/* ── Badges ─────────────────────────────────────────────────────────────────── */
+
 .estado-badge {
   display: inline-block;
   padding: 4px 12px;
@@ -117,7 +113,7 @@
   color: #3730a3;
 }
 
-/* ── Fechas ──────────────────────────────────────────────────────────────────── */
+
 .reserva-fechas {
   display: flex;
   align-items: center;
@@ -155,7 +151,6 @@
   flex-shrink: 0;
 }
 
-/* ── Costo ───────────────────────────────────────────────────────────────────── */
 .reserva-costo {
   padding: 14px 20px;
   background: #f9fafb;
@@ -186,7 +181,7 @@
   color: #10b981;
 }
 
-/* ── Mascotas preview ────────────────────────────────────────────────────────── */
+
 .mascotas-preview {
   padding: 14px 20px;
   border-top: 1px solid #e5e7eb;

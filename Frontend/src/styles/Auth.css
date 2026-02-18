@@ -121,7 +121,6 @@ h4 {
      -webkit-text-fill-color: black !important;
 }
 
-/* Labels del login */
 .auth-form .form-group label {
      width:auto!important;
      font-weight: bold;
@@ -138,7 +137,6 @@ h4 {
      white-space: nowrap;
 }
 
-/* Botón del login */
 .auth-form button {
      padding: 18px 20px;
      width: 60%;
@@ -163,7 +161,6 @@ h4 {
      transform: translateY(-2px);
 }
 
-/* Mensaje de error del login */
 .error-message {
      color: #f97136;
      text-align: center;
@@ -195,7 +192,6 @@ h4 {
      padding: 0 20px;
 }
 
-/* Labels del register */
 .auth-container-register label {
      width: fit-content;
      max-width: 270px;
@@ -213,7 +209,6 @@ h4 {
      white-space: nowrap;
 }
 
-/* Inputs y selects del register */
 .auth-container-register input,
 .auth-container-register select,
 .auth-container-register textarea {
@@ -244,7 +239,6 @@ h4 {
      min-height: 100px;
 }
 
-/* Botón submit del register */
 .auth-container-register form button[type="submit"] {
      padding: 18px 20px;
      width: 60%;
