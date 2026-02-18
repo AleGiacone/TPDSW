@@ -83,7 +83,7 @@ app.use((req, res, next) => {
 // Rate limiter general - EXCLUIR WEBHOOK DE STRIPE
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100,                  // 100 requests por IP
+  max: 1000,                  // 100 requests por IP
   standardHeaders: true,     // Devuelve info en headers `RateLimit-*`
   legacyHeaders: false,      // Deshabilita headers `X-RateLimit-*`
   skip: (req) => req.path.startsWith('/api/webhook/stripe'), // ✅ EXCLUIR WEBHOOK

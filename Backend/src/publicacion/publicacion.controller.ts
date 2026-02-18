@@ -525,7 +525,7 @@ async function remove(req: Request, res: Response) {
       { populate: ['imagenes', 'diasOcupados', 'reservas', 'reservas.diasReservados'] }  // ← agregar todo
     );
 
-
+    console.log("Publicacion encontrada", publicacion)
     const imagenes = publicacion.imagenes.getItems();
     for (const img of imagenes) {
       const filePath = `public${img.path}`;
