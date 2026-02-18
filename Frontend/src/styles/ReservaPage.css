@@ -29,7 +29,7 @@
   position: sticky;
   top: 20px;
   margin-top: 56px;
-  /* ← bajá este valor hasta que quede alineado */
+
 }
 
 .price-header {
@@ -43,7 +43,6 @@
 
 .price {
   font-size: 28px;
-  /* ← antes 22px */
   font-weight: 700;
   color: #222;
 }
@@ -103,14 +102,12 @@
   color: #717171;
 }
 
-/* Sección de mascotas */
 .mascotas-section {
   margin-bottom: 24px;
 }
 
 .section-title {
   font-size: 1.3rem;
-  /* ← antes 16px */
   font-weight: 700;
   margin-bottom: 14px;
   color: #f97840;
@@ -153,7 +150,6 @@
 /* Imagen de la mascota en miniatura */
 .mascota-image-thumb {
   width: 80px;
-  /* ← antes 50px */
   height: 80px;
   border-radius: 50%;
   overflow: hidden;
@@ -185,7 +181,6 @@
 
 .mascota-item .mascota-info .mascota-name {
   font-size: 1.3rem!important;
-  /* ← antes 14px */
   font-weight: 700;
   color: #222;
 }
@@ -242,7 +237,6 @@
   border: 1px solid #b0b0b0;
   border-radius: 8px;
   font-size: 1rem;
-  /* ← antes 14px */
   font-family: inherit;
   resize: vertical;
 }
@@ -256,13 +250,11 @@
 .reserve-button {
   width: 100%;
   padding: 18px;
-  /* ← antes 14px */
   background: linear-gradient(to right, #f97840, #ff6b35);
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 1.1rem;
-  /* ← antes 16px */
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
@@ -585,7 +577,7 @@
   }
 }
 
-/* ── 600px : móviles grandes ── */
+/* ── 600px  */
 @media (max-width: 600px) {
   .reserva-container {
     padding: 16px 12px;
@@ -687,7 +679,7 @@
   }
 }
 
-/* ── 480px : móviles medianos ── */
+/* ── 480px  ── */
 @media (max-width: 480px) {
   .reserva-container {
     padding: 12px 10px;
@@ -757,7 +749,7 @@
   }
 }
 
-/* ── 380px : móviles pequeños ── */
+/* ── 380px  ── */
 @media (max-width: 380px) {
   .reserva-card {
     padding: 12px 10px;

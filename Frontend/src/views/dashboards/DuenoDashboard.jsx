@@ -54,7 +54,7 @@ const DuenoDashboard = () => {
         return () => intervals.forEach(clearTimeout);
     }, []);
 
-    // 👇 TAMBIÉN agregá esto cada vez que cambia la vista
+
     useEffect(() => {
         forceNavbarVisibility();
     }, [currentView]);
@@ -134,7 +134,7 @@ const DuenoDashboard = () => {
         setQrCode2FA(null);
     };
 
-    // ─── Redirect to reservas view if coming back from a successful payment ────
+    // ─── Redirect to reservas 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const fromPayment = params.get('from');
@@ -142,7 +142,7 @@ const DuenoDashboard = () => {
         // Si viene del pago, abrir reservas
         if (fromPayment === 'payment') {
             setCurrentView('reservas');
-            // Limpiar la URL
+            // Limpia la URL
             window.history.replaceState({}, '', window.location.pathname);
         }
     }, []);
@@ -390,19 +390,10 @@ const DuenoDashboard = () => {
         }
     };
 
-
-    // ============================================================================
-    // REEMPLAZO COMPLETO de handleMascotaSubmit en DuenoDashboard.jsx
-    // ============================================================================
-
     const handleMascotaSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
-
-        // ============================================================================
-        // VALIDACIONES FRONTEND
-        // ============================================================================
 
         // 1. Validar nombre
         if (!mascotaForm.nombre || mascotaForm.nombre.trim() === '') {
@@ -462,10 +453,6 @@ const DuenoDashboard = () => {
             return;
         }
 
-        // ============================================================================
-        // PREPARAR DATOS PARA ENVIAR
-        // ============================================================================
-
         try {
             const url = editingMascota
                 ? `${API_BASE_URL}/mascotas/${editingMascota.idMascota || editingMascota.id}`
@@ -473,29 +460,23 @@ const DuenoDashboard = () => {
 
             const method = editingMascota ? 'PUT' : 'POST';
 
-            // ✅ DATOS LIMPIOS Y VALIDADOS
             const mascotaData = {
                 nomMascota: mascotaForm.nombre.trim(),
-                edad: mascotaForm.edad.toString(), // Backend espera string
+                edad: mascotaForm.edad.toString(), // Back espera string
                 sexo: mascotaForm.sexo,
                 exotico: Boolean(mascotaForm.exotico),
-                descripcion: mascotaForm.descripcion.trim() || 'Sin descripción', // ✅ FIX: nunca enviar string vacío
+                descripcion: mascotaForm.descripcion.trim() || 'Sin descripción', 
                 peso: pesoNumerico,
                 especie: especieId,
                 raza: razaId,
                 dueno: parseInt(user.idUsuario)
             };
 
-            // Si estamos editando, agregar el ID
             if (editingMascota) {
                 mascotaData.idMascota = editingMascota.idMascota;
             }
 
             console.log('📤 Enviando datos de mascota:', mascotaData);
-
-            // ============================================================================
-            // ENVIAR REQUEST
-            // ============================================================================
 
             const response = await fetch(url, {
                 method,
@@ -537,10 +518,6 @@ const DuenoDashboard = () => {
                     alert('⚠️ Mascota guardada pero hubo un error al subir la imagen: ' + imgError.message);
                 }
             }
-
-            // ============================================================================
-            // ACTUALIZAR LISTA Y LIMPIAR FORMULARIO
-            // ============================================================================
 
             await fetchMascotas();
 
@@ -693,7 +670,6 @@ const DuenoDashboard = () => {
         catch (err) { console.error('Error al cerrar sesión:', err); }
     };
 
-    // ─── renderReservas: NO hooks inside, uses filterStatus from component scope ─
 
     const renderReservas = () => {
         const reservasFiltradas = getReservasByEstado(filterStatus);
@@ -760,7 +736,6 @@ const DuenoDashboard = () => {
                                 reserva={reserva}
                                 userType="dueno"
                                 onCancelar={handleCancelarReserva}
-                            // isExpired y onAceptar/onRechazar eliminados:
                             // el estado lo calcula la card desde reserva.estadoCalculado
                             />
                         ))}
@@ -772,7 +747,6 @@ const DuenoDashboard = () => {
 
 
     const renderMascotas = () => (
-        // Usamos un fragmento para que no haya wrapper extra
         <>
             {/* CABECERA: fuera del contenedor de cards */}
             <div className="mascotas-header">

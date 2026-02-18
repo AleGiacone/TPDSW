@@ -149,7 +149,6 @@
   transform: translateY(-1px);
 }
 
-/* CRITICAL: dashboard-main debe ser completamente transparente y sin padding */
 .dashboard-container .dashboard-main {
   width: 100%;
   padding: 0 !important;
@@ -160,17 +159,15 @@
   border-radius: 0;
 }
 
-/* El wrapper de publicaciones maneja su propio padding */
 .dashboard-container .publicaciones-grid-wrapper {
   width: 100%;
   min-height: calc(100vh - 185px);
   background: var(--lighter-peach, #fffaf8);
   border-top: 1px solid #f0e8e4;
   padding: 2.5rem 3rem 4rem;
-  /* ← Padding solo aquí */
 }
 
-/* Header también maneja su propio padding */
+
 .dashboard-container .publicaciones-header {
   display: flex;
   justify-content: space-between;
@@ -192,7 +189,7 @@
   
 }
 
-/* Grid dentro del wrapper */
+
 .dashboard-container .publicaciones-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
@@ -338,6 +335,7 @@
   margin-bottom: 0.65rem;
   width: fit-content;
   box-shadow: var(--shadow-sm);
+  margin-top: 1rem;
 }
 
 .dashboard-container .form-input,
@@ -375,26 +373,19 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
   width: 100%;
-  /* ← AGREGADO */
   box-sizing: border-box;
-  /* ← AGREGADO */
 }
 
 .dashboard-container .form-grid .form-group {
   margin-bottom: 0;
   width: 100%;
-  /* ← AGREGADO */
   box-sizing: border-box;
-  /* ← AGREGADO */
   min-width: 0;
-  /* ← AGREGADO: previene overflow */
 }
 
 .dashboard-container .form-grid .form-input {
   width: 100%;
-  /* ← AGREGADO */
   box-sizing: border-box;
-  /* ← AGREGADO */
 }
 
 .dashboard-container .checkbox-group {
@@ -998,10 +989,8 @@
 
 /* ============================================================
    PERFIL COMPARTIDO — Cuidador & Dueño
-   Importar en ambos dashboards:  @import './PerfilShared.css';
    ============================================================ */
 
-/* ── Wrapper principal ─────────────────────────────────────── */
 .perfil-container {
   width: 100%;
   max-width: 780px;
@@ -1018,9 +1007,6 @@
   border-bottom: 3px solid var(--light-peach);
 }
 
-/* ============================================================
-   MODO VISTA
-   ============================================================ */
 
 .perfil-card {
   background: var(--white);
@@ -1038,7 +1024,6 @@
   box-shadow: var(--shadow-lg);
 }
 
-/* ── Foto ──────────────────────────────────────────────────── */
 .perfil-image-container {
   display: flex;
   justify-content: center;
@@ -1077,7 +1062,6 @@
   transform: scale(1.04);
 }
 
-/* ── Filas de datos ────────────────────────────────────────── */
 .perfil-fields {
   display: flex;
   flex-direction: column;
@@ -1638,7 +1622,7 @@
   font-size: 1rem;
 }
 
-/* ── btn-danger (outline) ── */
+
 .btn-danger {
   display: inline-flex;
   align-items: center;
@@ -1666,7 +1650,6 @@
   cursor: not-allowed;
 }
 
-/* ── Sobrescribir btn-delete cuando está en perfil-actions ── */
 .perfil-actions .btn-delete {
   flex: unset !important;
   width: 100% !important;
@@ -1786,7 +1769,6 @@
   line-height: 1.6;
 }
 
-/* ── Grid 2 columnas — CONTENIDO en el ancho del card ── */
 .perfil-form-card .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1943,10 +1925,10 @@
     padding: 12px 14px;
     flex-wrap: wrap;
     row-gap: 8px;
-    /* NO flex-direction:column — mantenemos flex-wrap */
+    
   }
 
-  /* Fila 1: título izq + down-buttons (perfil+logout) der */
+ 
   .dashboard-container .navbar-brand {
     flex: 1 1 auto;
     order: 1;
@@ -1960,7 +1942,7 @@
     justify-content: flex-end;
   }
 
-  /* Fila 2: up-buttons nav, full-width centrados */
+  
   .dashboard-container .up-buttons {
     flex: 0 0 100%;
     order: 3;
@@ -2129,7 +2111,7 @@
     font-size: 1.3rem;
   }
 
-  /* Imágenes preview más pequeñas */
+  
   .dashboard-container .image-preview-grid {
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     gap: 1rem;
@@ -2169,7 +2151,6 @@
     font-size: 0.95rem;
   }
 
-  /* up-buttons: solo iconos */
   .dashboard-container .up-buttons button {
     font-size: 0;
     padding: 8px;
@@ -2186,7 +2167,7 @@
     flex-shrink: 0;
   }
 
-  /* down-buttons: solo iconos también */
+ 
   .dashboard-container .down-buttons button {
     font-size: 0;
     padding: 8px;

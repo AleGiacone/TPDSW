@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
         return !localStorage.getItem('user');
     });
 
-    // ─── NUEVO: función que busca el perfil completo del usuario ──────────────
+    // Busca perfil completo usuario
     const fetchFullProfile = useCallback(async (userData) => {
         if (!userData?.idUsuario || !userData?.tipoUsuario) return userData;
         try {
@@ -107,23 +107,22 @@ export const AuthProvider = ({ children }) => {
 
             const data = await response.json();
 
-            // ── Caso: usuario tiene 2FA activo pero no se envió el token ──
-            // El backend responde 400 con message '2FA code is required'
+            //  usuario tiene 2FA activo pero no se envió el token ──
             if (response.status === 400 && data.message === '2FA code is required') {
                 return { success: false, requires2FA: true };
             }
 
-            // ── Caso: código 2FA incorrecto ──
+            // código 2FA incorrecto ──
             if (response.status === 400 && data.message === 'Invalid 2FA code') {
                 return { success: false, error: 'Invalid 2FA code' };
             }
 
-            // ── Caso: credenciales incorrectas u otro error ──
+            // credenciales incorrectas u otro error ──
             if (!response.ok || !data.success) {
                 return { success: false, error: data.message || 'Credenciales incorrectas' };
             }
 
-            // ── Login exitoso — cargar perfil completo ──
+            // ── Login exitoso 
             const fullUser = await fetchFullProfile(data.user);
             setUser(fullUser);
             localStorage.setItem('user', JSON.stringify(fullUser));
@@ -160,7 +159,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Nuevo: fuerza recarga del perfil completo desde el backend
+  
     const refreshProfile = useCallback(async () => {
         if (user) {
             const fullUser = await fetchFullProfile(user);

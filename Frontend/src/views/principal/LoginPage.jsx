@@ -28,7 +28,7 @@ function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
-    if (!email || !password) { setErrorMsg('Por favor, complete todos los campos.'); return; }
+    if (!email.trim() || !password.trim()) { setErrorMsg('Por favor, complete todos los campos.'); return; }
     setLoading(true);
     try {
       const result = await login(email, password);
@@ -131,7 +131,6 @@ function LoginPage() {
                 value={email}
                 placeholder="tuemail@ejemplo.com"
                 onChange={(e) => setEmail(e.target.value)}
-                required
                 disabled={loading}
               />
               <label htmlFor="password" className="password">Contraseña:</label>
@@ -141,7 +140,6 @@ function LoginPage() {
                 value={password}
                 placeholder="Tu contraseña"
                 onChange={(e) => setPassword(e.target.value)}
-                required
                 disabled={loading}
               />
               {errorMsg && <p className="error-message">{errorMsg}</p>}

@@ -3,18 +3,18 @@ import PublicacionCard from './PublicacionCard';
 import '../styles/PrivateHomePage.css';
 
 /**
- * Grid de publicaciones reutilizable - ACTUALIZADO PARA DASHBOARD CUIDADOR
- * @param {Array} publicaciones - Array de publicaciones a mostrar
- * @param {Boolean} loading - Estado de carga
- * @param {String} error - Mensaje de error si existe
- * @param {Function} onRetry - Función para reintentar carga
- * @param {Function} renderCardActions - Función que retorna los botones de acción para cada card
- * @param {String} emptyMessage - Mensaje cuando no hay publicaciones
- * @param {Boolean} showCuidadorInfo - Mostrar info del cuidador en cada card
- * @param {Boolean} isSelectable - Las cards son seleccionables
- * @param {Function} onCardClick - Callback cuando se hace click en una card
- * @param {Number} selectedCardId - ID de la card seleccionada
- * @param {Boolean} isDashboard - Si está en el dashboard (para aplicar wrapper completo)
+  Grid de publicaciones reutilizable - ACTUALIZADO PARA DASHBOARD CUIDADOR
+ @param {Array} publicaciones - Array de publicaciones a mostrar
+ @param {Boolean} loading - Estado de carga
+ @param {String} error - Mensaje de error si existe
+ @param {Function} onRetry - Función para reintentar carga
+ @param {Function} renderCardActions - Función que retorna los botones de acción para cada card
+ @param {String} emptyMessage - Mensaje cuando no hay publicaciones
+ @param {Boolean} showCuidadorInfo - Mostrar info del cuidador en cada card
+ @param {Boolean} isSelectable - Las cards son seleccionables
+ @param {Function} onCardClick - Callback cuando se hace click en una card
+ @param {Number} selectedCardId - ID de la card seleccionada
+ @param {Boolean} isDashboard - Si está en el dashboard (para aplicar wrapper completo)
  */
 const PublicacionesGrid = ({
   publicaciones = [],
@@ -27,7 +27,7 @@ const PublicacionesGrid = ({
   isSelectable = false,
   onCardClick = null,
   selectedCardId = null,
-  isDashboard = false // ← NUEVO PROP
+  isDashboard = false 
 }) => {
 
   // Renderizar contenido

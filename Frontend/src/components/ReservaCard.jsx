@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/ReservaCard.css';
 
-// especie/raza vienen como objeto {idEspecie, nomEspecie} — los convertimos a string
+// especie/raza vienen como objeto {idEspecie, nomEspecie}
 const resolveStr = (val) => {
   if (!val) return 'N/A';
   if (typeof val === 'string') return val;
@@ -10,13 +10,12 @@ const resolveStr = (val) => {
 };
 
 // Extrae el string "YYYY-MM-DD" de cualquier formato de fecha que venga del backend
-// Puede llegar como: "2025-07-15T00:00:00.000Z", "2025-07-15", Date object, etc.
 const toDateStr = (val) => {
   if (!val) return null;
   return String(val).split('T')[0]; // siempre queda "YYYY-MM-DD"
 };
 
-// Formatea "YYYY-MM-DD" → "15 de julio de 2025" sin desfase UTC
+// Formatea "YYYY-MM-DD" 
 const formatFecha = (dateStr) => {
   if (!dateStr) return 'N/A';
   const [y, m, d] = dateStr.split('-').map(Number);
@@ -26,7 +25,7 @@ const formatFecha = (dateStr) => {
   });
 };
 
-// Extrae los strings "YYYY-MM-DD" de diasReservados (pueden ser objetos o strings)
+// Extrae los strings "YYYY-MM-DD" de diasReservados 
 const getDiasStrings = (diasReservados = []) =>
   diasReservados
     .map(d => (typeof d === 'string' ? d : d?.fechaReservada ?? ''))
@@ -47,9 +46,8 @@ const ReservaCard = ({ reserva, userType, onCancelar }) => {
   const cuidador = publicacion?.idCuidador || publicacion?.cuidador;
   const primeraImg = publicacion?.imagenes?.[0];
 
-  // ── Fechas ────────────────────────────────────────────────────────────────
-  // Estrategia: usar fechaDesde/fechaHasta si existen,
-  // si no, derivarlas del min/max de diasReservados (que siempre están)
+  // usar fechaDesde/fechaHasta si existen,
+  // si no, derivarlas del min/max de diasReservados 
   const diasStrings = getDiasStrings(reserva.diasReservados);
 
   const now = new Date();
@@ -61,17 +59,16 @@ const ReservaCard = ({ reserva, userType, onCancelar }) => {
   const fechaDesdeStr = toDateStr(reserva.fechaDesde) ?? diasStrings[0] ?? null;
   const fechaHastaStr = toDateStr(reserva.fechaHasta) ?? diasStrings[diasStrings.length - 1] ?? null;
 
-  // ── Días y total ──────────────────────────────────────────────────────────
   // El precio no existe en la entidad Reserva, se calcula:
   //   cantidad de días reservados × tarifa por día de la publicación
-  // Usamos diasReservados.length porque es la fuente de verdad (siempre persiste)
+  // diasReservados.length porque es la fuente de verdad 
   const cantidadDias = diasStrings.length || (() => {
     // fallback: diferencia entre fechaDesde y fechaHasta si no hay diasReservados
     if (!fechaDesdeStr || !fechaHastaStr) return 0;
     const [y1, m1, d1] = fechaDesdeStr.split('-').map(Number);
     const [y2, m2, d2] = fechaHastaStr.split('-').map(Number);
     const ms = Math.abs(new Date(y2, m2 - 1, d2) - new Date(y1, m1 - 1, d1));
-    return Math.ceil(ms / (1000 * 60 * 60 * 24)) + 1; // +1 porque el rango es inclusivo
+    return Math.ceil(ms / (1000 * 60 * 60 * 24)) + 1; // porque el rango es inclusivo
   })();
 
   const tarifaPorDia = publicacion?.tarifaPorDia ?? 0;

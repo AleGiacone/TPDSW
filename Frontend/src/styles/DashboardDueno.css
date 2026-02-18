@@ -1,10 +1,7 @@
 /* ============================================
-   DASHBOARD DUEÑO - CSS LIMPIO Y DEFINITIVO
+   DASHBOARD DUEÑO
    ============================================ */
 
-/* ============================================
-   1. VARIABLES Y RESET
-   ============================================ */
 :root {
   --primary-orange: #f97840;
   --secondary-orange: #ff8f73;
@@ -135,7 +132,7 @@ body {
   background: var(--lighter-peach);
 }
 
-/* IMPORTANTE: Selector específico para el título de mascotas */
+
 .mascotas-header .section-title {
   font-size: 1.8rem !important;
   font-weight: 800 !important;
@@ -717,10 +714,8 @@ body {
 
 /* ============================================================
    PERFIL COMPARTIDO — Cuidador & Dueño
-   Pegar al final de DashboardCuidador.css y DashboardDueno.css
    ============================================================ */
 
-/* ── Wrapper principal ─────────────────────────────────────── */
 .perfil-container {
   width: 100%;
   max-width: 660px;
@@ -760,7 +755,7 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
-/* ── Foto ── */
+
 .perfil-image-container {
   display: flex;
   justify-content: center;
@@ -799,7 +794,6 @@ body {
   transform: scale(1.04);
 }
 
-/* ── Filas de datos ── */
 .perfil-fields {
   display: flex;
   flex-direction: column;
@@ -934,7 +928,6 @@ body {
   font-size: 1rem;
 }
 
-/* ── btn-danger (outline) ── */
 .btn-danger {
   display: inline-flex;
   align-items: center;
@@ -962,7 +955,6 @@ body {
   cursor: not-allowed;
 }
 
-/* ── Sobrescribir btn-delete cuando está en perfil-actions ── */
 .perfil-actions .btn-delete {
   flex: unset !important;
   width: 100% !important;
@@ -993,7 +985,6 @@ body {
   box-sizing: border-box;
 }
 
-/* ── Preview imagen ── */
 .perfil-image-upload {
   display: flex;
   flex-direction: column;
@@ -1032,7 +1023,7 @@ body {
   border-color: var(--primary-orange);
 }
 
-/* ── form-group dentro del form de perfil ── */
+
 .perfil-form-card .form-group {
   margin-bottom: 1.5rem;
   width: 100%;
@@ -1082,7 +1073,6 @@ body {
   line-height: 1.6;
 }
 
-/* ── Grid 2 columnas — CONTENIDO en el ancho del card ── */
 .perfil-form-card .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1638,8 +1628,7 @@ body {
   }
 }
 /* ============================================================
-   2FA — Modal (DashboardDueno.css y DashboardCuidador.css)
-   Agregar al final de cada archivo
+   2FA — Modal 
    ============================================================ */
 
 /* ── Overlay ── */
@@ -1655,7 +1644,7 @@ body {
   padding: 1rem;
 }
 
-/* ── Card del modal ── */
+
 .twofa-modal-content {
   background: var(--white);
   border-radius: var(--radius-xl);
