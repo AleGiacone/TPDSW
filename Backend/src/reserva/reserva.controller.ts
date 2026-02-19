@@ -115,7 +115,7 @@ async function verifyDate(req: Request, res: Response, next: NextFunction) {
         return;
       }
     }
-     if(publicacion.exotico != mascota.exotico){ 
+     if(publicacion.exotico == false && mascota.exotico == true){ 
       res.status(400).json({ message: `La mascota no coincide con el tipo de alojamiento de la publicación.` });
       return;
       }
@@ -309,7 +309,7 @@ async function testPagoStripe(req: Request, res: Response) {
           product_data: {
             name: 'Test Product',
           },
-          unit_amount: total * 100, // Stripe trabaja en centavos
+          unit_amount: Math.round(total * 100), // Stripe trabaja en centavos (entero)
         },
         quantity: 1,
       },
@@ -346,9 +346,9 @@ async function testPagoStripe(req: Request, res: Response) {
     cancel_url: `${process.env.VITE_URL || 'http://localhost:3008'}/payment/cancel`,
   });
   res.status(200).json({ session });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error initializing Stripe:", error);
-    res.status(500).json({ message: "Error initializing Stripe" });
+    res.status(500).json({ message: "Error initializing Stripe", error: error?.message, type: error?.type });
     return;
   }
   return;
