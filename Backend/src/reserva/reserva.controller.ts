@@ -342,8 +342,8 @@ async function testPagoStripe(req: Request, res: Response) {
       },
        
 
-    success_url: 'http://localhost:3308/payment/success',
-    cancel_url: 'http://localhost:3308/payment/cancel',
+    success_url: `${process.env.VITE_URL || 'http://localhost:3008'}/payment/success`,
+    cancel_url: `${process.env.VITE_URL || 'http://localhost:3008'}/payment/cancel`,
   });
   res.status(200).json({ session });
   } catch (error) {
