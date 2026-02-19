@@ -55,8 +55,10 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3307',
   'http://localhost:3308',
+  'https://tpdsw-phi.vercel.app',
   process.env.VITE_URL?.replace(/\/$/, ''),
 ].filter(Boolean) as string[];
+console.log('🌐 CORS allowedOrigins:', allowedOrigins);
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
