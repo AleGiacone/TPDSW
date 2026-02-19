@@ -39,7 +39,7 @@ export class Cuidador extends Usuario {
 
   @OneToMany(() => Publicacion, publicacion => publicacion.idCuidador, { 
     nullable: true,
-    cascade: [Cascade.ALL], orphanRemoval: true 
+    cascade: [Cascade.REMOVE], orphanRemoval: true 
   })
   publicaciones = new Collection<Publicacion>(this);
 }

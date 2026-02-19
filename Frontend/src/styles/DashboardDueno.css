@@ -597,7 +597,7 @@ body {
   background: linear-gradient(135deg, #416948 0%, #2d4a34 100%);
   border-radius: var(--radius-lg);
   cursor: pointer;
-  color: white;
+  color: #416948 !important;
   font-weight: 700;
 }
 

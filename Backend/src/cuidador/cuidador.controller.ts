@@ -320,7 +320,7 @@ async function remove(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
     const idUsuario = Number.parseInt(req.params.idUsuario as string);
-    const cuidador = await em.findOneOrFail(Cuidador, { idUsuario: idUsuario });
+    const cuidador = await em.findOneOrFail(Cuidador, { idUsuario: idUsuario, }, { populate: ['publicaciones'] });
   
     if (cuidador.perfilImage) {
       const imagePath = path.join('public', cuidador.perfilImage);

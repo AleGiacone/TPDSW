@@ -115,7 +115,7 @@ async function verifyDate(req: Request, res: Response, next: NextFunction) {
         return;
       }
     }
-     if(publicacion.exotico != mascota.exotico){ 
+     if(mascota.exotico == true && publicacion.exotico == false){ 
       res.status(400).json({ message: `La mascota no coincide con el tipo de alojamiento de la publicación.` });
       return;
       }
