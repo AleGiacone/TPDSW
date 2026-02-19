@@ -9,7 +9,8 @@ import fs from 'fs';
 import { Reserva } from '../reserva/reserva.entity.js';
 import { Temporal } from 'temporal-polyfill'
 import { DiaReservado } from '../reserva/diaReservado.entity.js';
-
+import jwt from 'jsonwebtoken';
+import { SECRET_JWT_KEY } from '../config.js';
 
 
 function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
@@ -47,7 +48,7 @@ function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
           Temporal.PlainDate.from(dia);
         }
       } catch (error) {
-        res.status(400).json({ message: "Error parsing dates", error: error });
+        res.status(400).json({ message: "Error parsing dates" });
         return;
       }
     }
@@ -89,7 +90,7 @@ async function diasReservados(req: Request, res: Response) {
     res.status(200).json({ message: "Días reservados obtenidos", data: todosLosDiasReservados });
     }
     catch (error: any) {
-    res.status(500).json({ message: "Error retrieving reserved days", error: error.message });
+    res.status(500).json({ message: "Error retrieving reserved days" });
     return;
   }
 }
@@ -133,7 +134,7 @@ async function reservaCuidador(req: Request, res: Response, next: NextFunction) 
 
     res.status(200).json({ message: "Reserva cuidador verificada", data: diasReservados });
   }catch (error: any) {  
-    res.status(400).json({ message: "Error verifying reserva cuidador", error: error.message });
+    res.status(400).json({ message: "Error verifying reserva cuidador" });
     return;
   }
 
@@ -239,7 +240,7 @@ async function findAll(req: Request, res: Response) {
     await em.populate(publicaciones, ['idCuidador']);
     res.status(200).json({ message: 'Found all publicaciones', data: publicaciones });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving publicaciones", error: error.message });
+    res.status(500).json({ message: "Error retrieving publicaciones" });
   }
 }
 
@@ -250,7 +251,7 @@ async function findOne(req: Request, res: Response) {
     const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas', 'imagenes','idCuidador'] });
     res.status(200).json({ message: 'Publicacion found', data: publicacion });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving publicacion", error: error.message });
+    res.status(500).json({ message: "Error retrieving publicacion" });
   }
 }
 
@@ -268,7 +269,7 @@ async function getDiasReservados(req: Request, res: Response) {
       
     res.status(200).json({ message: "Días reservados obtenidos", data: diasReservados });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving reserved days", error: error.message });
+    res.status(500).json({ message: "Error retrieving reserved days" });
     return;
   }
 
@@ -327,8 +328,7 @@ async function findByCuidador(req: Request, res: Response): Promise<void> {
     });
   } catch (error: any) {
     res.status(500).json({ 
-      message: "Error retrieving publicaciones del cuidador", 
-      error: error.message 
+      message: "Error retrieving publicaciones del cuidador"
     });
   }
 }
@@ -431,8 +431,7 @@ async function add(req: Request, res: Response): Promise<void> {
         }
         
         res.status(500).json({ 
-            message: "Error creating publicacion", 
-            error: error.message
+          message: "Error creating publicacion"
         });
     }
 }
@@ -445,9 +444,18 @@ async function update(req: Request, res: Response): Promise<void> {
     const publicacion = await em.findOneOrFail(
       Publicacion,
       { idPublicacion },
-      { populate: ['imagenes'] }
+      { populate: ['imagenes', 'idCuidador'] }
     );
-
+    const token = req.cookies.access_token;
+    const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+    req.usuario = decoded;
+    if(req.usuario.tipoUsuario !== 'admin' && req.usuario.idUsuario !== publicacion.idCuidador.idUsuario) {
+      res.status(403).json({ 
+      success: false,
+      message: 'Acceso denegado',
+      usuario: null});
+      return;
+    }
     const { titulo, descripcion, tarifaPorDia, ubicacion, tipoAlojamiento, cantAnimales, exotico } = req.body.sanitizeInput;
 
     if (titulo !== undefined) publicacion.titulo = titulo;
@@ -509,46 +517,42 @@ async function update(req: Request, res: Response): Promise<void> {
       });
     }
     res.status(500).json({
-      message: "Error updating publicacion",
-      error: error.message
+      message: "Error updating publicacion"
     });
   }
 }
 
 async function remove(req: Request, res: Response) {
   try {
-    const em = orm.em.fork();
-    const idPublicacion = Number.parseInt(req.params.idPublicacion as string);
-    const publicacion = await em.findOneOrFail(
-      Publicacion,
-      { idPublicacion },
-      { populate: ['imagenes', 'diasOcupados', 'reservas', 'reservas.diasReservados'] }  // ← agregar todo
-    );
+//      const token = req.cookies.access_token;
+//     const em = orm.em.fork();
+      const idPublicacion = Number.parseInt(req.params.idPublicacion as string);
+      const publicacion = await em.findOneOrFail(
+        Publicacion, 
+        { idPublicacion }, 
+        { populate: ['imagenes', 'idCuidador'] }
+      );
 
-
-    const imagenes = publicacion.imagenes.getItems();
-    for (const img of imagenes) {
-      const filePath = `public${img.path}`;
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+      const imagenes = publicacion.imagenes.getItems();
+      for (const img of imagenes) {
+        const filePath = `public${img.path}`;
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
       }
-    }
-
-    for (const dia of publicacion.diasOcupados.getItems()) {
-      em.remove(dia);
-    }
-
-    // Eliminar diasReservados de cada reserva
-    for (const reserva of publicacion.reservas.getItems()) {
-      for (const dia of reserva.diasReservados.getItems()) {
-        em.remove(dia);
-      }
-    }
-
-    await em.removeAndFlush(publicacion);
-    res.status(200).json({ message: 'Publicacion removed', data: publicacion });
+//      const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+ //                   req.usuario = decoded;
+ //                   if(req.usuario.tipoUsuario !== 'admin' && req.usuario.idUsuario !== publicacion.idCuidador.idUsuario) {
+   //                   res.status(403).json({ 
+     //                   success: false,
+       //                 message: 'Acceso denegado',
+         //               usuario: null});
+           //           return;
+             //       }
+      await em.removeAndFlush(publicacion);
+      res.status(200).json({ message: 'Publicacion removed', data: publicacion });
   } catch (error: any) {
-    res.status(500).json({ message: "Error removing publicacion", error: error.message });
+    res.status(500).json({ message: "Error removing publicacion" });
   }
 }
 export { sanitizePublicacion, findAll, findOne, findByCuidador, add, update, remove, getDiasReservados, reservaCuidador, diasReservados};

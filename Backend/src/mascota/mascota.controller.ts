@@ -9,6 +9,9 @@ import multer from 'multer';
 import path from 'path';
 import sanitizeHTML from 'sanitize-html';
 import fs from 'fs';
+import jwt from 'jsonwebtoken';
+import { SECRET_JWT_KEY } from '../config.js';
+
 
 function sanitizeMascota(req: Request, res: Response, next: NextFunction) {
   let exoticoValue = false;
@@ -49,7 +52,7 @@ async function findAll(req: Request, res: Response) {
     );
     res.status(200).json({ message: 'finded all mascotas', data: mascotas });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving mascotas", error: error.message });
+    res.status(500).json({ message: "Error retrieving mascotas" });
   }
 }
 
@@ -65,7 +68,7 @@ async function findOne(req: Request, res: Response) {
     );
     res.status(200).json({ message: 'Mascota found', data: mascota });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving mascota", error: error.message });
+    res.status(500).json({ message: "Error retrieving mascota" });
   }
 }
 
@@ -162,11 +165,7 @@ async function add(req: Request, res: Response) {
     res.status(201).json({ message: 'Mascota created', data: mascota });
 
   } catch (error: any) {
-    console.error('Error creating mascota:', error);
-    res.status(500).json({
-      message: "Error creating mascota",
-      error: error.message
-    });
+    res.status(500).json({ message: "Error creating mascota" });
   }
 }
 
@@ -201,14 +200,14 @@ async function update(req: Request, res: Response) {
     await em.populate(mascota, ['dueno', 'especie', 'raza', 'imagen']);
     res.status(200).json({ message: 'Mascota updated', data: mascota });
   } catch (error: any) {
-    res.status(500).json({ message: "Error updating mascota", error: error.message });
+    res.status(500).json({ message: "Error updating mascota" });
   }
 }
 
 async function findByOwner(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-
+    
     const idDueno = Number(req.params.id);
     
     const mascotas = await em.find(
@@ -223,8 +222,7 @@ async function findByOwner(req: Request, res: Response) {
     });
   } catch (error: any) {
     res.status(500).json({
-      message: "Error retrieving mascotas for owner",
-      error: error.message
+      message: "Error retrieving mascotas for owner"
     });
   }
 }
@@ -233,13 +231,23 @@ async function remove(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
 
+
     const idMascota = Number(req.params.idMascota);
     const mascota = await em.findOneOrFail(
       Mascota,
       { idMascota },
-      { populate: ['imagen'] }
+      { populate: ['imagen', 'dueno'] }
     );
-
+    const token = req.cookies.access_token;
+    const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+              req.usuario = decoded;
+              if(req.usuario.tipoUsuario !== 'admin' && mascota.dueno?.idUsuario !== req.usuario.idUsuario) {
+                res.status(403).json({ 
+                  success: false,
+                  message: 'Acceso denegado',
+                  usuario: null});
+                return;
+              }
     if (mascota.imagen) {
       if (mascota.imagen.path) {
         const filename = path.basename(mascota.imagen.path);
@@ -254,7 +262,7 @@ async function remove(req: Request, res: Response) {
     await em.removeAndFlush(mascota);
     res.status(200).json({ message: 'Mascota removed', data: mascota });
   } catch (error: any) {
-    res.status(500).json({ message: "Error removing mascota", error: error.message });
+    res.status(500).json({ message: "Error removing mascota" });
   }
 }
 
@@ -374,9 +382,7 @@ async function uploadFiles(req: Request, res: Response): Promise<void> {
     }
 
     res.status(500).json({
-      message: "Error interno al procesar la imagen",
-      error: error.message,
-      errorName: error.name
+      message: "Error interno al procesar la imagen"
     });
   }
 }

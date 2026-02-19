@@ -22,9 +22,7 @@ export const seedReservas = async (em: EntityManager): Promise<void> => {
       // Si ya existe la reserva, la saltea para evitar duplicados
       const existe = await em.findOne(Reserva, { descripcion: data.descripcion });
       const dueno = await em.findOne(Dueno, { idUsuario: data.idDueno });
-      console.log('Buscando mascota con id:', data.mascota);
       const mascota = await em.findOne(Mascota, { idMascota: data.mascota });
-      console.log('Mascota encontrada:', mascota);
       const publicacion = await em.findOne(Publicacion, { idPublicacion: data.idPublicacion });
       if(existe) {
         console.log('La reserva ya existe, saltando:', data.descripcion);
@@ -45,7 +43,6 @@ export const seedReservas = async (em: EntityManager): Promise<void> => {
       console.log('Creando reserva con datos:', data);
       const nuevaReserva = em.create(Reserva, { ...data, dueno: dueno, publicacion: publicacion })
       console.log('Reserva creada:', nuevaReserva);
-      console.log('Agregando mascota a la reserva:', mascota);
       nuevaReserva.mascotas.add(mascota);
       await em.persistAndFlush(nuevaReserva);
     }

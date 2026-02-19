@@ -20,6 +20,7 @@ import cors from 'cors';
 import { reservaRouter, webHookRouter } from './reserva/reserva.routes.js';
 import { pagoRouter } from './reserva/pago.routers.js';
 import rateLimit from 'express-rate-limit';
+import { adminRouter } from './admin/admin.routes.js';
 
 console.log('ENV:', process.env.STRIPE_SECRET_KEY)
 
@@ -83,27 +84,18 @@ app.use((req, res, next) => {
 // Rate limiter general - EXCLUIR WEBHOOK DE STRIPE
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100,                  // 100 requests por IP
+  max: 500,                  // 100 requests por IP
   standardHeaders: true,     // Devuelve info en headers `RateLimit-*`
   legacyHeaders: false,      // Deshabilita headers `X-RateLimit-*`
   skip: (req) => req.path.startsWith('/api/webhook/stripe'), // ✅ EXCLUIR WEBHOOK
   handler: (req, res) => {
-    res.status(429).json({ error: 'Demasiadas solicitudes, intenta más tarde' });
+    res.status(429).json({ message: 'Demasiadas solicitudes, intenta más tarde' });
   }
 });
 
 app.use(generalLimiter); 
 
-// 📊 MIDDLEWARE DE LOGGING GLOBAL
-app.use((req, res, next) => {
-  if (req.path.includes('webhook')) {
-    console.log(`\n🌐 [${new Date().toISOString()}] ${req.method.toUpperCase()} ${req.path}`);
-    console.log('   Remote IP:', req.ip);
-    console.log('   Body length:', Buffer.isBuffer(req.body) ? req.body.length : (req.body ? JSON.stringify(req.body).length : 0));
-  }
-  next();
-});
-
+app.use("/api/admin", adminRouter);
 app.use("/api/usuarios", usuarioRouter);
 app.use("/api/mascotas", mascotaRouter);
 app.use("/api/especies", especieRouter);

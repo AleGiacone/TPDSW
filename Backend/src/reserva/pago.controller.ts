@@ -26,7 +26,7 @@ async function findAll(req: Request, res: Response) {
     const pagos = await em.find(Pago, {});
     res.status(200).json({ message: 'Found all pagos', data: pagos });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving pagos", error: error.message });
+    res.status(500).json({ message: "Error retrieving pagos" });
   }
 }
 
@@ -37,7 +37,7 @@ async function findOne(req: Request, res: Response) {
     const pago = await em.findOneOrFail(Pago, { idPago });
     res.status(200).json({ message: 'Pago found', data: pago });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving pago", error: error.message });
+    res.status(500).json({ message: "Error retrieving pago" });
   }
 }
 
@@ -48,7 +48,7 @@ async function add(req: Request, res: Response) {
     await em.flush();
     res.status(200).json({ message: 'Pago created', data: pago });
   } catch (error: any) {
-    res.status(500).json({ message: "Error creating pago", error: error.message });
+    res.status(500).json({ message: "Error creating pago" });
   }
 }
 
@@ -61,7 +61,7 @@ async function update(req: Request, res: Response) {
     await em.flush();
     res.status(200).json({ message: 'Pago updated', data: pago });
   } catch (error: any) {
-    res.status(500).json({ message: "Error updating pago", error: error.message });
+    res.status(500).json({ message: "Error updating pago" });
   }
 }
 
@@ -73,7 +73,7 @@ async function remove(req: Request, res: Response) {
     await em.removeAndFlush(pago);
     res.status(200).json({ message: 'Pago removed', data: pago });
   } catch (error: any) {
-    res.status(500).json({ message: "Error removing pago", error: error.message });
+    res.status(500).json({ message: "Error removing pago" });
   }
 }
 

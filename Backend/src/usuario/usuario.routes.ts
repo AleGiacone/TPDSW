@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authMiddleware, sanitizeUsuario, findAll, findOne, add, update, remove, loginCtrl, uploadFiles, setupTwoFactor, codeValidation,getMe } from './usuario.controller.js';
 import { appendFile } from 'fs';
+import { adminAuthenticate } from '../admin/admin.controller.js';
 
 export const usuarioRouter = Router();
 
@@ -15,7 +16,7 @@ usuarioRouter.get('/', findAll); //Poner verificaicon para obtener all
 usuarioRouter.get('/:id', authMiddleware, findOne);
 usuarioRouter.put('/:email', authMiddleware, sanitizeUsuario, update);
 usuarioRouter.patch('/:email', authMiddleware, sanitizeUsuario, update);
-usuarioRouter.delete('/:email', authMiddleware, remove);
+usuarioRouter.delete('/:idUsuario', remove);
 usuarioRouter.post('/upload-image', upload.single('imageFile'), uploadFiles, add);
 
 // 2FA
