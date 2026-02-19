@@ -54,7 +54,7 @@ const DuenoDashboard = () => {
         return () => intervals.forEach(clearTimeout);
     }, []);
 
-    // 👇 TAMBIÉN agregá esto cada vez que cambia la vista
+
     useEffect(() => {
         forceNavbarVisibility();
     }, [currentView]);
@@ -134,7 +134,7 @@ const DuenoDashboard = () => {
         setQrCode2FA(null);
     };
 
-    // ─── Redirect to reservas view if coming back from a successful payment ────
+    // ─── Redirect to reservas 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const fromPayment = params.get('from');
@@ -142,7 +142,7 @@ const DuenoDashboard = () => {
         // Si viene del pago, abrir reservas
         if (fromPayment === 'payment') {
             setCurrentView('reservas');
-            // Limpiar la URL
+            // Limpia la URL
             window.history.replaceState({}, '', window.location.pathname);
         }
     }, []);
@@ -394,51 +394,164 @@ const DuenoDashboard = () => {
         e.preventDefault();
         setLoading(true);
         setError('');
+
+        // 1. Validar nombre
+        if (!mascotaForm.nombre || mascotaForm.nombre.trim() === '') {
+            setError('Por favor, ingresa el nombre de la mascota.');
+            setLoading(false);
+            return;
+        }
+
+        // 2. Validar edad
         const edadNumerica = parseInt(mascotaForm.edad, 10);
+        if (isNaN(edadNumerica) || edadNumerica <= 0 || edadNumerica > 30) {
+            setError('Por favor, ingresa una edad válida (entre 1 y 30 años).');
+            setLoading(false);
+            return;
+        }
+
+        // 3. Validar peso
         const pesoNumerico = parseFloat(mascotaForm.peso);
-        if (isNaN(edadNumerica) || edadNumerica <= 0) { setError('Por favor, ingresa una edad válida.'); setLoading(false); return; }
-        if (isNaN(pesoNumerico) || pesoNumerico <= 0) { setError('Por favor, ingresa un peso válido.'); setLoading(false); return; }
+        if (isNaN(pesoNumerico) || pesoNumerico <= 0 || pesoNumerico > 200) {
+            setError('Por favor, ingresa un peso válido (entre 0.1 y 200 kg).');
+            setLoading(false);
+            return;
+        }
+
+        // 4. Validar sexo
+        if (!mascotaForm.sexo || (mascotaForm.sexo !== 'M' && mascotaForm.sexo !== 'F')) {
+            setError('Por favor, selecciona el sexo de la mascota (Macho o Hembra).');
+            setLoading(false);
+            return;
+        }
+
+        // 5. Validar especie
+        if (!mascotaForm.idEspecie) {
+            setError('Por favor, selecciona una especie.');
+            setLoading(false);
+            return;
+        }
+
+        const especieId = parseInt(mascotaForm.idEspecie);
+        if (isNaN(especieId)) {
+            setError('Especie inválida. Por favor, selecciona nuevamente.');
+            setLoading(false);
+            return;
+        }
+
+        // 6. Validar raza
+        if (!mascotaForm.idRaza) {
+            setError('Por favor, selecciona una raza.');
+            setLoading(false);
+            return;
+        }
+
+        const razaId = parseInt(mascotaForm.idRaza);
+        if (isNaN(razaId)) {
+            setError('Raza inválida. Por favor, selecciona nuevamente.');
+            setLoading(false);
+            return;
+        }
+
         try {
-            const url = editingMascota ? `${API_BASE_URL}/mascotas/${editingMascota.idMascota || editingMascota.id}` : `${API_BASE_URL}/mascotas`;
+            const url = editingMascota
+                ? `${API_BASE_URL}/mascotas/${editingMascota.idMascota || editingMascota.id}`
+                : `${API_BASE_URL}/mascotas`;
+
             const method = editingMascota ? 'PUT' : 'POST';
+
             const mascotaData = {
                 nomMascota: mascotaForm.nombre.trim(),
-                edad: mascotaForm.edad.toString(),
+                edad: mascotaForm.edad.toString(), // Back espera string
                 sexo: mascotaForm.sexo,
                 exotico: Boolean(mascotaForm.exotico),
-                descripcion: mascotaForm.descripcion.trim(),
+                descripcion: mascotaForm.descripcion.trim() || 'Sin descripción', 
                 peso: pesoNumerico,
-                especie: parseInt(mascotaForm.idEspecie),
-                raza: parseInt(mascotaForm.idRaza),
+                especie: especieId,
+                raza: razaId,
                 dueno: parseInt(user.idUsuario)
             };
-            if (editingMascota) mascotaData.idMascota = editingMascota.idMascota;
+
+            if (editingMascota) {
+                mascotaData.idMascota = editingMascota.idMascota;
+            }
+
+            console.log('📤 Enviando datos de mascota:', mascotaData);
+
             const response = await fetch(url, {
-                method, credentials: 'include',
+                method,
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(mascotaData)
             });
+
+            // ============================================================================
+            // MANEJAR RESPUESTA
+            // ============================================================================
+
             if (!response.ok) {
                 const errorData = await response.json().catch(async () => {
                     const text = await response.text();
                     return { message: text || `Error ${response.status}` };
                 });
+
+                // Mostrar error específico del backend
+                console.error('❌ Error del servidor:', errorData);
                 throw new Error(errorData.message || `Error ${response.status}`);
             }
+
             const result = await response.json();
+            console.log('✅ Respuesta del servidor:', result);
+
             const mascotaId = result.data.idMascota || editingMascota?.idMascota;
+
+            // ============================================================================
+            // SUBIR IMAGEN SI EXISTE
+            // ============================================================================
+
             if (mascotaImageFile && mascotaId) {
-                try { await uploadMascotaImage(mascotaId, mascotaImageFile); }
-                catch (imgError) { alert('Mascota guardada pero hubo un error al subir la imagen: ' + imgError.message); }
+                try {
+                    await uploadMascotaImage(mascotaId, mascotaImageFile);
+                    console.log('✅ Imagen subida correctamente');
+                } catch (imgError) {
+                    console.warn('⚠️ Mascota guardada pero error al subir imagen:', imgError);
+                    alert('⚠️ Mascota guardada pero hubo un error al subir la imagen: ' + imgError.message);
+                }
             }
+
             await fetchMascotas();
-            alert(editingMascota ? 'Mascota actualizada exitosamente!' : 'Mascota creada exitosamente!');
-            setMascotaForm({ nombre: '', edad: '', sexo: '', exotico: false, descripcion: '', peso: '', idEspecie: '', idRaza: '' });
+
+            alert(editingMascota
+                ? '✅ Mascota actualizada exitosamente!'
+                : '✅ Mascota creada exitosamente!'
+            );
+
+            // Limpiar formulario
+            setMascotaForm({
+                nombre: '',
+                edad: '',
+                sexo: '',
+                exotico: false,
+                descripcion: '',
+                peso: '',
+                idEspecie: '',
+                idRaza: ''
+            });
             setMascotaImageFile(null);
             setEditingMascota(null);
             setCurrentView('mascotas');
+
         } catch (err) {
-            setError('Error: ' + err.message);
+            console.error('❌ Error al guardar mascota:', err);
+            setError('Error al guardar mascota: ' + err.message);
+
+            // Mostrar alert con el error específico
+            alert('❌ Error al guardar mascota:\n\n' + err.message +
+                '\n\nPor favor, verifica que:\n' +
+                '• La especie y raza existan en la base de datos\n' +
+                '• La raza pertenezca a la especie seleccionada\n' +
+                '• Todos los campos estén completos'
+            );
         } finally {
             setLoading(false);
         }
@@ -557,7 +670,6 @@ const DuenoDashboard = () => {
         catch (err) { console.error('Error al cerrar sesión:', err); }
     };
 
-    // ─── renderReservas: NO hooks inside, uses filterStatus from component scope ─
 
     const renderReservas = () => {
         const reservasFiltradas = getReservasByEstado(filterStatus);
@@ -624,7 +736,6 @@ const DuenoDashboard = () => {
                                 reserva={reserva}
                                 userType="dueno"
                                 onCancelar={handleCancelarReserva}
-                            // isExpired y onAceptar/onRechazar eliminados:
                             // el estado lo calcula la card desde reserva.estadoCalculado
                             />
                         ))}
@@ -636,7 +747,6 @@ const DuenoDashboard = () => {
 
 
     const renderMascotas = () => (
-        // Usamos un fragmento para que no haya wrapper extra
         <>
             {/* CABECERA: fuera del contenedor de cards */}
             <div className="mascotas-header">

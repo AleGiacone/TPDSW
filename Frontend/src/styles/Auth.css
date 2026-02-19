@@ -10,7 +10,9 @@ body {
      box-sizing: border-box;
 }
 
-
+/* ========================================= */
+/* LAYOUT BASE                               */
+/* ========================================= */
 .auth-page-layout {
      min-height: 100vh;
      background: url('/fondo.png') repeat center fixed;
@@ -37,14 +39,35 @@ body {
      padding-top: 20px;
 }
 
-/* LOGIN */
+/* ========================================= */
+/* TÍTULOS H3 / H4                           */
+/* ========================================= */
+h3,
+h4 {
+     width: 700px;
+     max-width: 90%;
+     background-color: #fff;
+     color: #f97316;
+     text-align: center;
+     font-weight: bold;
+     font-size: 4rem;
+     line-height: 1.1;
+     padding: 1rem;
+     margin: 2rem auto 60px;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+     border-radius: 30px;
+     box-sizing: border-box;
+}
+
+/* ========================================= */
+/* LOGIN - CONTENEDOR                        */
+/* ========================================= */
 .auth-container {
      width: 100%;
-     margin: 0 auto;
+     margin: 50px auto;
      padding: 20px;
      border-radius: 20px;
-     justify-content: center;
-     font-family: "Nunito", "Sans-serif";
+     font-family: "Nunito", sans-serif;
      display: flex;
      flex-direction: column;
      align-items: center;
@@ -52,56 +75,77 @@ body {
      font-size: 1.4rem;
 }
 
-.auth-container,
-.auth-container-register {
-     margin-top: 50px;
-     margin-bottom: 50px;
-
-}
-
+/* ========================================= */
+/* LOGIN - FORMULARIO                        */
+/* ========================================= */
 .auth-form {
      display: flex;
      flex-direction: column;
      align-items: center;
-     font-family: "Nunito", "Sans-serif";
-
-}
-
-.auth-form input {
-     height: 100%;
+     font-family: "Nunito", sans-serif;
      width: 100%;
-     padding: 20px;
-     margin-bottom: 30px;
-     border: 1px solid #ccc;
-     border-radius: 10px;
-     background-color: #ffff;
-     color: #222222;
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-     outline: none;
-     box-sizing: border-box;
-     font-size: 1.2rem;
-
 }
 
 .form-group {
      display: flex;
      flex-direction: column;
-     width: 1450px;
-     max-width: 100%;
+     width: 100%;
+     max-width: 600px;
      margin: 0 auto;
      align-items: center;
 }
 
+.auth-form input {
+     width: 100%;
+     max-width: 600px;
+     padding: 20px;
+     margin-bottom: 30px;
+     border: 1px solid #ccc;
+     border-radius: 10px;
+     background-color: #fff;
+     color: #222;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+     outline: none;
+     box-sizing: border-box;
+     font-size: 1.2rem;
+}
+
+.auth-form input:focus {
+     outline: none;
+     border-color: #f97136;
+     box-shadow: 0 0 0 3px rgba(249, 113, 54, 0.15);
+}
+
+.auth-form input:-webkit-autofill {
+     -webkit-box-shadow: 0 0 0 1000px white inset !important;
+     -webkit-text-fill-color: black !important;
+}
+
+.auth-form .form-group label {
+     width:auto!important;
+     font-weight: bold;
+     margin-bottom: 10px;
+     text-align: left;
+     padding: 10px 18px;
+     display: block;
+     background: linear-gradient(145deg, #FFAD66, #FA8351);
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+     border-radius: 10px;
+     color: #fff;
+     align-self: flex-start;
+     font-size: 1.3rem;
+     white-space: nowrap;
+}
 
 .auth-form button {
-     padding: 20px;
+     padding: 18px 20px;
      width: 60%;
      max-width: 400px;
-     margin: 0 auto;
+     margin: 10px auto 0;
      font-family: "Nunito";
      text-align: center;
      background-color: rgba(249, 113, 54, 0.95);
-     color: #ffff;
+     color: #fff;
      border: none;
      border-radius: 20px;
      font-weight: bold;
@@ -117,82 +161,10 @@ body {
      transform: translateY(-2px);
 }
 
-/*INGRESAR y REGISTRARSE TÍTULOS (H3/H4) */
-h3,
-h4 {
-     width: 700px;
-     max-width: 100%;
-     background-color: #fff;
-     color: #f97316;
-     text-align: center;
-     font-weight: bold;
-     font-size: 4rem;
-     line-height: 1.1;
-     padding: 1rem;
-     margin: 0 auto 60px;
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-     border-radius: 30px;
-     box-sizing: border-box;
-     margin-top: 2rem;
-
-}
-
-/* MISMO PARA AMBOS (Labels y otros ) */
-.auth-form .form-group label {
-     font-weight: bold;
-     margin-bottom: 20px;
-     text-align: left;
-     padding: 10px;
-     width: 15%;
-     display: block;
-     flex-direction: column;
-     background: linear-gradient(145deg, #FFAD66, #FA8351);
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-     border-radius: 20px;
-     color: #fff;
-     border-color: #222;
-     align-self: flex-start;
-     margin-left: 27rem;
-}
-
-.auth-form .form-group label.password {
-     font-weight: bold;
-     margin-bottom: 20px;
-     text-align: left;
-     padding: 10px;
-     width: 10%;
-     display: block;
-     flex-direction: column;
-     background: linear-gradient(145deg, #FFAD66, #FA8351);
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-     border-radius: 20px;
-     color: #fff;
-     border-color: #222;
-     align-self: flex-start;
-     margin-left: 27rem;
-}
-
-.auth-container-register label {
-     font-weight: bold;
-     font-size: 1.3rem;
-     margin-bottom: 20px;
-     text-align: center;
-     padding: 10px;
-     width: 50%;
-     display: block;
-     flex-direction: column;
-     background: linear-gradient(145deg, #FFAD66, #FA8351);
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-     border-radius: 20px;
-     color: #fff;
-     border-color: #222;
-     ;
-}
-
 .error-message {
      color: #f97136;
      text-align: center;
-     font-family: 'Nunito', 'Sans-serif';
+     font-family: 'Nunito', sans-serif;
      font-size: 1.2rem;
      margin-bottom: 20px;
      background-color: #fff;
@@ -201,45 +173,81 @@ h4 {
      display: flex;
      flex-direction: column;
      align-items: center;
-}
-
-.auth-form input:focus {
-     outline: none;
-}
-
-.auth-form input:-webkit-autofill {
-     -webkit-box-shadow: 0 0 0 1000px white inset !important;
-     -webkit-text-fill-color: black !important;
-}
-
-/* REGISTER */
-.auth-container-register {
-     max-width: 900px;
      width: 100%;
-     margin: 0 auto;
-     border-radius: 20px;
-     justify-content: center;
-     font-family: "Nunito", "Sans-serif";
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-     box-sizing: border-box;
-     margin-top: 30px;
-     margin-bottom: 30px;
 }
 
-/* Estilo para el botón de REGISTRARSE (dentro del formulario) */
-.auth-container-register form button[type="submit"] {
+/* ========================================= */
+/* REGISTER - CONTENEDOR                     */
+/* ========================================= */
+.auth-container-register {
+     max-width: 640px;
+     width: 100%;
+     margin: 30px auto;
+     border-radius: 20px;
+     font-family: "Nunito", sans-serif;
      display: flex;
      flex-direction: column;
-     padding: 20px;
+     align-items: stretch;
+     box-sizing: border-box;
+     padding: 0 20px;
+}
+
+.auth-container-register label {
+     width: fit-content;
+     max-width: 400px;
+     font-weight: bold;
+     margin-bottom: 10px;
+     text-align: left;
+     padding: 10px 18px;
+     display: block;
+     background: linear-gradient(145deg, #FFAD66, #FA8351);
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+     border-radius: 10px;
+     color: #fff;
+     align-self: flex-start;
+     font-size: 1.3rem;
+     white-space: nowrap;
+}
+
+.auth-container-register input,
+.auth-container-register select,
+.auth-container-register textarea {
+     width: 100%;
+     max-width: 600px;
+     padding: 15px;
+     margin-bottom: 20px;
+     font-size: 1.2rem;
+     border: 1px solid #ccc;
+     border-radius: 10px;
+     background-color: #fff;
+     color: #222;
+     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+     outline: none;
+     box-sizing: border-box;
+     font-family: "Nunito", sans-serif;
+}
+
+.auth-container-register input:focus,
+.auth-container-register select:focus,
+.auth-container-register textarea:focus {
+     border-color: #f97136;
+     box-shadow: 0 0 0 3px rgba(249, 113, 54, 0.15);
+}
+
+.auth-container-register textarea {
+     resize: vertical;
+     min-height: 100px;
+}
+
+.auth-container-register form button[type="submit"] {
+     padding: 18px 20px;
      width: 60%;
      max-width: 400px;
-     margin: 0 auto;
+     margin: 10px auto 20px;
      font-family: "Nunito";
      text-align: center;
      background-color: #f97840;
-     color: #ffff;
+     color: #fff;
      border: none;
      border-radius: 20px;
      font-weight: bold;
@@ -247,6 +255,7 @@ h4 {
      cursor: pointer;
      transition: 0.3s ease;
      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+     display: block;
 }
 
 .auth-container-register form button[type="submit"]:hover {
@@ -260,7 +269,9 @@ h4 {
      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* BOTONES USUARIO */
+/* ========================================= */
+/* SELECTOR DUEÑO / CUIDADOR                 */
+/* ========================================= */
 .selector-tipo {
      width: 100%;
      max-width: 600px;
@@ -272,12 +283,11 @@ h4 {
      display: flex;
      gap: 15px;
      justify-content: center;
-     font-size: 1.2rem;
 }
 
 .opciones-tipo button {
-     flex-grow: 1;
-     max-width: 300px;
+     flex: 1;
+     max-width: 280px;
      padding: 12px 25px;
      border: 2px solid #f97136;
      background-color: white;
@@ -288,10 +298,11 @@ h4 {
      font-weight: 700;
      font-size: 1.3rem;
      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+     font-family: "Nunito", sans-serif;
 }
 
 .opciones-tipo button:hover {
-     background-color: #f971361a;
+     background-color: rgba(249, 113, 54, 0.1);
      transform: translateY(-1px);
 }
 
@@ -302,46 +313,37 @@ h4 {
      transform: scale(1.02);
 }
 
-input,
-select {
-     width: 100%;
-     max-width: 600px;
-     padding: 15px;
-     margin-bottom: 20px;
-     font-size: 1.2rem;
-     border: 1px solid #ccc;
-     border-radius: 10px;
-     background-color: #ffff;
-     color: #222222;
-     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-     outline: none;
-     box-sizing: border-box;
-}
-
+/* ========================================= */
+/* MENSAJES DE FEEDBACK                      */
+/* ========================================= */
 .mensaje-exito-redireccion {
      padding: 15px 20px;
-     margin-bottom: 20px;
+     margin: 10px 0 20px;
      border-radius: 8px;
      background-color: #e6ffed;
      color: #008000;
      border: 1px solid #b7eb8f;
      font-weight: 600;
      text-align: center;
-     font-size: 16px;
+     font-size: 1rem;
      box-shadow: 0 2px 4px rgba(0, 128, 0, 0.1);
      animation: fadeInOut 0.5s ease-in-out;
+     width: 100%;
+     max-width: 600px;
 }
 
 .mensaje-error {
      padding: 15px 20px;
-     margin-bottom: 20px;
+     margin: 10px 0 20px;
      border-radius: 8px;
      background-color: #fff0f6;
      color: #cf1322;
      border: 1px solid #ffa39e;
      font-weight: 500;
      text-align: center;
-     font-size: 16px;
+     font-size: 1rem;
+     width: 100%;
+     max-width: 600px;
 }
 
 @keyframes fadeInOut {
@@ -357,124 +359,8 @@ select {
 }
 
 /* ========================================= */
-/* RESPONSIVE: MÓVILES (Max-width 768px)      */
+/* 2FA — CARD DE VERIFICACIÓN               */
 /* ========================================= */
-@media (max-width: 768px) {
-
-     h3,
-     h4 {
-          max-width: 90%;
-          font-size: 2.5rem;
-          padding: 15px;
-          margin: 15px auto 20px;
-     }
-
-     .auth-container {
-          max-width: 95%;
-          padding: 10px;
-     }
-
-     .auth-container-register {
-          max-width: 95%;
-          padding: 10px;
-     }
-
-     .auth-form {
-          width: 100%;
-          max-width: 90%;
-     }
-
-     .auth-form input,
-     input,
-     select {
-          width: 100%;
-          max-width: 100%;
-          padding: 12px;
-          font-size: 0.95rem;
-          margin-bottom: 15px;
-     }
-
-     label {
-          width: auto;
-          padding: 8px 15px;
-          font-size: 0.9rem;
-          margin-bottom: 5px;
-     }
-
-     .auth-form button {
-          width: 100%;
-          max-width: 250px;
-          padding: 15px;
-          font-size: 1.1rem;
-          margin-top: 10px;
-     }
-
-     .selector-tipo {
-          max-width: 100%;
-          padding: 0 10px;
-     }
-
-     .opciones-tipo {
-          flex-direction: column;
-          gap: 10px;
-     }
-
-     .opciones-tipo button {
-          width: 100%;
-          max-width: 100%;
-          padding: 10px 15px;
-          font-size: 0.9rem;
-     }
-
-     .auth-container-register form button[type="submit"] {
-          max-width: 250px;
-          font-size: 1.1rem;
-          padding: 15px;
-          margin-top: 20px;
-     }
-}
-
-@media (max-width: 480px) {
-
-     h3,
-     h4 {
-          font-size: 2rem;
-          padding: 10px;
-          margin-bottom: 15px;
-     }
-
-     .auth-container,
-     .auth-container-register {
-          margin-top: 20px;
-          padding: 5px;
-     }
-
-     .auth-form input,
-     input,
-     select {
-          padding: 10px;
-          font-size: 0.9rem;
-     }
-
-     .opciones-tipo button {
-          padding: 8px 10px;
-          font-size: 0.85rem;
-     }
-
-     .auth-form button,
-     .auth-container-register form button[type="submit"] {
-          padding: 12px;
-          font-size: 1rem;
-     }
-}
-
-
-/* ============================================================
-   2FA — PANTALLA VERIFICACIÓN
-   Card propia que resetea TODOS los estilos globales
-   ============================================================ */
-
-/* Card centrada con ancho fijo — ignora los estilos de auth-container */
 .twofa-card {
      width: 380px;
      max-width: calc(100vw - 2rem);
@@ -485,13 +371,10 @@ select {
      display: flex;
      flex-direction: column;
      align-items: center;
-     gap: 0;
      box-sizing: border-box;
-     /* Resetear font-size del auth-container */
      font-size: 1rem;
 }
 
-/* Ícono */
 .twofa-card .twofa-icon {
      font-size: 2rem;
      line-height: 1;
@@ -500,7 +383,6 @@ select {
      text-align: center;
 }
 
-/* Título — resetear el h3 global (4rem, naranja, caja blanca) */
 .twofa-card .twofa-title {
      font-family: 'Nunito', sans-serif;
      font-size: 1.45rem !important;
@@ -516,7 +398,6 @@ select {
      line-height: 1.25 !important;
 }
 
-/* Subtítulo */
 .twofa-card .twofa-subtitle {
      font-family: 'Nunito', sans-serif;
      font-size: 0.875rem;
@@ -531,15 +412,12 @@ select {
      width: 100%;
 }
 
-/* Formulario dentro del card */
 .twofa-card .twofa-form {
      display: flex;
      flex-direction: column;
      width: 100%;
-     gap: 0;
 }
 
-/* Grupo del campo */
 .twofa-card .twofa-field {
      display: flex;
      flex-direction: column;
@@ -547,7 +425,6 @@ select {
      margin-bottom: 0.75rem;
 }
 
-/* Label del campo — resetear el label naranja con fondo */
 .twofa-card .twofa-field .twofa-label {
      font-family: 'Nunito', sans-serif !important;
      font-size: 0.72rem !important;
@@ -566,7 +443,6 @@ select {
      display: block !important;
 }
 
-/* Input código 6 dígitos — resetear input global */
 .twofa-card .twofa-field .twofa-input {
      width: 100% !important;
      max-width: 100% !important;
@@ -598,7 +474,6 @@ select {
      font-weight: 400;
 }
 
-/* Error */
 .twofa-card .twofa-error {
      width: 100%;
      background: #fef2f2;
@@ -615,7 +490,6 @@ select {
      font-family: 'Nunito', sans-serif;
 }
 
-/* Botones — resetear .auth-form button global */
 .twofa-card .twofa-buttons {
      display: flex;
      flex-direction: column;
@@ -685,4 +559,317 @@ select {
 .twofa-card .twofa-buttons .btn-back:disabled {
      opacity: 0.5 !important;
      cursor: not-allowed !important;
+}
+
+/* ========================================= */
+/* RESPONSIVE — TABLETS (768px - 1024px)     */
+/* ========================================= */
+@media (min-width: 768px) and (max-width: 1024px) {
+
+     h3,
+     h4 {
+          font-size: 3rem;
+          width: 90%;
+          margin: 1.5rem auto 40px;
+     }
+
+     .auth-container {
+          padding: 15px;
+          font-size: 1.2rem;
+     }
+
+     .form-group {
+          max-width: 90%;
+     }
+
+     .auth-form input {
+          padding: 16px;
+          font-size: 1.1rem;
+          margin-bottom: 20px;
+     }
+
+     .auth-form .form-group label {
+          font-size: 1rem;
+          padding: 8px 16px;
+     }
+
+     .auth-form button {
+          width: 70%;
+          font-size: 1.4rem;
+          padding: 15px;
+     }
+
+     .auth-container-register {
+          max-width: 90%;
+          padding: 0 15px;
+     }
+
+     .auth-container-register label {
+          font-size: 1.15rem;
+     }
+
+     .auth-container-register input,
+     .auth-container-register select,
+     .auth-container-register textarea {
+          font-size: 1.1rem;
+          padding: 13px;
+     }
+
+     .auth-container-register form button[type="submit"] {
+          width: 70%;
+          font-size: 1.15rem;
+     }
+
+     .opciones-tipo button {
+          font-size: 1.15rem;
+          padding: 11px 20px;
+     }
+}
+
+/* ========================================= */
+/* RESPONSIVE — MÓVILES GRANDES (max 767px)  */
+/* ========================================= */
+@media (max-width: 767px) {
+
+     h3,
+     h4 {
+          font-size: 2.4rem;
+          width: 90%;
+          padding: 14px 18px;
+          margin: 1rem auto 30px;
+          border-radius: 20px;
+     }
+
+     /* LOGIN */
+     .auth-container {
+          margin: 20px auto;
+          padding: 10px 15px;
+          font-size: 1.1rem;
+     }
+
+     .form-group {
+          width: 100%;
+          max-width: 100%;
+          padding: 0 10px;
+     }
+
+     .auth-form {
+          width: 100%;
+     }
+
+     .auth-form input {
+          padding: 14px;
+          font-size: 1rem;
+          margin-bottom: 16px;
+     }
+
+     .auth-form .form-group label {
+          font-size: 0.95rem;
+          padding: 8px 14px;
+          margin-bottom: 8px;
+          white-space: normal;
+     }
+
+     .auth-form button {
+          width: 85%;
+          max-width: 320px;
+          padding: 14px;
+          font-size: 1.2rem;
+          margin-top: 15px;
+     }
+
+     .error-message {
+          font-size: 1rem;
+          padding: 10px;
+     }
+
+     /* REGISTER */
+     .auth-container-register {
+          max-width: 100%;
+          padding: 0 15px;
+          margin: 15px auto;
+     }
+
+     .auth-container-register label {
+          font-size: 1.05rem;
+          padding: 9px 16px;
+          min-width: 160px;
+          width: auto;
+          max-width: 80%;
+     }
+
+     .auth-container-register input,
+     .auth-container-register select,
+     .auth-container-register textarea {
+          width: 100%;
+          max-width: 100%;
+          padding: 13px;
+          font-size: 1rem;
+          margin-bottom: 14px;
+     }
+
+     .auth-container-register form button[type="submit"] {
+          width: 85%;
+          max-width: 320px;
+          font-size: 1.1rem;
+          padding: 14px;
+          margin-top: 15px;
+     }
+
+     /* SELECTOR DUEÑO/CUIDADOR */
+     .selector-tipo {
+          max-width: 100%;
+          padding: 0;
+     }
+
+     .opciones-tipo {
+          gap: 10px;
+     }
+
+     .opciones-tipo button {
+          font-size: 1.1rem;
+          padding: 11px 15px;
+     }
+
+     /* MENSAJES */
+     .mensaje-exito-redireccion,
+     .mensaje-error {
+          max-width: 100%;
+          font-size: 0.95rem;
+     }
+
+     /* 2FA */
+     .twofa-card {
+          width: calc(100vw - 2rem);
+          padding: 1.5rem 1.25rem;
+     }
+}
+
+/* ========================================= */
+/* RESPONSIVE — MÓVILES PEQUEÑOS (max 480px) */
+/* ========================================= */
+@media (max-width: 480px) {
+
+     h3,
+     h4 {
+          font-size: 1.9rem;
+          padding: 12px 14px;
+          margin: 0.75rem auto 20px;
+          border-radius: 16px;
+     }
+
+     /* LOGIN */
+     .auth-container {
+          margin: 10px auto;
+          padding: 8px 12px;
+          font-size: 1rem;
+     }
+
+     .form-group {
+          padding: 0 5px;
+     }
+
+     .auth-form input {
+          padding: 12px;
+          font-size: 0.95rem;
+          margin-bottom: 12px;
+     }
+
+     .auth-form .form-group label {
+          font-size: 0.88rem;
+          padding: 7px 12px;
+     }
+
+     .auth-form button {
+          width: 90%;
+          font-size: 1.1rem;
+          padding: 13px;
+     }
+
+     /* REGISTER */
+     .auth-container-register {
+          padding: 0 10px;
+          margin: 10px auto;
+     }
+
+     .auth-container-register label {
+          font-size: 0.95rem;
+          padding: 8px 14px;
+          min-width: 140px;
+     }
+
+     .auth-container-register input,
+     .auth-container-register select,
+     .auth-container-register textarea {
+          padding: 11px;
+          font-size: 0.95rem;
+          margin-bottom: 12px;
+     }
+
+     .auth-container-register form button[type="submit"] {
+          width: 90%;
+          font-size: 1rem;
+          padding: 13px;
+     }
+
+     /* SELECTOR */
+     .opciones-tipo {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 10px;
+     }
+
+     .opciones-tipo button {
+          max-width: 100%;
+          width: 100%;
+          font-size: 1rem;
+          padding: 12px 15px;
+     }
+
+     /* 2FA */
+     .twofa-card {
+          padding: 1.25rem 1rem;
+          border-radius: 16px;
+     }
+
+     .twofa-card .twofa-field .twofa-input {
+          font-size: 1.3rem !important;
+          letter-spacing: 0.4rem !important;
+          padding: 0.75rem 0.5rem !important;
+     }
+
+     .twofa-card .twofa-buttons .btn-verify {
+          font-size: 0.9rem !important;
+          padding: 0.8rem !important;
+     }
+}
+
+/* ========================================= */
+/* RESPONSIVE — PANTALLAS MUY PEQUEÑAS       */
+/* ========================================= */
+@media (max-width: 360px) {
+
+     h3,
+     h4 {
+          font-size: 1.6rem;
+          padding: 10px 12px;
+     }
+
+     .auth-form input,
+     .auth-container-register input,
+     .auth-container-register select {
+          padding: 10px;
+          font-size: 0.9rem;
+     }
+
+     .auth-form button,
+     .auth-container-register form button[type="submit"] {
+          font-size: 0.95rem;
+          padding: 11px;
+     }
+
+     .twofa-card .twofa-field .twofa-input {
+          font-size: 1.1rem !important;
+          letter-spacing: 0.3rem !important;
+     }
 }

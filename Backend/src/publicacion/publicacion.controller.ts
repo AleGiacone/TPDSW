@@ -522,10 +522,10 @@ async function update(req: Request, res: Response): Promise<void> {
   }
 }
 
-async function remove(req: Request, res: Response) { 
+async function remove(req: Request, res: Response) {
   try {
-      const token = req.cookies.access_token;
-      const em = orm.em.fork();
+//      const token = req.cookies.access_token;
+//     const em = orm.em.fork();
       const idPublicacion = Number.parseInt(req.params.idPublicacion as string);
       const publicacion = await em.findOneOrFail(
         Publicacion, 
@@ -540,20 +540,19 @@ async function remove(req: Request, res: Response) {
           fs.unlinkSync(filePath);
         }
       }
-      const decoded = jwt.verify(token, SECRET_JWT_KEY!);
-                    req.usuario = decoded;
-                    if(req.usuario.tipoUsuario !== 'admin' && req.usuario.idUsuario !== publicacion.idCuidador.idUsuario) {
-                      res.status(403).json({ 
-                        success: false,
-                        message: 'Acceso denegado',
-                        usuario: null});
-                      return;
-                    }
+//      const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+ //                   req.usuario = decoded;
+ //                   if(req.usuario.tipoUsuario !== 'admin' && req.usuario.idUsuario !== publicacion.idCuidador.idUsuario) {
+   //                   res.status(403).json({ 
+     //                   success: false,
+       //                 message: 'Acceso denegado',
+         //               usuario: null});
+           //           return;
+             //       }
       await em.removeAndFlush(publicacion);
       res.status(200).json({ message: 'Publicacion removed', data: publicacion });
   } catch (error: any) {
     res.status(500).json({ message: "Error removing publicacion" });
   }
 }
-
 export { sanitizePublicacion, findAll, findOne, findByCuidador, add, update, remove, getDiasReservados, reservaCuidador, diasReservados};

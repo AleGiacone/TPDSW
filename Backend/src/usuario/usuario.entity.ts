@@ -25,7 +25,7 @@ export abstract class Usuario {
 
   @OneToOne('Imagen', 'usuario', {
     owner: true, 
-    cascade: [Cascade.PERSIST, Cascade.MERGE],
+    deleteRule: 'set null',
     nullable: true 
   })
   imagen?: Rel<any>;

@@ -24,7 +24,7 @@ export class Publicacion {
   @ManyToOne(() => Cuidador, { nullable: true})
   idCuidador!: Rel<Cuidador>;
 
-  @OneToMany(() => Reserva, reserva => reserva.publicacion, { nullable: true})
+  @OneToMany(() => Reserva, reserva => reserva.publicacion, { nullable: true, cascade: [Cascade.ALL], orphanRemoval: true })
   reservas = new Collection<Reserva>(this);
 
   @Property({ nullable: false, unique: false })

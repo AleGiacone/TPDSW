@@ -98,6 +98,7 @@ const DisponibilidadCalendar = ({ onDateSelect, blockedDates = [], publicacionId
         <div className="disponibilidad-calendar">
             <div className="calendar-header">
                 <button
+                    type="button"
                     onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
                     className="calendar-nav-btn"
                 >
@@ -107,6 +108,7 @@ const DisponibilidadCalendar = ({ onDateSelect, blockedDates = [], publicacionId
                     {months[currentMonth.getMonth()]} {currentMonth.getFullYear()}
                 </span>
                 <button
+                    type="button"
                     onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
                     className="calendar-nav-btn"
                 >
@@ -191,7 +193,6 @@ const CuidadorDashboard = () => {
         exotico: false
     });
 
-
     const {
         reservas,
         loading: reservasLoading,
@@ -199,9 +200,7 @@ const CuidadorDashboard = () => {
         getReservasByEstado,
     } = useReservas(user?.idUsuario, 'cuidador');
 
-
     const [filterStatus, setFilterStatus] = useState('todas');
-
 
     // Estados para 2FA
     const [show2FAModal, setShow2FAModal] = useState(false);
@@ -216,16 +215,13 @@ const CuidadorDashboard = () => {
                 method: 'POST',
                 credentials: 'include',
                 body: JSON.stringify({ email: user.email }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'Content-Type': 'application/json' }
             });
             const data = await response.json();
             if (data.qrDataUrl) {
                 setQrCode2FA(data.qrDataUrl);
             }
         } catch (err) {
-            console.error('Error al generar 2FA:', err);
             setError('Error al generar código QR para 2FA');
         } finally {
             setLoading2FA(false);
@@ -262,10 +258,7 @@ const CuidadorDashboard = () => {
 
     const handleProfileChange = (e) => {
         const { name, value } = e.target;
-        setProfileFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setProfileFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleProfileImageChange = (e) => {
@@ -283,17 +276,12 @@ const CuidadorDashboard = () => {
             let updatedImagePath = user?.perfilImage;
 
             if (profileImage) {
-                console.log('📸 Subiendo nueva imagen de perfil...');
                 const imageFormData = new FormData();
                 imageFormData.append('profileImage', profileImage);
 
                 const imageResponse = await fetch(
                     `${API_BASE_URL}/cuidador/${user.idUsuario}/profile-image`,
-                    {
-                        method: 'POST',
-                        body: imageFormData,
-                        credentials: 'include'
-                    }
+                    { method: 'POST', body: imageFormData, credentials: 'include' }
                 );
 
                 if (!imageResponse.ok) {
@@ -309,9 +297,7 @@ const CuidadorDashboard = () => {
                 `${API_BASE_URL}/cuidador/${user.idUsuario}/profile`,
                 {
                     method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         nombre: profileFormData.nombre,
                         email: profileFormData.email,
@@ -330,9 +316,6 @@ const CuidadorDashboard = () => {
                 throw new Error(errorData.message || 'Error al actualizar perfil');
             }
 
-            const data = await response.json();
-            console.log('✅ Respuesta del servidor:', data);
-
             const updatedUserData = {
                 ...user,
                 nombre: profileFormData.nombre,
@@ -344,13 +327,11 @@ const CuidadorDashboard = () => {
             };
 
             updateUser(updatedUserData);
-
             setEditingProfile(false);
             setProfileImage(null);
             setError('');
 
         } catch (error) {
-            console.error('❌ Error al actualizar perfil:', error);
             setError(error.message || 'Error al actualizar el perfil');
             alert('❌ ' + error.message);
         } finally {
@@ -360,15 +341,12 @@ const CuidadorDashboard = () => {
 
     const handleFileChange = (e) => {
         const newlySelectedFiles = Array.from(e.target.files);
-        const existingFiles = files;
-        const allFiles = [...existingFiles, ...newlySelectedFiles];
+        const allFiles = [...files, ...newlySelectedFiles];
 
         const uniqueFilesMap = new Map();
         allFiles.forEach(file => {
             const key = `${file.name}-${file.size}-${file.lastModified}`;
-            if (!uniqueFilesMap.has(key)) {
-                uniqueFilesMap.set(key, file);
-            }
+            if (!uniqueFilesMap.has(key)) uniqueFilesMap.set(key, file);
         });
 
         const arrayUniqueFiles = Array.from(uniqueFilesMap.values());
@@ -383,10 +361,7 @@ const CuidadorDashboard = () => {
     };
 
     const removeFile = (indexToRemove) => {
-        console.log(`🗑️ Archivo a remover: ${files[indexToRemove]?.name}`);
-        const newFiles = files.filter((_, index) => index !== indexToRemove);
-        console.log(`📦 Archivos restantes: ${newFiles.length}`);
-        setFiles(newFiles);
+        setFiles(files.filter((_, index) => index !== indexToRemove));
     };
 
     const fetchPublicaciones = useCallback(async () => {
@@ -395,8 +370,7 @@ const CuidadorDashboard = () => {
         setError('');
 
         try {
-            const userId = user.idUsuario;
-            const response = await fetch(`${API_BASE_URL}/publicacion/cuidador/${userId}`, {
+            const response = await fetch(`${API_BASE_URL}/publicacion/cuidador/${user.idUsuario}`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' }
@@ -407,7 +381,6 @@ const CuidadorDashboard = () => {
             }
 
             const data = await response.json();
-            console.log('DB Response:', data.publicaciones);
             setPublicaciones(Array.isArray(data.publicaciones) ? data.publicaciones : []);
         } catch (err) {
             setError('Error al cargar publicaciones: ' + err.message);
@@ -417,41 +390,24 @@ const CuidadorDashboard = () => {
     }, [user?.idUsuario]);
 
     const fetchDiasReservados = async (publicacionId) => {
-        if (!publicacionId) {
-            console.warn('⚠️ No hay ID de publicación');
-            return;
-        }
+        if (!publicacionId) return;
 
         try {
-            console.log('📥 Cargando días no disponibles para publicación:', publicacionId);
-
-            // 🆕 Usar el nuevo endpoint POST
             const response = await fetch(
                 `${API_BASE_URL}/publicacion/dias-reservados`,
                 {
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        idPublicacion: publicacionId
-                    })
+                    body: JSON.stringify({ idPublicacion: publicacionId })
                 }
             );
 
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`Error ${response.status}`);
 
             const data = await response.json();
-
-            // El backend retorna todos los días (reservados + bloqueados)
-            const todosLosDias = data.data || [];
-
-            console.log(`✅ ${todosLosDias.length} días no disponibles:`, todosLosDias);
-            setDiasReservados(todosLosDias);
-
+            setDiasReservados(data.data || []);
         } catch (err) {
-            console.error('❌ Error al cargar días:', err);
             setDiasReservados([]);
         }
     };
@@ -461,16 +417,12 @@ const CuidadorDashboard = () => {
     }, []);
 
     useEffect(() => {
-        if (user?.idUsuario) {
-            fetchPublicaciones();
-        }
+        if (user?.idUsuario) fetchPublicaciones();
     }, [user?.idUsuario, fetchPublicaciones]);
 
     useEffect(() => {
-        if (editingPublicacion?.id) {
-            fetchDiasReservados(editingPublicacion.id);
-        }
-    }, [editingPublicacion]);
+        if (editingPublicacion?.id) fetchDiasReservados(editingPublicacion.id);
+    }, [editingPublicacion?.id]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -485,9 +437,6 @@ const CuidadorDashboard = () => {
             return;
         }
 
-        console.log("\n=== 🔍 VERIFICACIÓN PRE-ENVÍO ===");
-        console.log("📁 Total de archivos en state:", files.length);
-
         const formDataPayload = new FormData();
         formDataPayload.append('idUsuario', userId);
         formDataPayload.append('titulo', formData.titulo);
@@ -498,9 +447,7 @@ const CuidadorDashboard = () => {
         formDataPayload.append('cantAnimales', formData.cantAnimales);
         formDataPayload.append('exotico', formData.exotico);
 
-        console.log("\n📎 Agregando archivos al FormData:");
-        files.forEach((file, index) => {
-            console.log(`Agregando ${index + 1}/${files.length}: ${file.name} (${file.size} bytes)`);
+        files.forEach((file) => {
             formDataPayload.append('images', file, file.name);
         });
 
@@ -518,19 +465,10 @@ const CuidadorDashboard = () => {
 
             await fetchPublicaciones();
             setFiles([]);
-            setFormData({
-                titulo: '',
-                descripcion: '',
-                tarifaPorDia: '',
-                ubicacion: '',
-                tipoAlojamiento: '',
-                cantAnimales: '',
-                exotico: false
-            });
+            setFormData({ titulo: '', descripcion: '', tarifaPorDia: '', ubicacion: '', tipoAlojamiento: '', cantAnimales: '', exotico: false });
             setCurrentView('publicaciones');
             alert('✅ Publicación creada exitosamente');
         } catch (err) {
-            console.error('Error al crear publicación:', err);
             setError('Error al crear publicación: ' + err.message);
             alert('❌ Error al crear publicación: ' + err.message);
         } finally {
@@ -539,26 +477,19 @@ const CuidadorDashboard = () => {
     };
 
     const handleDeleteUser = async () => {
-        if (!window.confirm('🚨 ADVERTENCIA: Esta acción es irreversible. ¿Estás absolutamente seguro de que quieres ELIMINAR tu cuenta? Se eliminarán todas tus publicaciones y reservas.')) {
-            return;
-        }
+        if (!window.confirm('🚨 ADVERTENCIA: Esta acción es irreversible. ¿Estás absolutamente seguro de que quieres ELIMINAR tu cuenta? Se eliminarán todas tus publicaciones y reservas.')) return;
 
         setLoading(true);
         setError('');
 
         try {
             const userId = user.idUsuario;
-            if (!userId) {
-                throw new Error('ID de usuario no encontrado.');
-            }
+            if (!userId) throw new Error('ID de usuario no encontrado.');
 
-            const response = await fetch(
-                `${API_BASE_URL}/cuidador/${userId}`,
-                {
-                    method: 'DELETE',
-                    credentials: 'include'
-                }
-            );
+            const response = await fetch(`${API_BASE_URL}/cuidador/${userId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
@@ -570,7 +501,6 @@ const CuidadorDashboard = () => {
             navigate('/');
 
         } catch (error) {
-            console.error('❌ Error al eliminar la cuenta:', error);
             setError(error.message || 'Error al eliminar la cuenta. Inténtalo de nuevo.');
             alert('❌ Error: ' + (error.message || 'No se pudo eliminar la cuenta.'));
         } finally {
@@ -580,10 +510,7 @@ const CuidadorDashboard = () => {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
+        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
     const handleLogout = async () => {
@@ -596,50 +523,32 @@ const CuidadorDashboard = () => {
     };
 
     const deletePublicacion = async (id) => {
-        if (!id || id === undefined || id === null) {
+        if (!id) {
             alert('❌ Error: No se puede eliminar - ID inválido');
-            console.error('🚨 ID inválido:', id);
             return;
         }
 
-        console.log('🗑️ Intentando eliminar publicación con ID:', id);
-
-        if (!window.confirm(`⚠️ ¿Estás seguro de eliminar esta publicación?\n\nID: ${id}\n\nEsta acción es irreversible.`)) {
-            console.log('❌ Usuario canceló la eliminación');
-            return;
-        }
+        if (!window.confirm(`⚠️ ¿Estás seguro de eliminar esta publicación?\n\nEsta acción es irreversible.`)) return;
 
         setLoading(true);
         setError('');
 
         try {
-            const url = `${API_BASE_URL}/publicacion/${id}`;
-            console.log('🌐 Enviando DELETE a:', url);
-
-            const response = await fetch(url, {
+            const response = await fetch(`${API_BASE_URL}/publicacion/${id}`, {
                 method: 'DELETE',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' }
             });
 
-            console.log('📥 Response status:', response.status);
-
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                console.error('❌ Error data:', errorData);
                 throw new Error(errorData.message || `Error ${response.status}: No se pudo eliminar la publicación.`);
             }
 
-            const responseData = await response.json().catch(() => null);
-            console.log('✅ Respuesta del servidor:', responseData);
-
             await fetchPublicaciones();
-
             alert('✅ Publicación eliminada exitosamente');
-            console.log('✅ Publicación eliminada correctamente');
 
         } catch (err) {
-            console.error('❌ Error al eliminar:', err);
             setError('Error al eliminar publicación: ' + err.message);
             alert('❌ Error al eliminar publicación: ' + err.message);
         } finally {
@@ -648,8 +557,6 @@ const CuidadorDashboard = () => {
     };
 
     const startEditPublicacion = (pub) => {
-        console.log('Editando publicación:', pub);
-
         setEditingPublicacion(pub);
         setFormData({
             titulo: pub.titulo,
@@ -675,15 +582,7 @@ const CuidadorDashboard = () => {
 
     const cancelEdit = () => {
         setEditingPublicacion(null);
-        setFormData({
-            titulo: '',
-            descripcion: '',
-            tarifaPorDia: '',
-            ubicacion: '',
-            tipoAlojamiento: '',
-            cantAnimales: '',
-            exotico: false
-        });
+        setFormData({ titulo: '', descripcion: '', tarifaPorDia: '', ubicacion: '', tipoAlojamiento: '', cantAnimales: '', exotico: false });
         setExistingImages([]);
         setFiles([]);
         setImagesToDelete([]);
@@ -736,15 +635,6 @@ const CuidadorDashboard = () => {
         }
     };
 
-
-    useEffect(() => {
-        if (editingPublicacion?.id) {
-            console.log('🔄 Publicación en edición cambió, cargando días no disponibles');
-            fetchDiasReservados(editingPublicacion.id);
-        }
-    }, [editingPublicacion?.id]);
-
-
     const handleUpdate = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -752,7 +642,6 @@ const CuidadorDashboard = () => {
 
         try {
             const formDataPayload = new FormData();
-
             formDataPayload.append('titulo', formData.titulo);
             formDataPayload.append('descripcion', formData.descripcion);
             formDataPayload.append('tarifaPorDia', formData.tarifaPorDia);
@@ -765,9 +654,7 @@ const CuidadorDashboard = () => {
                 formDataPayload.append('imagesToDelete', JSON.stringify(imagesToDelete));
             }
 
-            files.forEach((file) => {
-                formDataPayload.append('images', file);
-            });
+            files.forEach((file) => formDataPayload.append('images', file));
 
             const response = await fetch(`${API_BASE_URL}/publicacion/${editingPublicacion.id}`, {
                 method: 'PUT',
@@ -785,48 +672,32 @@ const CuidadorDashboard = () => {
             alert('✅ Publicación actualizada exitosamente!');
 
         } catch (err) {
-            console.error('Error al actualizar:', err);
             setError('Error al actualizar publicación: ' + err.message);
         } finally {
             setLoading(false);
         }
     };
 
-
     const renderPublicaciones = () => {
-        const renderDashboardActions = (pub) => {
-            return (
-                <>
-                    <button
-                        onClick={() => startEditPublicacion(pub)}
-                        className="btn-edit"
-                    >
-                        ✏️ Editar
-                    </button>
-                    <button
-                        onClick={() => deletePublicacion(pub.id)}
-                        className="btn-delete"
-                    >
-                        🗑️ Eliminar
-                    </button>
-                </>
-            );
-        };
+        const renderDashboardActions = (pub) => (
+            <>
+                <button onClick={() => startEditPublicacion(pub)} className="btn-edit">
+                    ✏️ Editar
+                </button>
+                <button onClick={() => deletePublicacion(pub.id)} className="btn-delete">
+                    🗑️ Eliminar
+                </button>
+            </>
+        );
 
         return (
             <>
-                {/* CABECERA: fuera del wrapper */}
                 <div className="publicaciones-header">
                     <h2 className="section-title">Mis Publicaciones</h2>
-                    <button
-                        onClick={() => setCurrentView('nueva-publicacion')}
-                        className="btn-primary"
-                    >
+                    <button onClick={() => setCurrentView('nueva-publicacion')} className="btn-primary">
                         + Nueva Publicación
                     </button>
                 </div>
-
-                {/* WRAPPER MANUAL CON GRID */}
                 <div className="publicaciones-grid-wrapper">
                     <PublicacionesGrid
                         publicaciones={publicaciones}
@@ -836,152 +707,71 @@ const CuidadorDashboard = () => {
                         renderCardActions={renderDashboardActions}
                         emptyMessage="Aún no tienes publicaciones"
                         showCuidadorInfo={false}
-                        isDashboard={false} // ← FALSE para evitar wrapper duplicado
+                        isDashboard={false}
                     />
                 </div>
             </>
         );
     };
+
     const renderNuevaPublicacion = () => (
         <div className="dashboard-main">
             <div className="form-container">
                 <h2 className="section-title">Nueva Publicación</h2>
-
                 <form onSubmit={handleSubmit} className="form-card" encType="multipart/form-data">
                     <div className="form-group">
                         <label className="form-label">Título:</label>
-                        <input
-                            type="text"
-                            name="titulo"
-                            value={formData.titulo}
-                            onChange={handleChange}
-                            required
-                            className="form-input"
-                        />
+                        <input type="text" name="titulo" value={formData.titulo} onChange={handleChange} required className="form-input" placeholder="Ej: Cuidado de mascotas en casa amplia con jardín" />
                     </div>
-
                     <div className="form-group">
                         <label className="form-label">Descripción:</label>
-                        <textarea
-                            name="descripcion"
-                            value={formData.descripcion}
-                            onChange={handleChange}
-                            rows={4}
-                            required
-                            className="form-textarea"
-                        />
+                        <textarea name="descripcion" value={formData.descripcion} onChange={handleChange} rows={4} required className="form-textarea" placeholder="Describe tu espacio, experiencia y lo que ofreces..." />
                     </div>
-
                     <div className="form-grid">
                         <div className="form-group">
                             <label className="form-label">Tarifa por día ($):</label>
-                            <input
-                                type="number"
-                                name="tarifaPorDia"
-                                value={formData.tarifaPorDia}
-                                onChange={handleChange}
-                                min="0"
-                                step="0.01"
-                                required
-                                className="form-input"
-                            />
+                            <input type="number" name="tarifaPorDia" value={formData.tarifaPorDia} onChange={handleChange} min="0" step="0.01" required className="form-input" placeholder="0.00" />
                         </div>
                         <div className="form-group">
                             <label className="form-label">Cantidad de animales:</label>
-                            <input
-                                type="number"
-                                name="cantAnimales"
-                                value={formData.cantAnimales}
-                                onChange={handleChange}
-                                min="1"
-                                required
-                                className="form-input"
-                            />
+                            <input type="number" name="cantAnimales" value={formData.cantAnimales} onChange={handleChange} min="1" required className="form-input" placeholder="¿Cuántos podés cuidar?" />
                         </div>
                     </div>
-
                     <div className="form-group">
                         <label className="form-label">Ubicación:</label>
-                        <input
-                            type="text"
-                            name="ubicacion"
-                            value={formData.ubicacion}
-                            onChange={handleChange}
-                            required
-                            className="form-input"
-                        />
+                        <input type="text" name="ubicacion" value={formData.ubicacion} onChange={handleChange} required className="form-input" placeholder="Ej: Rosario, Barrio Alberdi" />
                     </div>
-
                     <div className="form-group">
                         <label className="form-label">Tipo de alojamiento:</label>
-                        <select
-                            name="tipoAlojamiento"
-                            value={formData.tipoAlojamiento}
-                            onChange={handleChange}
-                            required
-                            className="form-select"
-                        >
+                        <select name="tipoAlojamiento" value={formData.tipoAlojamiento} onChange={handleChange} required className="form-select">
                             <option value="">Seleccionar...</option>
-                            <option value="casa">En mi casa</option>
-                            <option value="domicilio">En casa del dueño</option>
-                            <option value="ambos">Ambos</option>
+                            <option value="casa">🏠 En mi casa</option>
+                            <option value="domicilio">🚪 En casa del dueño</option>
+                            <option value="ambos">✅ Ambos</option>
                         </select>
                     </div>
-
                     <div className="form-group">
                         <label className="checkbox-group">
-                            <input
-                                type="checkbox"
-                                name="exotico"
-                                checked={formData.exotico}
-                                onChange={handleChange}
-                                className="checkbox-input"
-                            />
-                            <span>Acepto mascotas exóticas</span>
+                            <input type="checkbox" name="exotico" checked={formData.exotico} onChange={handleChange} className="checkbox-input" />
+                            <span>🦜 Acepto mascotas exóticas</span>
                         </label>
                     </div>
-
                     <div className="form-group file-upload-group">
-                        <label className="form-label">
-                            Fotos de la Publicación (Máx. 5):
-                        </label>
-
+                        <label className="form-label">📸 Fotos de la Publicación (Máx. 5):</label>
                         <div className="file-input-wrapper">
-                            <input
-                                type="file"
-                                name="images"
-                                onChange={handleFileChange}
-                                multiple
-                                accept="image/*"
-                                className="form-input file-input"
-                                id="file-input"
-                            />
+                            <input type="file" name="images" onChange={handleFileChange} multiple accept="image/*" className="form-input file-input" id="file-input" />
                             <label htmlFor="file-input" className="file-input-label">
-                                📁 Seleccionar imágenes
+                                <Upload size={18} /> Seleccionar imágenes
                             </label>
                         </div>
-
                         {files.length > 0 && (
                             <div className="image-preview-container">
-                                <p className="file-count">
-                                    {files.length} imagen{files.length !== 1 ? 'es' : ''} seleccionada{files.length !== 1 ? 's' : ''} ({5 - files.length} restante{5 - files.length !== 1 ? 's' : ''})
-                                </p>
+                                <p className="file-count">{files.length} imagen{files.length !== 1 ? 'es' : ''} seleccionada{files.length !== 1 ? 's' : ''} ({5 - files.length} restante{5 - files.length !== 1 ? 's' : ''})</p>
                                 <div className="image-preview-grid">
                                     {files.map((file, index) => (
                                         <div key={index} className="image-preview-item">
-                                            <img
-                                                src={URL.createObjectURL(file)}
-                                                alt={`Preview ${index + 1}`}
-                                                className="preview-thumbnail"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => removeFile(index)}
-                                                className="remove-image-btn"
-                                                title="Eliminar imagen"
-                                            >
-                                                ✕
-                                            </button>
+                                            <img src={URL.createObjectURL(file)} alt={`Preview ${index + 1}`} className="preview-thumbnail" />
+                                            <button type="button" onClick={() => removeFile(index)} className="remove-image-btn" title="Eliminar imagen">✕</button>
                                             <span className="image-name">{file.name}</span>
                                         </div>
                                     ))}
@@ -989,27 +779,10 @@ const CuidadorDashboard = () => {
                             </div>
                         )}
                     </div>
-
-                    {error && (<div className="error-message">{error}</div>)}
-
+                    {error && <div className="error-message">{error}</div>}
                     <div className="form-buttons">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setCurrentView('publicaciones');
-                                setFiles([]);
-                            }}
-                            className="btn-secondary"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="btn-primary"
-                        >
-                            {loading ? 'Creando...' : 'Crear Publicación'}
-                        </button>
+                        <button type="button" onClick={() => { setCurrentView('publicaciones'); setFiles([]); }} className="btn-secondary">Cancelar</button>
+                        <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Creando...' : '✨ Crear Publicación'}</button>
                     </div>
                 </form>
             </div>
@@ -1018,106 +791,48 @@ const CuidadorDashboard = () => {
 
     const renderEditarPublicacion = () => {
         const totalImages = existingImages.length + files.length;
-
         return (
             <div className="dashboard-main">
                 <div className="form-container">
                     <h2 className="section-title">Editar Publicación</h2>
-
                     <form onSubmit={handleUpdate} className="form-card" encType="multipart/form-data">
                         <div className="form-group">
                             <label className="form-label">Título:</label>
-                            <input
-                                type="text"
-                                name="titulo"
-                                value={formData.titulo}
-                                onChange={handleChange}
-                                required
-                                className="form-input"
-                            />
+                            <input type="text" name="titulo" value={formData.titulo} onChange={handleChange} required className="form-input" />
                         </div>
-
                         <div className="form-group">
                             <label className="form-label">Descripción:</label>
-                            <textarea
-                                name="descripcion"
-                                value={formData.descripcion}
-                                onChange={handleChange}
-                                rows={4}
-                                required
-                                className="form-textarea"
-                            />
+                            <textarea name="descripcion" value={formData.descripcion} onChange={handleChange} rows={4} required className="form-textarea" />
                         </div>
-
                         <div className="form-grid">
                             <div className="form-group">
                                 <label className="form-label">Tarifa por día ($):</label>
-                                <input
-                                    type="number"
-                                    name="tarifaPorDia"
-                                    value={formData.tarifaPorDia}
-                                    onChange={handleChange}
-                                    min="0"
-                                    step="0.01"
-                                    required
-                                    className="form-input"
-                                />
+                                <input type="number" name="tarifaPorDia" value={formData.tarifaPorDia} onChange={handleChange} min="0" step="0.01" required className="form-input" />
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Cantidad de animales:</label>
-                                <input
-                                    type="number"
-                                    name="cantAnimales"
-                                    value={formData.cantAnimales}
-                                    onChange={handleChange}
-                                    min="1"
-                                    required
-                                    className="form-input"
-                                />
+                                <input type="number" name="cantAnimales" value={formData.cantAnimales} onChange={handleChange} min="1" required className="form-input" />
                             </div>
                         </div>
-
                         <div className="form-group">
                             <label className="form-label">Ubicación:</label>
-                            <input
-                                type="text"
-                                name="ubicacion"
-                                value={formData.ubicacion}
-                                onChange={handleChange}
-                                required
-                                className="form-input"
-                            />
+                            <input type="text" name="ubicacion" value={formData.ubicacion} onChange={handleChange} required className="form-input" />
                         </div>
-
                         <div className="form-group">
                             <label className="form-label">Tipo de alojamiento:</label>
-                            <select
-                                name="tipoAlojamiento"
-                                value={formData.tipoAlojamiento}
-                                onChange={handleChange}
-                                required
-                                className="form-select"
-                            >
+                            <select name="tipoAlojamiento" value={formData.tipoAlojamiento} onChange={handleChange} required className="form-select">
                                 <option value="">Seleccionar...</option>
                                 <option value="casa">En mi casa</option>
                                 <option value="domicilio">En casa del dueño</option>
                                 <option value="ambos">Ambos</option>
                             </select>
                         </div>
-
                         <div className="form-group">
                             <label className="checkbox-group">
-                                <input
-                                    type="checkbox"
-                                    name="exotico"
-                                    checked={formData.exotico}
-                                    onChange={handleChange}
-                                    className="checkbox-input"
-                                />
+                                <input type="checkbox" name="exotico" checked={formData.exotico} onChange={handleChange} className="checkbox-input" />
                                 <span>Acepto mascotas exóticas</span>
                             </label>
                         </div>
-
                         {existingImages.length > 0 && (
                             <div className="form-group">
                                 <label className="form-label">Imágenes actuales:</label>
@@ -1125,19 +840,8 @@ const CuidadorDashboard = () => {
                                     <div className="image-preview-grid">
                                         {existingImages.map((img) => (
                                             <div key={img.id} className="image-preview-item existing-image">
-                                                <img
-                                                    src={img.url || `http://localhost:3000${img.path}`}
-                                                    alt="Imagen existente"
-                                                    className="preview-thumbnail"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => markImageForDeletion(img.id)}
-                                                    className="remove-image-btn"
-                                                    title="Eliminar imagen"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
+                                                <img src={img.url || `http://localhost:3000${img.path}`} alt="Imagen existente" className="preview-thumbnail" />
+                                                <button type="button" onClick={() => markImageForDeletion(img.id)} className="remove-image-btn" title="Eliminar imagen"><Trash2 size={16} /></button>
                                                 <span className="image-label">Existente</span>
                                             </div>
                                         ))}
@@ -1145,57 +849,23 @@ const CuidadorDashboard = () => {
                                 </div>
                             </div>
                         )}
-
                         <div className="form-group file-upload-group">
-                            <label className="form-label">
-                                Agregar nuevas fotos (Máx. 5 en total):
-                            </label>
-
+                            <label className="form-label">Agregar nuevas fotos (Máx. 5 en total):</label>
                             <div className="file-input-wrapper">
-                                <input
-                                    type="file"
-                                    name="images"
-                                    onChange={handleFileChange}
-                                    multiple
-                                    accept="image/*"
-                                    className="form-input file-input"
-                                    id="file-input-edit"
-                                    disabled={totalImages >= 5}
-                                />
-                                <label
-                                    htmlFor="file-input-edit"
-                                    className={`file-input-label ${totalImages >= 5 ? 'disabled' : ''}`}
-                                >
-                                    {totalImages >= 5
-                                        ? '🚫 Máximo alcanzado'
-                                        : '📁 Agregar más imágenes'
-                                    }
+                                <input type="file" name="images" onChange={handleFileChange} multiple accept="image/*" className="form-input file-input" id="file-input-edit" disabled={totalImages >= 5} />
+                                <label htmlFor="file-input-edit" className={`file-input-label ${totalImages >= 5 ? 'disabled' : ''}`}>
+                                    {totalImages >= 5 ? '🚫 Máximo alcanzado' : '📁 Agregar más imágenes'}
                                 </label>
                             </div>
-
-                            <p className="file-count">
-                                Total: {totalImages} imagen(es) ({5 - totalImages} restante(s))
-                            </p>
-
+                            <p className="file-count">Total: {totalImages} imagen(es) ({5 - totalImages} restante(s))</p>
                             {files.length > 0 && (
                                 <div className="image-preview-container">
                                     <p className="file-count-label">Nuevas imágenes a subir:</p>
                                     <div className="image-preview-grid">
                                         {files.map((file, index) => (
                                             <div key={index} className="image-preview-item new-image">
-                                                <img
-                                                    src={URL.createObjectURL(file)}
-                                                    alt={`Preview ${index + 1}`}
-                                                    className="preview-thumbnail"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeFile(index)}
-                                                    className="remove-image-btn"
-                                                    title="Eliminar imagen"
-                                                >
-                                                    <X size={16} />
-                                                </button>
+                                                <img src={URL.createObjectURL(file)} alt={`Preview ${index + 1}`} className="preview-thumbnail" />
+                                                <button type="button" onClick={() => removeFile(index)} className="remove-image-btn" title="Eliminar imagen"><X size={16} /></button>
                                                 <span className="image-label new-label">Nueva</span>
                                             </div>
                                         ))}
@@ -1203,25 +873,14 @@ const CuidadorDashboard = () => {
                                 </div>
                             )}
                         </div>
-
-                        {/* Sección de Disponibilidad */}
                         <div className="disponibilidad-section">
                             <div className="disponibilidad-header">
-                                <Calendar size={20} className="icon-calendar" />
-                                <h3>Gestionar Disponibilidad</h3>
+                                <h3><Calendar size={20} className="icon-calendar" /> Gestionar Disponibilidad</h3>
                             </div>
-                            <p className="disponibilidad-description">
-                                Bloquea fechas en las que no puedas recibir mascotas
-                            </p>
-
-                            <button
-                                type="button"
-                                onClick={() => setShowCalendar(!showCalendar)}
-                                className="btn-toggle-calendar"
-                            >
+                            <p className="disponibilidad-description">Bloquea fechas en las que no puedas recibir mascotas</p>
+                            <button type="button" onClick={() => setShowCalendar(!showCalendar)} className="btn-toggle-calendar">
                                 {showCalendar ? '🙈 Ocultar' : '📅 Mostrar'} Calendario
                             </button>
-
                             {diasReservados.length > 0 && (
                                 <div className="reservas-alert">
                                     <AlertCircle size={16} />
@@ -1229,42 +888,18 @@ const CuidadorDashboard = () => {
                                 </div>
                             )}
                         </div>
-
                         {showCalendar && (
                             <div className="calendar-section">
-                                <DisponibilidadCalendar
-                                    onDateSelect={handleDateSelect}
-                                    blockedDates={diasReservados}
-                                    publicacionId={editingPublicacion.id}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleBloquearFechas}
-                                    disabled={fechasABloquear.length === 0 || loading}
-                                    className="btn-bloquear-fechas"
-                                >
+                                <DisponibilidadCalendar onDateSelect={handleDateSelect} blockedDates={diasReservados} publicacionId={editingPublicacion.id} />
+                                <button type="button" onClick={handleBloquearFechas} disabled={fechasABloquear.length === 0 || loading} className="btn-bloquear-fechas">
                                     {loading ? '⏳ Bloqueando...' : `🔒 Bloquear ${fechasABloquear.length || 0} fecha${fechasABloquear.length !== 1 ? 's' : ''}`}
                                 </button>
                             </div>
                         )}
-
-                        {error && (<div className="error-message">{error}</div>)}
-
+                        {error && <div className="error-message">{error}</div>}
                         <div className="form-buttons">
-                            <button
-                                type="button"
-                                onClick={cancelEdit}
-                                className="btn-secondary"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="btn-primary"
-                            >
-                                {loading ? 'Actualizando...' : '💾 Actualizar Publicación'}
-                            </button>
+                            <button type="button" onClick={cancelEdit} className="btn-secondary">Cancelar</button>
+                            <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Actualizando...' : '💾 Actualizar Publicación'}</button>
                         </div>
                     </form>
                 </div>
@@ -1272,41 +907,20 @@ const CuidadorDashboard = () => {
         );
     };
 
-
     const renderReservas = () => {
         const reservasFiltradas = getReservasByEstado(filterStatus);
-
         return (
             <>
-                {/* CABECERA */}
                 <div className="reservas-header">
-                    <h2 className="section-title">Reservas Recibidas</h2>
-
+                    <h2 className="section-title">Reservas recibidas</h2>
                     <div className="reservas-filters">
-                        <button
-                            onClick={() => setFilterStatus('todas')}
-                            className={`filter-btn ${filterStatus === 'todas' ? 'active' : ''}`}
-                        >
-                            Todas ({reservas.length})
-                        </button>
-                        <button
-                            onClick={() => setFilterStatus('pendiente')}
-                            className={`filter-btn ${filterStatus === 'pendiente' ? 'active' : ''}`}
-                        >
-                            Pendientes ({getReservasByEstado('pendiente').length})
-                        </button>
-                        <button
-                            onClick={() => setFilterStatus('en_curso')}
-                            className={`filter-btn ${filterStatus === 'en_curso' ? 'active' : ''}`}
-                        >
-                            En curso ({getReservasByEstado('en_curso').length})
-                        </button>
+                        <button onClick={() => setFilterStatus('todas')} className={`filter-btn ${filterStatus === 'todas' ? 'active' : ''}`}>Todas ({reservas.length})</button>
+                        <button onClick={() => setFilterStatus('pendiente')} className={`filter-btn ${filterStatus === 'pendiente' ? 'active' : ''}`}>Pendientes ({getReservasByEstado('pendiente').length})</button>
+                        <button onClick={() => setFilterStatus('en_curso')} className={`filter-btn ${filterStatus === 'en_curso' ? 'active' : ''}`}>En curso ({getReservasByEstado('en_curso').length})</button>
                     </div>
                 </div>
-
                 {reservasLoading && <div className="loading-message">Cargando reservas...</div>}
                 {reservasError && <div className="error-message">{reservasError}</div>}
-
                 {reservasFiltradas.length === 0 && !reservasLoading ? (
                     <div className="empty-state" style={{ background: 'var(--lighter-peach)', margin: '0 3rem 4rem' }}>
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
@@ -1320,13 +934,7 @@ const CuidadorDashboard = () => {
                 ) : (
                     <div className="reservas-grid">
                         {reservasFiltradas.map((reserva) => (
-                            <ReservaCard
-                                key={reserva.idReserva || reserva.id}
-                                reserva={reserva}
-                                userType="cuidador"
-                            // El cuidador solo ve las reservas, no puede cancelarlas
-                            // onCancelar no se pasa → el botón no aparece en ReservaCard
-                            />
+                            <ReservaCard key={reserva.idReserva || reserva.id} reserva={reserva} userType="cuidador" />
                         ))}
                     </div>
                 )}
@@ -1334,85 +942,40 @@ const CuidadorDashboard = () => {
         );
     };
 
-
     const renderPerfil = () => (
         <div className="dashboard-main">
             <div className="perfil-container">
                 <h2 className="section-title">Mi Perfil</h2>
-
                 {!editingProfile ? (
                     <div className="perfil-card">
-                        {/* ── Foto ── */}
                         <div className="perfil-image-container">
                             {user?.perfilImage ? (
-                                <img
-                                    src={`http://localhost:3000${user.perfilImage}`}
-                                    alt="Foto de perfil"
-                                    className="perfil-image"
-                                />
+                                <img src={`http://localhost:3000${user.perfilImage}`} alt="Foto de perfil" className="perfil-image" />
                             ) : (
                                 <div className="perfil-placeholder">👤</div>
                             )}
                         </div>
-
-                        {/* ── Campos ── */}
                         <div className="perfil-fields">
-                            <div className="perfil-field">
-                                <span className="field-label">Nombre</span>
-                                <p className="field-value">{user?.nombre}</p>
-                            </div>
-                            <div className="perfil-field">
-                                <span className="field-label">Email</span>
-                                <p className="field-value">{user?.email}</p>
-                            </div>
-                            <div className="perfil-field">
-                                <span className="field-label">Teléfono</span>
-                                <p className="field-value">{user?.telefono || 'No especificado'}</p>
-                            </div>
-                            <div className="perfil-field">
-                                <span className="field-label">Documento</span>
-                                <p className="field-value">
-                                    {user?.tipoDocumento || 'DNI'} {user?.nroDocumento || 'No especificado'}
-                                </p>
-                            </div>
-                            <div className="perfil-field">
-                                <span className="field-label">Sexo</span>
-                                <p className="field-value">{user?.sexoCuidador || 'No especificado'}</p>
-                            </div>
-                            <div className="perfil-field">
-                                <span className="field-label">Descripción</span>
-                                <p className="field-value field-description">
-                                    {user?.descripcion || 'Sin descripción personalizada'}
-                                </p>
-                            </div>
+                            <div className="perfil-field"><span className="field-label">Nombre</span><p className="field-value">{user?.nombre}</p></div>
+                            <div className="perfil-field"><span className="field-label">Email</span><p className="field-value">{user?.email}</p></div>
+                            <div className="perfil-field"><span className="field-label">Teléfono</span><p className="field-value">{user?.telefono || 'No especificado'}</p></div>
+                            <div className="perfil-field"><span className="field-label">Documento</span><p className="field-value">{user?.tipoDocumento || 'DNI'} {user?.nroDocumento || 'No especificado'}</p></div>
+                            <div className="perfil-field"><span className="field-label">Sexo</span><p className="field-value">{user?.sexoCuidador || 'No especificado'}</p></div>
+                            <div className="perfil-field"><span className="field-label">Descripción</span><p className="field-value field-description">{user?.descripcion || 'Sin descripción personalizada'}</p></div>
                         </div>
-
-                        {/* ── 2FA ── */}
                         <div className="perfil-2fa">
                             <span className="perfil-2fa-label">🔐 Verificación en dos pasos</span>
-                            <button
-                                type="button"
-                                onClick={handleActivate2FA}
-                                disabled={loading2FA}
-                                className="btn-2fa"
-                            >
+                            <button type="button" onClick={handleActivate2FA} disabled={loading2FA} className="btn-2fa">
                                 {loading2FA ? 'Generando...' : 'Activar 2FA'}
                             </button>
                         </div>
-
-                        {/* ── Acciones ── */}
                         <div className="perfil-actions">
-                            <button onClick={startEditProfile} className="btn-primary">
-                                ✏️ Editar Perfil
-                            </button>
-                            <button onClick={handleDeleteUser} className="btn-danger" disabled={loading}>
-                                {loading ? 'Eliminando...' : '🗑️ Eliminar Cuenta'}
-                            </button>
+                            <button onClick={startEditProfile} className="btn-primary">✏️ Editar Perfil</button>
+                            <button onClick={handleDeleteUser} className="btn-danger" disabled={loading}>{loading ? 'Eliminando...' : '🗑️ Eliminar Cuenta'}</button>
                         </div>
                     </div>
                 ) : (
                     <form onSubmit={handleUpdateProfile} className="perfil-form-card">
-                        {/* ── Foto ── */}
                         <div className="perfil-image-upload">
                             <label className="form-label">Foto de perfil:</label>
                             <div className="profile-image-preview">
@@ -1426,70 +989,34 @@ const CuidadorDashboard = () => {
                             </div>
                             <input type="file" accept="image/*" onChange={handleProfileImageChange} />
                         </div>
-
-                        {/* ── Campos ── */}
-                        <div className="form-group">
-                            <label className="form-label">Nombre:</label>
-                            <input type="text" name="nombre" value={profileFormData.nombre}
-                                onChange={handleProfileChange} className="form-input" />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Email:</label>
-                            <input type="email" name="email" value={profileFormData.email}
-                                onChange={handleProfileChange} className="form-input" />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Teléfono:</label>
-                            <input type="tel" name="telefono" value={profileFormData.telefono}
-                                onChange={handleProfileChange} className="form-input" />
-                        </div>
-
+                        <div className="form-group"><label className="form-label">Nombre:</label><input type="text" name="nombre" value={profileFormData.nombre} onChange={handleProfileChange} className="form-input" /></div>
+                        <div className="form-group"><label className="form-label">Email:</label><input type="email" name="email" value={profileFormData.email} onChange={handleProfileChange} className="form-input" /></div>
+                        <div className="form-group"><label className="form-label">Teléfono:</label><input type="tel" name="telefono" value={profileFormData.telefono} onChange={handleProfileChange} className="form-input" /></div>
                         <div className="form-grid">
                             <div className="form-group">
                                 <label className="form-label">Tipo de documento:</label>
-                                <select name="tipoDocumento" value={profileFormData.tipoDocumento}
-                                    onChange={handleProfileChange} className="form-select">
+                                <select name="tipoDocumento" value={profileFormData.tipoDocumento} onChange={handleProfileChange} className="form-select">
                                     <option value="DNI">DNI</option>
                                     <option value="Pasaporte">Pasaporte</option>
                                     <option value="Otro">Otro</option>
                                 </select>
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Nro. documento:</label>
-                                <input type="text" name="nroDocumento" value={profileFormData.nroDocumento}
-                                    onChange={handleProfileChange} className="form-input" />
-                            </div>
+                            <div className="form-group"><label className="form-label">Nro. documento:</label><input type="text" name="nroDocumento" value={profileFormData.nroDocumento} onChange={handleProfileChange} className="form-input" /></div>
                         </div>
-
                         <div className="form-group">
                             <label className="form-label">Sexo:</label>
-                            <select name="sexoCuidador" value={profileFormData.sexoCuidador}
-                                onChange={handleProfileChange} className="form-select">
+                            <select name="sexoCuidador" value={profileFormData.sexoCuidador} onChange={handleProfileChange} className="form-select">
                                 <option value="">Seleccionar...</option>
                                 <option value="Masculino">Masculino</option>
                                 <option value="Femenino">Femenino</option>
                                 <option value="Otro">Otro</option>
                             </select>
                         </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Descripción personal:</label>
-                            <textarea name="descripcion" value={profileFormData.descripcion}
-                                onChange={handleProfileChange} rows={4} className="form-textarea"
-                                placeholder="Cuéntanos sobre ti, tu experiencia con mascotas, etc." />
-                        </div>
-
+                        <div className="form-group"><label className="form-label">Descripción personal:</label><textarea name="descripcion" value={profileFormData.descripcion} onChange={handleProfileChange} rows={4} className="form-textarea" placeholder="Cuéntanos sobre ti, tu experiencia con mascotas, etc." /></div>
                         {error && <div className="error-message">{error}</div>}
-
                         <div className="form-buttons">
-                            <button type="button" onClick={cancelEditProfile} className="btn-secondary">
-                                Cancelar
-                            </button>
-                            <button type="submit" disabled={loading} className="btn-primary">
-                                {loading ? 'Guardando...' : 'Guardar Cambios'}
-                            </button>
+                            <button type="button" onClick={cancelEditProfile} className="btn-secondary">Cancelar</button>
+                            <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Guardando...' : 'Guardar Cambios'}</button>
                         </div>
                     </form>
                 )}
@@ -1499,53 +1026,18 @@ const CuidadorDashboard = () => {
 
     return (
         <div className="dashboard-container">
-
-
             <nav className="dashboard-navbar">
                 <div className="navbar-brand">
-                    <h1 className="navbar-title">
-                        🐕 PetsBnB Cuidador
-                    </h1>
+                    <h1 className="navbar-title">🐕 PetsBnB Cuidador</h1>
                 </div>
-
                 <div className="up-buttons">
-                    <button
-                        onClick={() => navigate('/')}
-                        className="nav-button btn-publicaciones-extra"
-                    >
-                        <Home size={18} />
-                        Ver Publicaciones
-                    </button>
-                    <button
-                        onClick={() => setCurrentView('publicaciones')}
-                        className={`nav-button ${currentView === 'publicaciones' ? 'active' : ''}`}
-                    >
-                        Mis Publicaciones
-                    </button>
-                    <button
-                        onClick={() => setCurrentView('reservas')}
-                        className={`nav-button ${currentView === 'reservas' ? 'active' : ''}`}
-                    >
-                        <CalendarCheck size={18} />
-                        Reservas
-                    </button>
+                    <button onClick={() => navigate('/')} className="nav-button btn-publicaciones-extra"><Home size={18} /> Ver Publicaciones</button>
+                    <button onClick={() => setCurrentView('publicaciones')} className={`nav-button ${currentView === 'publicaciones' ? 'active' : ''}`}>Mis Publicaciones</button>
+                    <button onClick={() => setCurrentView('reservas')} className={`nav-button ${currentView === 'reservas' ? 'active' : ''}`}><CalendarCheck size={18} /> Reservas</button>
                 </div>
-
                 <div className="down-buttons">
-                    <button
-                        onClick={() => setCurrentView('perfil')}
-                        className={`nav-button ${currentView === 'perfil' ? 'active' : ''}`}
-                    >
-                        <User size={18} />
-                        Perfil
-                    </button>
-                    <button
-                        onClick={handleLogout}
-                        className="logout-button"
-                    >
-                        <LogOut size={18} />
-                        
-                    </button>
+                    <button onClick={() => setCurrentView('perfil')} className={`nav-button ${currentView === 'perfil' ? 'active' : ''}`}><User size={18} /> Perfil</button>
+                    <button onClick={handleLogout} className="logout-button"><LogOut size={18} /></button>
                 </div>
             </nav>
             <main>
@@ -1555,7 +1047,6 @@ const CuidadorDashboard = () => {
                 {currentView === 'nueva-publicacion' && renderNuevaPublicacion()}
                 {currentView === 'editar-publicacion' && renderEditarPublicacion()}
             </main>
-
             {show2FAModal && (
                 <div className="twofa-modal-overlay" onClick={close2FAModal}>
                     <div className="twofa-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -1564,24 +1055,17 @@ const CuidadorDashboard = () => {
                             <h3>Verificación en dos pasos</h3>
                             <button className="twofa-modal-close" onClick={close2FAModal}>✕</button>
                         </div>
-                        <p className="twofa-modal-desc">
-                            Escaneá este código QR con Google Authenticator o cualquier app TOTP.
-                            Una vez configurado, se te pedirá el código al iniciar sesión.
-                        </p>
+                        <p className="twofa-modal-desc">Escaneá este código QR con Google Authenticator o cualquier app TOTP. Una vez configurado, se te pedirá el código al iniciar sesión.</p>
                         <div className="twofa-modal-qr">
                             {loading2FA ? (
                                 <div className="twofa-loading">Generando código QR...</div>
                             ) : qrCode2FA ? (
                                 <img src={qrCode2FA} alt="Código QR 2FA" />
                             ) : (
-                                <div className="twofa-loading" style={{ color: 'var(--error-red)' }}>
-                                    Error al cargar el código QR
-                                </div>
+                                <div className="twofa-loading" style={{ color: 'var(--error-red)' }}>Error al cargar el código QR</div>
                             )}
                         </div>
-                        <button className="twofa-modal-btn-close" onClick={close2FAModal}>
-                            Listo, cerrar
-                        </button>
+                        <button className="twofa-modal-btn-close" onClick={close2FAModal}>Listo, cerrar</button>
                     </div>
                 </div>
             )}

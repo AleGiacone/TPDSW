@@ -146,13 +146,13 @@ const RegisterPage = () => {
               <>
                 <label>Tipo de documento:</label>
                 <select
-                  name="tipoDocumento"  // ✅ FIX 1: Nombre correcto (antes era "Tipo de documento")
-                  value={formData.tipoDocumento}  // ✅ FIX 1: Campo correcto
+                  name="tipoDocumento"  
+                  value={formData.tipoDocumento}  
                   onChange={handleChange}
                   required
                 >
-                  <option value="">Seleccionar...</option>  {/* ✅ Opción vacía */}
-                  <option value="DNI">DNI</option>  {/* ✅ FIX 3: Mayúscula */}
+                  <option value="">Seleccionar...</option>  
+                  <option value="DNI">DNI</option>  
                   <option value="Pasaporte">Pasaporte</option>
                   <option value="Otro">Otro</option>
                 </select>
@@ -199,8 +199,8 @@ const RegisterPage = () => {
                       onChange={handleChange}
                       required  
                     >
-                      <option value="">Seleccionar...</option>  {/* ✅ FIX 2: Opción vacía */}
-                      <option value="Masculino">Masculino</option>  {/* ✅ FIX 3: Mayúscula */}
+                      <option value="">Seleccionar...</option>  
+                      <option value="Masculino">Masculino</option>  
                       <option value="Femenino">Femenino</option>
                       <option value="Otro">Otro</option>
                     </select>
@@ -222,13 +222,11 @@ const RegisterPage = () => {
         </button>
 
             {error && (
-              // Puedes usar la clase 'mensaje-error' que definimos
               <div className="mensaje-error">
                 {error}
               </div>
             )}
             {success && (
-              // 🚨 AÑADE AQUÍ LA CLASE CSS 🚨
               <div className="mensaje-exito-redireccion">
                 {success}
               </div>

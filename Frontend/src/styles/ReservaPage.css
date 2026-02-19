@@ -29,7 +29,7 @@
   position: sticky;
   top: 20px;
   margin-top: 56px;
-  /* ← bajá este valor hasta que quede alineado */
+
 }
 
 .price-header {
@@ -43,7 +43,6 @@
 
 .price {
   font-size: 28px;
-  /* ← antes 22px */
   font-weight: 700;
   color: #222;
 }
@@ -103,14 +102,12 @@
   color: #717171;
 }
 
-/* Sección de mascotas */
 .mascotas-section {
   margin-bottom: 24px;
 }
 
 .section-title {
   font-size: 1.3rem;
-  /* ← antes 16px */
   font-weight: 700;
   margin-bottom: 14px;
   color: #f97840;
@@ -153,7 +150,6 @@
 /* Imagen de la mascota en miniatura */
 .mascota-image-thumb {
   width: 80px;
-  /* ← antes 50px */
   height: 80px;
   border-radius: 50%;
   overflow: hidden;
@@ -185,16 +181,14 @@
 
 .mascota-item .mascota-info .mascota-name {
   font-size: 1.3rem!important;
-  /* ← antes 14px */
   font-weight: 700;
   color: #222;
 }
 
 .mascota-details {
   font-size: 1.1rem;
-  /* ← antes 12px */
+  
   color: #717171;
-  margin-left:1.5rem;
   margin-bottom: 0.7rem;
  
 }
@@ -243,7 +237,6 @@
   border: 1px solid #b0b0b0;
   border-radius: 8px;
   font-size: 1rem;
-  /* ← antes 14px */
   font-family: inherit;
   resize: vertical;
 }
@@ -257,13 +250,11 @@
 .reserve-button {
   width: 100%;
   padding: 18px;
-  /* ← antes 14px */
   background: linear-gradient(to right, #f97840, #ff6b35);
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 1.1rem;
-  /* ← antes 16px */
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
@@ -474,41 +465,329 @@
   color: #717171;
 }
 
-/* Responsive */
+/* ============================================
+   RESPONSIVE COMPLETO
+   ============================================ */
+
+/* ── 1280px ── */
+@media (max-width: 1280px) {
+  .reserva-container {
+    max-width: 100%;
+    padding: 32px 24px;
+    gap: 32px;
+  }
+}
+
+/* ── 1024px ── */
 @media (max-width: 1024px) {
   .reserva-container {
     grid-template-columns: 1fr;
     gap: 24px;
+    padding: 28px 20px;
   }
 
   .reserva-card {
     position: static;
+    margin-top: 0;
   }
 
   .calendars-wrapper {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .modal-content {
+    max-width: 600px;
   }
 }
 
-@media (max-width: 640px) {
+/* ── 768px : tablets ── */
+@media (max-width: 768px) {
   .reserva-container {
-    padding: 20px 12px;
+    padding: 20px 16px;
+    gap: 20px;
   }
 
   .reserva-card {
     padding: 20px;
+    border-radius: 10px;
+  }
+
+  .price-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+  }
+
+  .price {
+    font-size: 24px;
+  }
+
+  .date-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .date-input {
+    border-right: none;
+    border-bottom: 1px solid #ebebeb;
+    padding: 10px 12px;
+  }
+
+  .date-input:last-child {
+    border-bottom: none;
+  }
+
+  .mascota-item {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .mascota-image-thumb {
+    width: 64px;
+    height: 64px;
+  }
+
+  .mascota-item .mascota-info .mascota-name {
+    font-size: 1.1rem !important;
+  }
+
+  .mascota-details {
+    font-size: 0.95rem;
+    margin-left: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+  }
+
+  .reserve-button {
+    padding: 16px;
+    font-size: 1rem;
   }
 
   .modal-content {
     padding: 24px 16px;
+    border-radius: 12px;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+  }
+}
+
+/* ── 600px  */
+@media (max-width: 600px) {
+  .reserva-container {
+    padding: 16px 12px;
+    gap: 16px;
+  }
+
+  .reserva-publicacion-section h2 {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+
+  .reserva-card {
+    padding: 16px;
+  }
+
+  .price {
+    font-size: 20px;
+  }
+
+  .price span {
+    font-size: 14px;
+  }
+
+  .rating {
+    font-size: 13px;
+  }
+
+  .date-inputs {
+    margin-bottom: 18px;
+  }
+
+  .date-label {
+    font-size: 9px;
+  }
+
+  .date-value {
+    font-size: 13px;
+  }
+
+  .mascota-image-thumb {
+    width: 56px;
+    height: 56px;
+    margin-left: 0;
+  }
+
+  .mascota-item .mascota-info .mascota-name {
+    font-size: 1rem !important;
+  }
+
+  .mascota-details {
+    font-size: 0.875rem;
+    margin-left: 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+
+  .notes-textarea {
+    font-size: 0.9rem;
+    min-height: 85px;
+    padding: 12px;
+  }
+
+  .reserve-button {
+    padding: 14px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
+
+  .price-row {
+    font-size: 13px;
+  }
+
+  .price-row.total {
+    font-size: 15px;
+  }
+
+  .modal-content {
+    padding: 20px 14px;
+  }
+
+  .calendar-day {
+    font-size: 13px;
+  }
+
+  .calendar-header div {
+    font-size: 11px;
+    padding: 6px 0;
+  }
+
+  .calendar-navigation span {
+    font-size: 14px;
+  }
+
+  .calendar-info {
+    font-size: 12px;
+  }
+}
+
+/* ── 480px  ── */
+@media (max-width: 480px) {
+  .reserva-container {
+    padding: 12px 10px;
+  }
+
+  .reserva-card {
+    padding: 14px 12px;
   }
 
   .price {
     font-size: 18px;
   }
 
-  .rating {
+  .mascotas-section {
+    margin-bottom: 18px;
+  }
+
+  .mascotas-list {
+    gap: 10px;
+  }
+
+  .mascota-item {
+    padding: 10px;
+    gap: 10px;
+    border-radius: 10px;
+  }
+
+  .mascota-image-thumb {
+    width: 48px;
+    height: 48px;
+  }
+
+  .mascota-checkbox {
+    width: 16px;
+    height: 16px;
+  }
+
+  .notes-section {
+    margin-bottom: 18px;
+  }
+
+  .notes-textarea {
+    min-height: 75px;
+    padding: 10px;
+  }
+
+  .price-breakdown {
+    padding-top: 14px;
+  }
+
+  .calendar-navigation button {
+    padding: 6px 10px;
+    font-size: 18px;
+  }
+
+  .modal-content {
+    padding: 16px 12px;
+    border-radius: 10px;
+  }
+
+  .modal-header {
+    margin-bottom: 18px;
+  }
+
+  .modal-header h2 {
+    font-size: 16px;
+  }
+}
+
+/* ── 380px  ── */
+@media (max-width: 380px) {
+  .reserva-card {
+    padding: 12px 10px;
+  }
+
+  .price {
+    font-size: 17px;
+  }
+
+  .mascota-image-thumb {
+    width: 42px;
+    height: 42px;
+  }
+
+  .mascota-item .mascota-info .mascota-name {
+    font-size: 0.9rem !important;
+  }
+
+  .mascota-details {
+    font-size: 0.8rem;
+  }
+
+  .reserve-button {
+    padding: 12px;
+    font-size: 0.875rem;
+  }
+
+  .calendar-day {
     font-size: 12px;
+  }
+
+  .calendar-header div {
+    font-size: 10px;
+  }
+
+  .add-mascota-button {
+    font-size: 0.875rem;
+    padding: 8px 16px;
   }
 }
 
@@ -521,4 +800,41 @@
   min-height: 400px;
   font-size: 18px;
   color: #717171;
+}
+.calendar-month-header {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.calendar-month-header>span {
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+  text-align: center;
+  flex: 1;
+}
+
+.calendar-month-header>button {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  background: #f0f0f0 !important;
+  border: none !important;
+  border-radius: 50%;
+  font-size: 22px;
+  color: #222 !important;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  visibility: visible !important;
+  opacity: 1;
+}
+
+.calendar-month-header>button:hover:not(:disabled) {
+  background: #e0e0e0 !important;
 }
