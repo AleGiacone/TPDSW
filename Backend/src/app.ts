@@ -51,7 +51,7 @@ app.use('/api/webhook', (req, res, next) => {
 
 app.use("/api/webhook/stripe", express.raw({ type: 'application/json' }), webHookRouter);
 app.use(cookieParser());
-app.use(cors({ origin: ['http://localhost:3307', 'http://localhost:3308'], credentials: true }));
+app.use(cors({ origin: ['http://localhost:3307', 'http://localhost:3308', process.env.VITE_URL || 'http://localhost:5173'], credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
