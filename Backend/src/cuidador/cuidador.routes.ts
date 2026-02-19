@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { sanitizeCuidador, findAll, findOne, add, update, remove, updateProfile, updateProfileImage, deleteProfileImage } from './cuidador.controller.js';
 import multer from 'multer';
 import path from 'path';
-
+import { adminAuthenticate } from '../admin/admin.controller.js';
 export const cuidadorRouter = Router();
 
 

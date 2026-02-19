@@ -46,7 +46,7 @@
 
     @OneToOne('Imagen', 'mascota', {
       owner: true, 
-      cascade: [Cascade.ALL],
+      deleteRule: 'set null',
       nullable: true 
     })
     imagen?: Rel<any>;

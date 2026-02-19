@@ -26,7 +26,7 @@ async function findAll(req: Request, res: Response){
       const especies = await em.find (Especie, {}, {populate : ['razas']})
       res.status(200).json ({message: 'finded all especies', data: especies })
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving especies", error: error.message });
+    res.status(500).json({ message: "Error retrieving especies" });
   }
 }
 
@@ -37,7 +37,7 @@ async function findOne(req: Request, res: Response) {
     const especie= await em.findOneOrFail (Especie , {idEspecie} , { populate : ['razas']});
     res.status(200).json({ message: 'Especie found', data: especie });
   } catch (error:any){
-    res.status(500).json({ message: "Error retrieving especie", error: error.message });
+    res.status(500).json({ message: "Error retrieving especie" });
 }
 }
 
@@ -49,7 +49,7 @@ async function add(req: Request, res: Response) {
     await em.flush()
     res.status(200).json({ message: 'Especie created', data: especie });
   } catch (error: any) {
-    res.status(500).json({ message: "Error creating especie", error: error.message });
+    res.status(500).json({ message: "Error creating especie" });
   }
   
 }
@@ -69,7 +69,7 @@ async function update(req: Request, res: Response) {
     res.status(200).json ({ message: "idEspecie updated", especie})
     
   } catch (error:any) {
-    res.status(500).json ({message : error.message})
+    res.status(500).json ({message : "Error updating especie"})
   }
 }
 
@@ -83,7 +83,7 @@ async function remove (req: Request, res: Response) {
    res.status(200).send ({message:"se fue"})
    //em.nativeDelete(especie ,{idEspecie})
  } catch (error:any){
- res.status(500).json ({message: error.message})
+ res.status(500).json ({message: "Error removing especie"})
  }
 }
 

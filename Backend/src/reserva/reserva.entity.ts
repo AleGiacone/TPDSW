@@ -37,12 +37,6 @@ export class Reserva {
 
   @ManyToMany({entity: () => Mascota, cascade: [Cascade.ALL]})
   mascotas = new Collection<Mascota>(this);
-  // Falta agregar pago
-
-  //Testeo de propiedad Dates
-
-  // @Property({ type: TemporalDateType, nullable: true, unique: false})
-  // fechasReservadas?: Temporal.PlainDate[];
 
   @OneToMany(() => DiaReservado, diasReservados => diasReservados.reserva, { nullable: true})
   diasReservados = new Collection<DiaReservado>(this);

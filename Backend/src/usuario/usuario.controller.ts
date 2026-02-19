@@ -53,7 +53,7 @@ async function findAll(req: Request, res: Response) {
     const usuarios = await em.find(Usuario, {});
     res.status(200).json({ message: 'Found all usuarios', data: usuarios });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving usuarios", error: error.message });
+    res.status(500).json({ message: "Error retrieving usuarios" });
   }
 }
 
@@ -74,7 +74,7 @@ async function add(req: Request, res: Response) {
       return ;
 
   } catch (error: any) {
-    res.status(500).json({ message: "Error creating usuario", error: error.message });
+    res.status(500).json({ message: "Error creating usuario" });
     return;
   }
   } else {
@@ -100,7 +100,7 @@ async function update(req: Request, res: Response) {
     await em.flush();
     res.status(200).json({ message: 'Usuario updated', data: usuario });
   } catch (error: any) {
-    res.status(500).json({ message: "Error updating usuario", error: error.message });
+    res.status(500).json({ message: "Error updating usuario" });
   }
 } 
 
@@ -112,7 +112,7 @@ async function remove(req: Request, res: Response) {
     await em.removeAndFlush(usuario);
     res.status(200).json({ message: 'Usuario removed', data: usuario });
   } catch (error: any) {
-    res.status(500).json({ message: "Error removing usuario", error: error.message });
+    res.status(500).json({ message: "Error removing usuario" });
   }
 }   
 
@@ -164,7 +164,7 @@ async function loginCtrl(req: Request, res: Response) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 1000 * 60 * 60 // 1 hora
+      maxAge: 1000 * 60 * 60 * 48// 1 hora
     });
 
     res.status(200).json({ 
@@ -176,7 +176,8 @@ async function loginCtrl(req: Request, res: Response) {
         email: usuario.email,
         tipoUsuario: usuario.tipoUsuario,
         perfilImage: usuario.perfilImage || null
-      }
+      },
+      token: token
     });
     return;
     } else if (usuario.twoFactorSecret && req.body.token != null) {
@@ -241,8 +242,7 @@ async function loginCtrl(req: Request, res: Response) {
     catch (error: any) {
     res.status(500).json({ 
       success: false,
-      message: "Error durante el login", 
-      error: error.message 
+      message: "Error durante el login"
     });
     return;
   }
@@ -322,8 +322,7 @@ async function getMe(req: Request, res: Response) {
   } catch (error: any) {
     res.status(500).json({ 
       success: false,
-      message: "Error verificando sesión", 
-      error: error.message 
+      message: "Error verificando sesión"
     });
     return;
   }
@@ -380,7 +379,7 @@ async function findOne(req: Request, res: Response) {
     const usuario = await em.findOneOrFail(Usuario, { idUsuario: idUsuario });
     res.status(200).json({ message: 'Usuario found', data: usuario });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving usuario", error: error.message });
+    res.status(500).json({ message: "Error retrieving usuario" });
   }
 }
 
@@ -392,20 +391,20 @@ async function authMiddleware(req: Request, res: Response, next: NextFunction) {
   if (!token) {
     res.status(401).json({ 
       success: false,
-      error: 'No autenticado',
+      message: 'No autenticado',
       usuario: null   
     });
     return;
   }
 
   try {
-    const decoded = jwt.verify(token, SECRET_JWT_KEY!) as any;
+    const decoded = jwt.verify(token, SECRET_JWT_KEY!);
     req.usuario = decoded;
     next(); 
   } catch (err) {
     res.status(403).json({ 
       success: false,
-      error: 'Token inválido',
+      message: 'Token inválido',
       usuario: null 
     });
     return;

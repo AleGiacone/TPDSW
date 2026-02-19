@@ -20,6 +20,7 @@ import cors from 'cors';
 import { reservaRouter, webHookRouter } from './reserva/reserva.routes.js';
 import { pagoRouter } from './reserva/pago.routers.js';
 import rateLimit from 'express-rate-limit';
+import { adminRouter } from './admin/admin.routes.js';
 
 console.log('ENV:', process.env.STRIPE_SECRET_KEY)
 
@@ -36,8 +37,19 @@ declare global {
 
 const app = express();
 
+// 🔍 MIDDLEWARE DE DEBUG PARA WEBHOOK
+app.use('/api/webhook', (req, res, next) => {
+  console.log('\n\n🚨🚨🚨 ¡WEBHOOK STRIPE INTERCEPTADO! 🚨🚨🚨');
+  console.log('⏰ Timestamp:', new Date().toISOString());
+  console.log('📍 URL:', req.url);
+  console.log('📊 Método:', req.method);
+  console.log('🎫 Headers clave:');
+  console.log('   - Content-Type:', req.headers['content-type']);
+  console.log('   - Stripe-Signature:', req.headers['stripe-signature']?.toString().substring(0, 50) + '...');
+  next();
+});
 
-app.use("/webhook", express.raw({ type: 'application/json' }), webHookRouter);
+app.use("/api/webhook/stripe", express.raw({ type: 'application/json' }), webHookRouter);
 app.use(cookieParser());
 app.use(cors({ origin: ['http://localhost:3307', 'http://localhost:3308'], credentials: true }));
 app.use(express.json());
@@ -47,39 +59,43 @@ app.use(express.static(path.join(process.cwd(), 'public')));
 
 console.log('📂 Sirviendo archivos estáticos desde:', path.join(__dirname, '../public/img'));
 
-
 app.use((req, res, next) => {
+  // Excluir webhook de Stripe
+  if (req.path.startsWith('/api/webhook/stripe')) {
+    return next();
+  }
+
   console.log('Token recibido:', req.cookies.access_token);
   const token = req.cookies.access_token;
   req.session = { usuario: null }
   try {
     const data = jwt.verify(token, SECRET_JWT_KEY!);
     req.session.usuario = data;
-  } catch {}
+  } catch { }
   next();
 })
 
-
+/*
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next)
 });
+*/
 
-
-// Rate limiter general
+// Rate limiter general - EXCLUIR WEBHOOK DE STRIPE
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100,                  // 100 requests por IP
+  max: 500,                  // 100 requests por IP
   standardHeaders: true,     // Devuelve info en headers `RateLimit-*`
   legacyHeaders: false,      // Deshabilita headers `X-RateLimit-*`
+  skip: (req) => req.path.startsWith('/api/webhook/stripe'), // ✅ EXCLUIR WEBHOOK
   handler: (req, res) => {
-    res.status(429).json({ error: 'Demasiadas solicitudes, intenta más tarde' });
+    res.status(429).json({ message: 'Demasiadas solicitudes, intenta más tarde' });
   }
 });
 
-
-
 app.use(generalLimiter); 
 
+app.use("/api/admin", adminRouter);
 app.use("/api/usuarios", usuarioRouter);
 app.use("/api/mascotas", mascotaRouter);
 app.use("/api/especies", especieRouter);

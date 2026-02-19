@@ -48,8 +48,7 @@ export const publicacionImageUpload = (req: Request, res: Response, next: NextFu
     baseUpload(req, res, (err) => {
         if (err) {
             return res.status(400).json({
-                message: 'Error al procesar archivos',
-                error: err.message
+                message: 'Error al procesar archivos'
             });
         }
         next();
