@@ -83,7 +83,7 @@ const ReservaCard = ({ reserva, userType, onCancelar }) => {
           {primeraImg ? (
             <>
               <img
-                src={primeraImg.url || `http://localhost:3000${primeraImg.path}`}
+                src={primeraImg.url || `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${primeraImg.path}`}
                 alt={publicacion?.titulo || 'Publicación'}
                 className="reserva-imagen"
                 onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
@@ -154,7 +154,7 @@ const ReservaCard = ({ reserva, userType, onCancelar }) => {
             reserva.mascotas.map((m, i) => {
               const nombre = m.nomMascota || m.nombre || 'Sin nombre';
               const imgSrc = m.imagen?.path
-                ? `http://localhost:3000${m.imagen.path}`
+                ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${m.imagen.path}`
                 : (m.imagen?.url ?? null);
               return (
                 <div key={i} className="mascota-chip">

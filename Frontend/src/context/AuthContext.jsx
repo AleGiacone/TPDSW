@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { loginCtrl, logoutCtrl, registerCtrl } from '../services/authService';
 import { AuthContext } from './AuthContextBase';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL = `${BASE_URL}/api`;
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
@@ -24,9 +25,9 @@ export const AuthProvider = ({ children }) => {
             const tipo = userData.tipoUsuario;
             let endpoint = '';
             if (tipo === 'cuidador') {
-                endpoint = `http://localhost:3000/api/cuidador/${userData.idUsuario}`;
+                endpoint = `${BASE_URL}/api/cuidador/${userData.idUsuario}`;
             } else if (tipo === 'dueno' || tipo === 'dueño') {
-                endpoint = `http://localhost:3000/api/duenos/${userData.idUsuario}`;
+                endpoint = `${BASE_URL}/api/duenos/${userData.idUsuario}`;
             } else {
                 return userData;
             }
@@ -59,7 +60,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/api/usuarios/me', {
+            const response = await fetch(`${BASE_URL}/api/usuarios/me`, {
                 credentials: 'include'
             });
             if (response.ok) {

@@ -38,7 +38,7 @@ const DuenoDashboard = () => {
     const [razasFiltradas, setRazasFiltradas] = useState([]);
     const [imageUploading, setImageUploading] = useState(false);
     const navigate = useNavigate();
-    const API_BASE_URL = 'http://localhost:3000/api';
+    const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api`;
     const [profileImageFile, setProfileImageFile] = useState(null);
 
     useEffect(() => {
@@ -1118,7 +1118,7 @@ const DuenoDashboard = () => {
                         <div className="perfil-image-container">
                             {user?.perfilImage ? (
                                 <img
-                                    src={`http://localhost:3000${user.perfilImage}`}
+                                    src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${user.perfilImage}`}
                                     alt="Foto de perfil"
                                     className="perfil-image"
                                 />
@@ -1192,7 +1192,7 @@ const DuenoDashboard = () => {
                                 {profileImageFile ? (
                                     <img src={URL.createObjectURL(profileImageFile)} alt="Preview" className="perfil-image" />
                                 ) : user?.perfilImage ? (
-                                    <img src={`http://localhost:3000${user.perfilImage}`} alt="Foto actual" className="perfil-image" />
+                                    <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${user.perfilImage}`} alt="Foto actual" className="perfil-image" />
                                 ) : (
                                     <div className="perfil-placeholder">👤</div>
                                 )}

@@ -7,7 +7,7 @@ import '../../styles/DashboardCuidador.css';
 import { useReservas } from '../../hooks/useReservas';
 import ReservaCard from '../../components/ReservaCard';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api`;
 
 // Componente de Calendario para selección múltiple de fechas
 const DisponibilidadCalendar = ({ onDateSelect, blockedDates = [], publicacionId }) => {
@@ -840,7 +840,7 @@ const CuidadorDashboard = () => {
                                     <div className="image-preview-grid">
                                         {existingImages.map((img) => (
                                             <div key={img.id} className="image-preview-item existing-image">
-                                                <img src={img.url || `http://localhost:3000${img.path}`} alt="Imagen existente" className="preview-thumbnail" />
+                                                <img src={img.url || `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${img.path}`} alt="Imagen existente" className="preview-thumbnail" />
                                                 <button type="button" onClick={() => markImageForDeletion(img.id)} className="remove-image-btn" title="Eliminar imagen"><Trash2 size={16} /></button>
                                                 <span className="image-label">Existente</span>
                                             </div>
@@ -950,7 +950,7 @@ const CuidadorDashboard = () => {
                     <div className="perfil-card">
                         <div className="perfil-image-container">
                             {user?.perfilImage ? (
-                                <img src={`http://localhost:3000${user.perfilImage}`} alt="Foto de perfil" className="perfil-image" />
+                                <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${user.perfilImage}`} alt="Foto de perfil" className="perfil-image" />
                             ) : (
                                 <div className="perfil-placeholder">👤</div>
                             )}
@@ -982,7 +982,7 @@ const CuidadorDashboard = () => {
                                 {profileImage ? (
                                     <img src={URL.createObjectURL(profileImage)} alt="Preview" className="perfil-image" />
                                 ) : user?.perfilImage ? (
-                                    <img src={`http://localhost:3000${user.perfilImage}`} alt="Foto actual" className="perfil-image" />
+                                    <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${user.perfilImage}`} alt="Foto actual" className="perfil-image" />
                                 ) : (
                                     <div className="perfil-placeholder">👤</div>
                                 )}

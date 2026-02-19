@@ -4,7 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { Calendar, X, AlertCircle, Check, PawPrint, Plus } from 'lucide-react';
 import PublicacionCard from '../../components/PublicacionCard';
 import '../../styles/ReservaPage.css';
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api`;
 
 // Componente de Calendario
 const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) => {

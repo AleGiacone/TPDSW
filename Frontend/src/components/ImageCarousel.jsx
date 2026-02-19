@@ -31,7 +31,7 @@ const ImageCarousel = ({ imagenes, titulo }) => {
     };
 
     const currentImage = imagenes[currentImageIndex];
-    const imageUrl = currentImage.url || `http://localhost:3000${currentImage.path}`;
+    const imageUrl = currentImage.url || `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${currentImage.path}`;
 
     return (
         <div className="carousel-container">
