@@ -294,6 +294,8 @@ import Stripe from 'stripe';
 
 async function testPagoStripe(req: Request, res: Response) {
   console.log("Iniciando test de pago con Stripe");
+  console.log("STRIPE_SECRET_KEY presente:", !!process.env.STRIPE_SECRET_KEY);
+  console.log("STRIPE_SECRET_KEY empieza con:", process.env.STRIPE_SECRET_KEY?.substring(0, 10));
   // La session de stripe la pedimos con el middleware
   try {
   const em = orm.em.fork();
