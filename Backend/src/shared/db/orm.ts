@@ -6,7 +6,7 @@ import { runSeeders } from "./seeder.js";
 export const orm = await MikroORM.init({
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
-  clientUrl: process.env.DATABASE_URL || 'mysql://admin:admin@127.0.0.1:3307/Petsbnb',
+  clientUrl: process.env.DATABASE_URL || process.env.MYSQL_URL || 'mysql://admin:admin@127.0.0.1:3307/Petsbnb',
   highlighter: new SqlHighlighter(),
   driver: MySqlDriver,
   debug: true,
