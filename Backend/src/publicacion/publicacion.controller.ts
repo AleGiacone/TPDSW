@@ -525,7 +525,7 @@ async function update(req: Request, res: Response): Promise<void> {
 async function remove(req: Request, res: Response) {
   try {
 //      const token = req.cookies.access_token;
-//     const em = orm.em.fork();
+     const em = orm.em.fork();
       const idPublicacion = Number.parseInt(req.params.idPublicacion as string);
       const publicacion = await em.findOneOrFail(
         Publicacion, 
