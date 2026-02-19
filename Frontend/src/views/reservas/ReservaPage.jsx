@@ -23,15 +23,16 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-
     return { daysInMonth, startingDayOfWeek };
   };
 
   const isDateDisabled = (date) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     return date < today || disabledDates.includes(dateStr);
   };
 
@@ -44,37 +45,70 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
     if (!selectedStart || selectedEnd || !hoveredDate) return false;
     const start = selectedStart < hoveredDate ? selectedStart : hoveredDate;
     const end = selectedStart < hoveredDate ? hoveredDate : selectedStart;
+    if (hasDisabledDatesInRange(start, end)) return false;
     return date >= start && date <= end;
+  };
+
+  const hasDisabledDatesInRange = (start, end) => {
+    const current = new Date(start);
+    while (current <= end) {
+      const year = current.getFullYear();
+      const month = String(current.getMonth() + 1).padStart(2, '0');
+      const day = String(current.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+      if (disabledDates.includes(dateStr)) return true;
+      current.setDate(current.getDate() + 1);
+    }
+    return false;
   };
 
   const handleDateClick = (date) => {
     if (isDateDisabled(date)) return;
-
     if (!selectedStart || selectedEnd) {
       setSelectedStart(date);
       setSelectedEnd(null);
       onDateChange(date, null);
     } else {
-      if (date < selectedStart) {
-        setSelectedEnd(selectedStart);
+      const start = date < selectedStart ? date : selectedStart;
+      const end = date < selectedStart ? selectedStart : date;
+      if (hasDisabledDatesInRange(start, end)) {
+        alert('El rango seleccionado contiene fechas no disponibles. Por favor elegí otro rango.');
         setSelectedStart(date);
-        onDateChange(date, selectedStart);
-      } else {
-        setSelectedEnd(date);
-        onDateChange(selectedStart, date);
+        setSelectedEnd(null);
+        onDateChange(date, null);
+        return;
       }
+      setSelectedStart(start);
+      setSelectedEnd(end);
+      onDateChange(start, end);
     }
+  };
+
+  const goToPrevMonth = (e) => {
+    e.stopPropagation();
+    const today = new Date();
+    const prevMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+    const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    if (prevMonth >= thisMonth) setCurrentMonth(prevMonth);
+  };
+
+  const goToNextMonth = (e) => {
+    e.stopPropagation();
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+  };
+
+  const getMonthLabel = (offset) => {
+    const d = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + offset, 1);
+    return `${months[d.getMonth()]} ${d.getFullYear()}`;
   };
 
   const renderCalendar = (monthOffset = 0) => {
     const displayMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + monthOffset, 1);
     const { daysInMonth, startingDayOfWeek } = getDaysInMonth(displayMonth);
     const days = [];
-
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
     }
-
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(displayMonth.getFullYear(), displayMonth.getMonth(), day);
       const disabled = isDateDisabled(date);
@@ -82,7 +116,6 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
       const isEnd = selectedEnd && date.toDateString() === selectedEnd.toDateString();
       const inRange = isDateInRange(date);
       const inHoverRange = isDateInHoverRange(date);
-
       days.push(
         <div
           key={day}
@@ -94,42 +127,51 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
         </div>
       );
     }
-
     return days;
   };
 
+  //  Solo si el mes anterior >= mes actual real
+  const today = new Date();
+  const canGoPrev = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1)
+    >= new Date(today.getFullYear(), today.getMonth(), 1);
+
   return (
     <div className="date-picker-container">
-      <div className="calendar-navigation">
-        <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}>
-          ←
-        </button>
-        <span>{months[currentMonth.getMonth()]} {currentMonth.getFullYear()}</span>
-        <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}>
-          →
-        </button>
-      </div>
-
       <div className="calendars-wrapper">
+
+        {/* MES IZQUIERDO */}
         <div className="calendar-grid">
+          <div className="calendar-month-header">
+            <button type="button" onClick={goToPrevMonth} disabled={!canGoPrev}
+              style={{ opacity: canGoPrev ? 1 : 0.2, cursor: canGoPrev ? 'pointer' : 'default' }}>
+              &#8249;
+            </button>
+            <span>{getMonthLabel(0)}</span>
+            <span style={{ width: '36px', display: 'inline-block' }} />
+          </div>
           <div className="calendar-header">
             <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div>
             <div>Jue</div><div>Vie</div><div>Sáb</div>
           </div>
-          <div className="calendar-days">
-            {renderCalendar(0)}
-          </div>
+          <div className="calendar-days">{renderCalendar(0)}</div>
         </div>
 
+        {/* MES DERECHO */}
         <div className="calendar-grid">
+          <div className="calendar-month-header">
+            <span style={{ width: '36px', display: 'inline-block' }} />
+            <span>{getMonthLabel(1)}</span>
+            <button type="button" onClick={goToNextMonth}>
+              &#8250;
+            </button>
+          </div>
           <div className="calendar-header">
             <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div>
             <div>Jue</div><div>Vie</div><div>Sáb</div>
           </div>
-          <div className="calendar-days">
-            {renderCalendar(1)}
-          </div>
+          <div className="calendar-days">{renderCalendar(1)}</div>
         </div>
+
       </div>
 
       <div className="calendar-info">
@@ -139,7 +181,6 @@ const DateRangePicker = ({ onDateChange, disabledDates = [], publicacionId }) =>
     </div>
   );
 };
-
 // Componente Principal de Reserva
 const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
   const [publicacion, setPublicacion] = useState(null);
@@ -178,11 +219,13 @@ const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
       setLoading(false);
     }
   };
-
   const fetchDiasReservados = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/publicacion/dias-reservados/${propPublicacionId}`, {
-        credentials: 'include'
+      const response = await fetch(`${API_BASE_URL}/publicacion/dias-reservados`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idPublicacion: propPublicacionId })
       });
       if (!response.ok) throw new Error('Error al cargar fechas');
       const data = await response.json();
@@ -191,7 +234,6 @@ const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
       console.error('Error fetching reserved days:', err);
     }
   };
-
   const fetchMascotas = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/mascotas/duenos/${userId}`, {
@@ -220,19 +262,19 @@ const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
 
   const calculateDias = () => {
     if (!fechaInicio || !fechaFin) return [];
-
     const dias = [];
     const current = new Date(fechaInicio);
     const end = new Date(fechaFin);
 
     while (current <= end) {
-      dias.push(current.toISOString().split('T')[0]);
+      const year = current.getFullYear();
+      const month = String(current.getMonth() + 1).padStart(2, '0');
+      const day = String(current.getDate()).padStart(2, '0');
+      dias.push(`${year}-${month}-${day}`);
       current.setDate(current.getDate() + 1);
     }
-
     return dias;
   };
-
   const calculateNights = () => {
     if (!fechaInicio || !fechaFin) return 0;
     const diffTime = Math.abs(fechaFin - fechaInicio);
@@ -276,17 +318,14 @@ const ReservaPage = ({ publicacionId: propPublicacionId, userId }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reservaData)
       });
-      const { session } = await response.json();
-
-     
-      window.location.href = session.url;
+      const data = await response.json();
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al crear reserva');
+        throw new Error(data.message || 'Error al crear reserva');
       }
 
-      alert('¡Reserva creada exitosamente!');
+      const { session } = data;
+      window.location.href = session.url;
       // Reset form
       setFechaInicio(null);
       setFechaFin(null);

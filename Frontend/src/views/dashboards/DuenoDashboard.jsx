@@ -54,7 +54,7 @@ const DuenoDashboard = () => {
         return () => intervals.forEach(clearTimeout);
     }, []);
 
-    // 👇 TAMBIÉN agregá esto cada vez que cambia la vista
+
     useEffect(() => {
         forceNavbarVisibility();
     }, [currentView]);
@@ -81,28 +81,68 @@ const DuenoDashboard = () => {
         email: user?.email || '',
         telefono: user?.telefono || '',
         nroDocumento: user?.nroDocumento || '',
-        tipoDocumento: user?.tipoDocumento || ''
+        tipoDocumento: user?.tipoDocumento || 'DNI',
+        telefonoEmergencia: user?.telefonoEmergencia || '',  // ← agregar
     });
     const [editingPerfil, setEditingPerfil] = useState(false);
 
     // ─── FIX: filterStatus moved here, out of renderReservas ───────────────────
     const [filterStatus, setFilterStatus] = useState('todas');
 
+
     const {
         reservas,
         loading: reservasLoading,
         error: reservasError,
         cancelarReserva,
-        getReservasByEstado,
-        isReservaExpired
+        getReservasByEstado,      // filtra por 'pendiente' | 'en_curso' | 'todas'
     } = useReservas(user?.idUsuario, 'dueno');
 
-    // ─── Redirect to reservas view if coming back from a successful payment ────
+
+
+    const [show2FAModal, setShow2FAModal] = useState(false);
+    const [qrCode2FA, setQrCode2FA] = useState(null);
+    const [loading2FA, setLoading2FA] = useState(false);
+
+    // ── Función activar 2FA (igual a cuidador) ──
+    const handleActivate2FA = async () => {
+        setLoading2FA(true);
+        setShow2FAModal(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/usuarios/2fa/generate`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email }),
+            });
+            const data = await response.json();
+            if (data.qrDataUrl) {
+                setQrCode2FA(data.qrDataUrl);
+            } else {
+                alert('Error al generar el código QR');
+            }
+        } catch (err) {
+            console.error('Error al generar 2FA:', err);
+            alert('Error de conexión al generar 2FA');
+        } finally {
+            setLoading2FA(false);
+        }
+    };
+
+    const close2FAModal = () => {
+        setShow2FAModal(false);
+        setQrCode2FA(null);
+    };
+
+    // ─── Redirect to reservas 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        if (params.get('from') === 'payment') {
+        const fromPayment = params.get('from');
+
+        // Si viene del pago, abrir reservas
+        if (fromPayment === 'payment') {
             setCurrentView('reservas');
-            // Clean up the URL without reloading
+            // Limpia la URL
             window.history.replaceState({}, '', window.location.pathname);
         }
     }, []);
@@ -354,51 +394,164 @@ const DuenoDashboard = () => {
         e.preventDefault();
         setLoading(true);
         setError('');
+
+        // 1. Validar nombre
+        if (!mascotaForm.nombre || mascotaForm.nombre.trim() === '') {
+            setError('Por favor, ingresa el nombre de la mascota.');
+            setLoading(false);
+            return;
+        }
+
+        // 2. Validar edad
         const edadNumerica = parseInt(mascotaForm.edad, 10);
+        if (isNaN(edadNumerica) || edadNumerica <= 0 || edadNumerica > 30) {
+            setError('Por favor, ingresa una edad válida (entre 1 y 30 años).');
+            setLoading(false);
+            return;
+        }
+
+        // 3. Validar peso
         const pesoNumerico = parseFloat(mascotaForm.peso);
-        if (isNaN(edadNumerica) || edadNumerica <= 0) { setError('Por favor, ingresa una edad válida.'); setLoading(false); return; }
-        if (isNaN(pesoNumerico) || pesoNumerico <= 0) { setError('Por favor, ingresa un peso válido.'); setLoading(false); return; }
+        if (isNaN(pesoNumerico) || pesoNumerico <= 0 || pesoNumerico > 200) {
+            setError('Por favor, ingresa un peso válido (entre 0.1 y 200 kg).');
+            setLoading(false);
+            return;
+        }
+
+        // 4. Validar sexo
+        if (!mascotaForm.sexo || (mascotaForm.sexo !== 'M' && mascotaForm.sexo !== 'F')) {
+            setError('Por favor, selecciona el sexo de la mascota (Macho o Hembra).');
+            setLoading(false);
+            return;
+        }
+
+        // 5. Validar especie
+        if (!mascotaForm.idEspecie) {
+            setError('Por favor, selecciona una especie.');
+            setLoading(false);
+            return;
+        }
+
+        const especieId = parseInt(mascotaForm.idEspecie);
+        if (isNaN(especieId)) {
+            setError('Especie inválida. Por favor, selecciona nuevamente.');
+            setLoading(false);
+            return;
+        }
+
+        // 6. Validar raza
+        if (!mascotaForm.idRaza) {
+            setError('Por favor, selecciona una raza.');
+            setLoading(false);
+            return;
+        }
+
+        const razaId = parseInt(mascotaForm.idRaza);
+        if (isNaN(razaId)) {
+            setError('Raza inválida. Por favor, selecciona nuevamente.');
+            setLoading(false);
+            return;
+        }
+
         try {
-            const url = editingMascota ? `${API_BASE_URL}/mascotas/${editingMascota.idMascota || editingMascota.id}` : `${API_BASE_URL}/mascotas`;
+            const url = editingMascota
+                ? `${API_BASE_URL}/mascotas/${editingMascota.idMascota || editingMascota.id}`
+                : `${API_BASE_URL}/mascotas`;
+
             const method = editingMascota ? 'PUT' : 'POST';
+
             const mascotaData = {
                 nomMascota: mascotaForm.nombre.trim(),
-                edad: mascotaForm.edad.toString(),
+                edad: mascotaForm.edad.toString(), // Back espera string
                 sexo: mascotaForm.sexo,
                 exotico: Boolean(mascotaForm.exotico),
-                descripcion: mascotaForm.descripcion.trim(),
+                descripcion: mascotaForm.descripcion.trim() || 'Sin descripción', 
                 peso: pesoNumerico,
-                especie: parseInt(mascotaForm.idEspecie),
-                raza: parseInt(mascotaForm.idRaza),
+                especie: especieId,
+                raza: razaId,
                 dueno: parseInt(user.idUsuario)
             };
-            if (editingMascota) mascotaData.idMascota = editingMascota.idMascota;
+
+            if (editingMascota) {
+                mascotaData.idMascota = editingMascota.idMascota;
+            }
+
+            console.log('📤 Enviando datos de mascota:', mascotaData);
+
             const response = await fetch(url, {
-                method, credentials: 'include',
+                method,
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(mascotaData)
             });
+
+            // ============================================================================
+            // MANEJAR RESPUESTA
+            // ============================================================================
+
             if (!response.ok) {
                 const errorData = await response.json().catch(async () => {
                     const text = await response.text();
                     return { message: text || `Error ${response.status}` };
                 });
+
+                // Mostrar error específico del backend
+                console.error('❌ Error del servidor:', errorData);
                 throw new Error(errorData.message || `Error ${response.status}`);
             }
+
             const result = await response.json();
+            console.log('✅ Respuesta del servidor:', result);
+
             const mascotaId = result.data.idMascota || editingMascota?.idMascota;
+
+            // ============================================================================
+            // SUBIR IMAGEN SI EXISTE
+            // ============================================================================
+
             if (mascotaImageFile && mascotaId) {
-                try { await uploadMascotaImage(mascotaId, mascotaImageFile); }
-                catch (imgError) { alert('Mascota guardada pero hubo un error al subir la imagen: ' + imgError.message); }
+                try {
+                    await uploadMascotaImage(mascotaId, mascotaImageFile);
+                    console.log('✅ Imagen subida correctamente');
+                } catch (imgError) {
+                    console.warn('⚠️ Mascota guardada pero error al subir imagen:', imgError);
+                    alert('⚠️ Mascota guardada pero hubo un error al subir la imagen: ' + imgError.message);
+                }
             }
+
             await fetchMascotas();
-            alert(editingMascota ? 'Mascota actualizada exitosamente!' : 'Mascota creada exitosamente!');
-            setMascotaForm({ nombre: '', edad: '', sexo: '', exotico: false, descripcion: '', peso: '', idEspecie: '', idRaza: '' });
+
+            alert(editingMascota
+                ? '✅ Mascota actualizada exitosamente!'
+                : '✅ Mascota creada exitosamente!'
+            );
+
+            // Limpiar formulario
+            setMascotaForm({
+                nombre: '',
+                edad: '',
+                sexo: '',
+                exotico: false,
+                descripcion: '',
+                peso: '',
+                idEspecie: '',
+                idRaza: ''
+            });
             setMascotaImageFile(null);
             setEditingMascota(null);
             setCurrentView('mascotas');
+
         } catch (err) {
-            setError('Error: ' + err.message);
+            console.error('❌ Error al guardar mascota:', err);
+            setError('Error al guardar mascota: ' + err.message);
+
+            // Mostrar alert con el error específico
+            alert('❌ Error al guardar mascota:\n\n' + err.message +
+                '\n\nPor favor, verifica que:\n' +
+                '• La especie y raza existan en la base de datos\n' +
+                '• La raza pertenezca a la especie seleccionada\n' +
+                '• Todos los campos estén completos'
+            );
         } finally {
             setLoading(false);
         }
@@ -417,7 +570,8 @@ const DuenoDashboard = () => {
                 email: user?.email || '',
                 telefono: user?.telefono || '',
                 nroDocumento: user?.nroDocumento || '',
-                tipoDocumento: user?.tipoDocumento || 'DNI'
+                tipoDocumento: user?.tipoDocumento || 'DNI',
+                telefonoEmergencia: user?.telefonoEmergencia || '',  // ← agregar
             });
         }
     }, [user]);
@@ -516,15 +670,15 @@ const DuenoDashboard = () => {
         catch (err) { console.error('Error al cerrar sesión:', err); }
     };
 
-    // ─── renderReservas: NO hooks inside, uses filterStatus from component scope ─
+
     const renderReservas = () => {
         const reservasFiltradas = getReservasByEstado(filterStatus);
 
         const handleCancelarReserva = async (reservaId) => {
-            if (!window.confirm('¿Estás seguro de cancelar esta reserva?')) return;
+            if (!window.confirm('¿Estás seguro de cancelar esta reserva? Esta acción no se puede deshacer.')) return;
             const result = await cancelarReserva(reservaId);
             if (result.success) alert('✅ Reserva cancelada exitosamente');
-            else alert('❌ Error: ' + result.error);
+            else alert('❌ Error al cancelar: ' + result.error);
         };
 
         return (
@@ -546,16 +700,10 @@ const DuenoDashboard = () => {
                             Pendientes ({getReservasByEstado('pendiente').length})
                         </button>
                         <button
-                            onClick={() => setFilterStatus('confirmada')}
-                            className={`filter-btn ${filterStatus === 'confirmada' ? 'active' : ''}`}
+                            onClick={() => setFilterStatus('en_curso')}
+                            className={`filter-btn ${filterStatus === 'en_curso' ? 'active' : ''}`}
                         >
-                            Confirmadas ({getReservasByEstado('confirmada').length})
-                        </button>
-                        <button
-                            onClick={() => setFilterStatus('cancelada')}
-                            className={`filter-btn ${filterStatus === 'cancelada' ? 'active' : ''}`}
-                        >
-                            Canceladas ({getReservasByEstado('cancelada').length})
+                            En curso ({getReservasByEstado('en_curso').length})
                         </button>
                     </div>
                 </div>
@@ -566,9 +714,17 @@ const DuenoDashboard = () => {
                 {reservasFiltradas.length === 0 && !reservasLoading ? (
                     <div className="empty-state">
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>📅</div>
-                        <h3>No tienes reservas {filterStatus !== 'todas' ? filterStatus + 's' : ''}</h3>
-                        <p>Explora las publicaciones disponibles y haz tu primera reserva</p>
-                        <button onClick={() => navigate('/')} className="btn-primary" style={{ marginTop: '16px' }}>
+                        <h3>
+                            {filterStatus === 'todas' && 'No tenés reservas todavía'}
+                            {filterStatus === 'pendiente' && 'No tenés reservas pendientes'}
+                            {filterStatus === 'en_curso' && 'No tenés reservas en curso'}
+                        </h3>
+                        <p>Explorá las publicaciones disponibles y hacé tu primera reserva</p>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="btn-primary"
+                            style={{ marginTop: '16px' }}
+                        >
                             Ver Publicaciones
                         </button>
                     </div>
@@ -576,11 +732,11 @@ const DuenoDashboard = () => {
                     <div className="reservas-grid">
                         {reservasFiltradas.map((reserva) => (
                             <ReservaCard
-                                key={reserva.id || reserva.idReserva}
+                                key={reserva.idReserva || reserva.id}
                                 reserva={reserva}
                                 userType="dueno"
                                 onCancelar={handleCancelarReserva}
-                                isExpired={isReservaExpired(reserva)}
+                            // el estado lo calcula la card desde reserva.estadoCalculado
                             />
                         ))}
                     </div>
@@ -590,9 +746,7 @@ const DuenoDashboard = () => {
     };
 
 
-
     const renderMascotas = () => (
-        // Usamos un fragmento para que no haya wrapper extra
         <>
             {/* CABECERA: fuera del contenedor de cards */}
             <div className="mascotas-header">
@@ -954,78 +1108,162 @@ const DuenoDashboard = () => {
     );
 
     const renderPerfil = () => (
-        <div className="form-container">
+        <div className="dashboard-main">
             <div className="perfil-container">
-                <div className="perfil-header">
-                    <h2 className="section-title">Mi Perfil</h2>
-                    <button onClick={() => { setEditingPerfil(!editingPerfil); setProfileImageFile(null); setError(''); if (editingPerfil) { setPerfilForm({ nombre: user?.nombre || '', email: user?.email || '', telefono: user?.telefono || '', nroDocumento: user?.nroDocumento || '', tipoDocumento: user?.tipoDocumento || '' }); } }} className="btn-primary">
-                        {editingPerfil ? 'Cancelar Edición' : 'Editar Perfil'}
-                    </button>
-                </div>
-                {error && <p className="error-message">{error}</p>}
-                {editingPerfil ? (
-                    <form onSubmit={handlePerfilSubmit} className="form-card">
-                        <div className="form-group" style={{ textAlign: 'center', marginBottom: '30px' }}>
-                            <label className="form-label">Foto de perfil:</label>
-                            <div style={{ margin: '15px 0' }}>
-                                {profileImageFile ? (
-                                    <img src={URL.createObjectURL(profileImageFile)} alt="Preview" style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #f97840' }} />
-                                ) : user?.perfilImage ? (
-                                    <img src={`http://localhost:3000${user.perfilImage}`} alt="Foto actual" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #3b82f6' }} />
-                                ) : (
-                                    <div style={{ width: '150px', height: '150px', borderRadius: '50%', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontSize: '48px', color: '#6b7280' }}>👤</div>
-                                )}
-                            </div>
-                            <input type="file" accept="image/*" onChange={handleProfileImageChange} className="form-input" style={{ marginTop: '10px' }} />
-                            {user?.perfilImage && (
-                                <button type="button" onClick={deleteDuenoProfileImage} className="btn-delete" disabled={imageUploading} style={{ marginTop: '10px' }}>
-                                    {imageUploading ? 'Eliminando...' : 'Eliminar Foto Actual'}
-                                </button>
-                            )}
-                        </div>
-                        <div className="form-group"><label>Nombre:</label><input type="text" name="nombre" value={perfilForm.nombre} onChange={handlePerfilFormChange} required /></div>
-                        <div className="form-group"><label>Email:</label><input type="email" name="email" value={perfilForm.email} onChange={handlePerfilFormChange} required /></div>
-                        <div className="form-group"><label>Teléfono:</label><input type="text" name="telefono" value={perfilForm.telefono} onChange={handlePerfilFormChange} /></div>
-                        <div className="form-group"><label>Número de Documento:</label><input type="text" name="nroDocumento" value={perfilForm.nroDocumento} onChange={handlePerfilFormChange} /></div>
-                        <div className="form-group">
-                            <label>Tipo de Documento:</label>
-                            <select name="tipoDocumento" value={perfilForm.tipoDocumento} onChange={handlePerfilFormChange}>
-                                <option value="">Selecciona tipo</option>
-                                <option value="DNI">DNI</option>
-                                <option value="Pasaporte">Pasaporte</option>
-                                <option value="Libreta Civica">Libreta Cívica</option>
-                            </select>
-                        </div>
-                        <button type="submit" className="btn-primary" disabled={loading || imageUploading}>
-                            {loading || imageUploading ? 'Guardando...' : 'Guardar Cambios'}
-                        </button>
-                    </form>
-                ) : (
-                    <div className="profile-details-card">
-                        <div className="profile-image-display">
+                <h2 className="section-title">Mi Perfil</h2>
+
+                {!editingPerfil ? (
+                    <div className="perfil-card">
+                        {/* ── Foto ── */}
+                        <div className="perfil-image-container">
                             {user?.perfilImage ? (
-                                <img src={`http://localhost:3000${user.perfilImage}`} alt="Foto de perfil" className="profile-display-img" />
+                                <img
+                                    src={`http://localhost:3000${user.perfilImage}`}
+                                    alt="Foto de perfil"
+                                    className="perfil-image"
+                                />
                             ) : (
-                                <div className="profile-placeholder-img">👤</div>
+                                <div className="perfil-placeholder">👤</div>
                             )}
                         </div>
-                        <div className="profile-info">
-                            <p><strong>Nombre:</strong> {user?.nombre}</p>
-                            <p><strong>Email:</strong> {user?.email}</p>
-                            <p><strong>Teléfono:</strong> {user?.telefono || 'N/A'}</p>
-                            <p><strong>Documento:</strong> {user?.tipoDocumento} {user?.nroDocumento || 'N/A'}</p>
+
+                        {/* ── Campos ── */}
+                        <div className="perfil-fields">
+                            <div className="perfil-field">
+                                <span className="field-label">Nombre</span>
+                                <p className="field-value">{user?.nombre}</p>
+                            </div>
+                            <div className="perfil-field">
+                                <span className="field-label">Email</span>
+                                <p className="field-value">{user?.email}</p>
+                            </div>
+                            <div className="perfil-field">
+                                <span className="field-label">Teléfono</span>
+                                <p className="field-value">{user?.telefono || 'No especificado'}</p>
+                            </div>
+                            <div className="perfil-field">
+                                <span className="field-label">Tel. Emergencia</span>
+                                <p className="field-value">{user?.telefonoEmergencia || 'No especificado'}</p>
+                            </div>
+                            <div className="perfil-field">
+                                <span className="field-label">Documento</span>
+                                <p className="field-value">
+                                    {user?.tipoDocumento || 'DNI'} {user?.nroDocumento || 'No especificado'}
+                                </p>
+                            </div>
                         </div>
-                        <div className="delete-user-section">
-                            <button onClick={handleDeleteUser} className="btn-delete" disabled={loading} style={{ width: '100%', padding: '10px', marginTop: '20px' }}>
-                                {loading ? 'Eliminando Cuenta...' : '🗑️ Eliminar Cuenta Definitivamente'}
+
+
+                        <div className="perfil-2fa">
+                            <span className="perfil-2fa-label">🔐 Verificación en dos pasos</span>
+                            <button
+                                type="button"
+                                onClick={handleActivate2FA}
+                                disabled={loading2FA}
+                                className="btn-2fa"
+                            >
+                                {loading2FA ? 'Generando...' : 'Activar 2FA'}
+                            </button>
+                        </div>
+
+                        {/* ── Acciones ── */}
+                        <div className="perfil-actions">
+                            <button
+                                onClick={() => { setEditingPerfil(true); setProfileImageFile(null); setError(''); }}
+                                className="btn-primary"
+                            >
+                                ✏️ Editar Perfil
+                            </button>
+                            <button
+                                onClick={handleDeleteUser}
+                                className="btn-danger"
+                                disabled={loading}
+                            >
+                                {loading ? 'Eliminando...' : '🗑️ Eliminar Cuenta'}
                             </button>
                         </div>
                     </div>
+                ) : (
+                    <form onSubmit={handlePerfilSubmit} className="perfil-form-card">
+                        {/* ── Foto ── */}
+                        <div className="perfil-image-upload">
+                            <label className="form-label">Foto de perfil:</label>
+                            <div className="profile-image-preview">
+                                {profileImageFile ? (
+                                    <img src={URL.createObjectURL(profileImageFile)} alt="Preview" className="perfil-image" />
+                                ) : user?.perfilImage ? (
+                                    <img src={`http://localhost:3000${user.perfilImage}`} alt="Foto actual" className="perfil-image" />
+                                ) : (
+                                    <div className="perfil-placeholder">👤</div>
+                                )}
+                            </div>
+                            <input type="file" accept="image/*" onChange={handleProfileImageChange} />
+                            {user?.perfilImage && (
+                                <button type="button" onClick={deleteDuenoProfileImage} className="btn-danger" disabled={imageUploading}>
+                                    {imageUploading ? 'Eliminando...' : '🗑️ Eliminar Foto'}
+                                </button>
+                            )}
+                        </div>
+
+                        {/* ── Campos ── */}
+                        <div className="form-group">
+                            <label className="form-label">Nombre:</label>
+                            <input type="text" name="nombre" value={perfilForm.nombre}
+                                onChange={handlePerfilFormChange} className="form-input" required />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Email:</label>
+                            <input type="email" name="email" value={perfilForm.email}
+                                onChange={handlePerfilFormChange} className="form-input" required />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Teléfono:</label>
+                            <input type="tel" name="telefono" value={perfilForm.telefono}
+                                onChange={handlePerfilFormChange} className="form-input" />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Teléfono de emergencia:</label>
+                            <input type="tel" name="telefonoEmergencia" value={perfilForm.telefonoEmergencia || ''}
+                                onChange={handlePerfilFormChange} className="form-input" />
+                        </div>
+
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label className="form-label">Tipo de documento:</label>
+                                <select name="tipoDocumento" value={perfilForm.tipoDocumento}
+                                    onChange={handlePerfilFormChange} className="form-select">
+                                    <option value="DNI">DNI</option>
+                                    <option value="Pasaporte">Pasaporte</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Nro. documento:</label>
+                                <input type="text" name="nroDocumento" value={perfilForm.nroDocumento}
+                                    onChange={handlePerfilFormChange} className="form-input" />
+                            </div>
+                        </div>
+
+                        {error && <div className="error-message">{error}</div>}
+
+                        <div className="form-buttons">
+                            <button type="button"
+                                onClick={() => { setEditingPerfil(false); setProfileImageFile(null); setError(''); }}
+                                className="btn-secondary">
+                                Cancelar
+                            </button>
+                            <button type="submit" disabled={loading || imageUploading} className="btn-primary">
+                                {loading || imageUploading ? 'Guardando...' : 'Guardar Cambios'}
+                            </button>
+                        </div>
+                    </form>
                 )}
             </div>
         </div>
     );
-
     if (loading && !mascotas.length && currentView === 'mascotas') {
         return <div className="loading-message">Cargando...</div>;
     }
@@ -1072,7 +1310,6 @@ const DuenoDashboard = () => {
                     </button>
                     <button onClick={handleLogout} className="logout-button">
                         <LogOut size={18} />
-                        Logout
                     </button>
                 </div>
             </nav>
@@ -1083,6 +1320,37 @@ const DuenoDashboard = () => {
                 {currentView === 'perfil' && renderPerfil()}
                 {currentView === 'nueva-mascota' && renderNuevaMascota()}
             </main>
+
+
+            {show2FAModal && (
+                <div className="twofa-modal-overlay" onClick={close2FAModal}>
+                    <div className="twofa-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="twofa-modal-header">
+                            <span className="twofa-modal-icon">🔐</span>
+                            <h3>Verificación en dos pasos</h3>
+                            <button className="twofa-modal-close" onClick={close2FAModal}>✕</button>
+                        </div>
+                        <p className="twofa-modal-desc">
+                            Escaneá este código QR con Google Authenticator o cualquier app TOTP.
+                            Una vez configurado, se te pedirá el código al iniciar sesión.
+                        </p>
+                        <div className="twofa-modal-qr">
+                            {loading2FA ? (
+                                <div className="twofa-loading">Generando código QR...</div>
+                            ) : qrCode2FA ? (
+                                <img src={qrCode2FA} alt="Código QR 2FA" />
+                            ) : (
+                                <div className="twofa-loading" style={{ color: 'var(--error-red)' }}>
+                                    Error al cargar el código QR
+                                </div>
+                            )}
+                        </div>
+                        <button className="twofa-modal-btn-close" onClick={close2FAModal}>
+                            Listo, cerrar
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

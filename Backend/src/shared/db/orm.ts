@@ -25,4 +25,4 @@ export const syncSchema = async () => {
   const em = orm.em.fork();
   await runSeeders(em);
 
-};
+}

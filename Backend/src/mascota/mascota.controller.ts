@@ -19,7 +19,7 @@ function sanitizeMascota(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizeInput = {
     idMascota: sanitizeHTML(req.body.idMascota),
     nomMascota: sanitizeHTML(req.body.nomMascota),
-    edad: parseInt(sanitizeHTML(req.body.edad)),
+    edad: sanitizeHTML(req.body.edad.toString()), // ✅ FIX: Mantener como STRING
     sexo: sanitizeHTML(req.body.sexo),
     exotico: exoticoValue,
     descripcion: sanitizeHTML(req.body.descripcion),
@@ -40,7 +40,7 @@ function sanitizeMascota(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-  const em = orm.em.fork();
+    const em = orm.em.fork();
 
     const mascotas = await em.find(
       Mascota,
@@ -69,57 +69,133 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
+// ============================================================================
+// FUNCIÓN CORREGIDA - authenticate ahora retorna un objeto con el resultado
+// ============================================================================
+function validateMascotaData(sanitizeInput: any): { valid: boolean; error?: string } {
+  if (sanitizeInput.sexo !== 'M' && sanitizeInput.sexo !== 'F') {
+    return { valid: false, error: 'Sexo must be M or F' };
+  }
+
+  if (typeof sanitizeInput.exotico !== 'boolean') {
+    return { valid: false, error: 'Exotico must be boolean' };
+  }
+
+  if (sanitizeInput.edad < 0) {
+    return { valid: false, error: 'La edad tiene que ser mayor a 0' };
+  }
+
+  if (sanitizeInput.peso < 0) {
+    return { valid: false, error: 'El peso tiene que ser mayor a 0' };
+  }
+
+  return { valid: true };
+}
+
+// ============================================================================
+// FUNCIÓN add() CORREGIDA
+// ============================================================================
 async function add(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
 
-    authenticate(req.body.sanitizeInput, res);
+    // 1. Validar datos de entrada
+    const validation = validateMascotaData(req.body.sanitizeInput);
+    if (!validation.valid) {
+      res.status(400).json({ message: validation.error });
+      return; // ← AHORA SÍ RETORNA Y DETIENE LA EJECUCIÓN
+    }
 
-    // Solo validar raza si se proporciona
-    if (req.body.sanitizeInput.raza) {
-      const raza = await em.findOne(Raza, { idRaza: req.body.sanitizeInput.raza, especie: req.body.sanitizeInput.especie });
+    // 2. Validar dueño
+    const dueno = await em.findOne(Dueno, { idUsuario: req.body.sanitizeInput.dueno });
+    if (!dueno) {
+      res.status(404).json({
+        message: 'Dueno not found',
+        data: req.body.sanitizeInput.dueno
+      });
+      return;
+    }
+
+    // 3. Validar especie
+    const especie = await em.findOne(Especie, { idEspecie: req.body.sanitizeInput.especie });
+    if (!especie) {
+      res.status(404).json({
+        message: 'Especie not found',
+        data: req.body.sanitizeInput.especie
+      });
+      return;
+    }
+
+    // 4. Validar raza SOLO si se proporciona
+    if (req.body.sanitizeInput.raza && !isNaN(req.body.sanitizeInput.raza)) {
+      const raza = await em.findOne(Raza, {
+        idRaza: req.body.sanitizeInput.raza,
+        especie: req.body.sanitizeInput.especie
+      });
+
       if (!raza) {
         res.status(400).json({
-          message: 'Raza not found or invalid for especie',
+          message: 'Raza not found or does not belong to the selected especie',
+          details: {
+            razaId: req.body.sanitizeInput.raza,
+            especieId: req.body.sanitizeInput.especie
+          }
         });
         return;
       }
+    } else {
+      // Si no hay raza válida, setear a null
+      req.body.sanitizeInput.raza = null;
     }
 
-    const dueno = await em.findOneOrFail(Dueno, { idUsuario: req.body.sanitizeInput.dueno });
-    if (!dueno) {
-      res.status(404).json({ message: 'Dueno not found', data: req.body.sanitizeInput.dueno });
-      return;
-    }
-
-    const especie = await em.findOne(Especie, { idEspecie: req.body.sanitizeInput.especie });
-    if (!especie) {
-      res.status(404).json({ message: 'Especie not found', data: req.body.sanitizeInput.especie });
-      return;
-    }
-
+    // 5. Crear mascota (todas las validaciones pasaron)
     const mascota = em.create(Mascota, req.body.sanitizeInput);
+
+    // 6. Agregar relaciones
     dueno.mascotas?.add(mascota);
     especie.mascotas?.add(mascota);
+
+    // 7. Persistir
     await em.persistAndFlush(mascota);
     await em.populate(mascota, ['dueno', 'especie', 'raza']);
 
     res.status(201).json({ message: 'Mascota created', data: mascota });
+
   } catch (error: any) {
-    res.status(500).json({ message: "Error creating mascota", error: error.message });
+    console.error('Error creating mascota:', error);
+    res.status(500).json({
+      message: "Error creating mascota",
+      error: error.message
+    });
   }
 }
 
 async function update(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-
+    console.log("Updating mascota with data:", req.body.sanitizeInput);
     const idMascota = Number(req.params.idMascota);
+    console.log("Parsed idMascota:", idMascota);
+    const raza = req.body.sanitizeInput.raza ? parseInt(req.body.sanitizeInput.raza) : null;
+    if (raza) {
+      const razaEntity = await em.findOne(Raza, { idRaza: raza });
+      if (!razaEntity) {
+        res.status(404).json({ message: 'Raza not found' });
+        return;
+      }
+    }
+    const especie = await em.findOne(Especie, { idEspecie: req.body.sanitizeInput.especie });
+    if (!especie) {
+      res.status(404).json({ message: 'Especie not found' });
+      return;
+    }
+
     const mascota = await em.findOneOrFail(
       Mascota,
       { idMascota: idMascota },
       { populate: ['dueno', 'especie', 'raza', 'imagen'] }
     );
+    console.log("Mascota found for update:", mascota);
     em.assign(mascota, req.body.sanitizeInput);
     await em.flush();
     await em.populate(mascota, ['dueno', 'especie', 'raza', 'imagen']);
@@ -134,7 +210,7 @@ async function findByOwner(req: Request, res: Response) {
     const em = orm.em.fork();
 
     const idDueno = Number(req.params.id);
-
+    
     const mascotas = await em.find(
       Mascota,
       { dueno: { idUsuario: idDueno } },
@@ -182,38 +258,14 @@ async function remove(req: Request, res: Response) {
   }
 }
 
+// ============================================================================
+// FUNCIÓN authenticate DEPRECADA - Ahora usa validateMascotaData
+// Mantenida solo por compatibilidad con otras partes del código
+// ============================================================================
 async function authenticate(sanitizeInput: any, res: Response) {
-  try {
-
-    if (sanitizeInput.sexo !== 'M' && sanitizeInput.sexo !== 'F') {
-      res.status(400).json({ message: 'Sexo must be M or F', data: sanitizeInput.sexo });
-      return;
-    }
-
-    if (typeof sanitizeInput.exotico !== 'boolean') {
-      res.status(400).json({
-        message: 'Exotico must be boolean',
-        data: {
-          value: sanitizeInput.exotico,
-          type: typeof sanitizeInput.exotico
-        }
-      });
-      return;
-    }
-
-    if (sanitizeInput.edad < 0) {
-      res.status(400).json({ message: 'La edad tiene que ser mayor a 0', data: sanitizeInput.edad });
-      return;
-    }
-
-    if (sanitizeInput.peso < 0) {
-      res.status(400).json({ message: 'El peso tiene que ser mayor a 0', data: sanitizeInput.peso });
-      return;
-    }
-
-  } catch (error: any) {
-    res.status(500).json({ message: "Error authenticating mascota", error: error.message });
-    return;
+  const validation = validateMascotaData(sanitizeInput);
+  if (!validation.valid) {
+    res.status(400).json({ message: validation.error });
   }
 }
 

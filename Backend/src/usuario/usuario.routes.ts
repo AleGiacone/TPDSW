@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware, sanitizeUsuario, findAll, findOne, add, update, remove, loginCtrl, uploadFiles, setupTwoFactor, codeValidation } from './usuario.controller.js';
+import { authMiddleware, sanitizeUsuario, findAll, findOne, add, update, remove, loginCtrl, uploadFiles, setupTwoFactor, codeValidation,getMe } from './usuario.controller.js';
 import { appendFile } from 'fs';
 
 export const usuarioRouter = Router();
@@ -10,12 +10,12 @@ const upload = multer({ dest: './public/img/perfilImages' });
 
 usuarioRouter.post('/', sanitizeUsuario, loginCtrl);
 usuarioRouter.post('/register', sanitizeUsuario, add);
-usuarioRouter.get('/usuario/me', authMiddleware);
-usuarioRouter.get('/', findAll);
-usuarioRouter.get('/:id', findOne);
-usuarioRouter.put('/:email', sanitizeUsuario, update);
-usuarioRouter.patch('/:email', sanitizeUsuario, update);
-usuarioRouter.delete('/:email', remove);
+usuarioRouter.get('/me', authMiddleware, getMe);
+usuarioRouter.get('/', findAll); //Poner verificaicon para obtener all
+usuarioRouter.get('/:id', authMiddleware, findOne);
+usuarioRouter.put('/:email', authMiddleware, sanitizeUsuario, update);
+usuarioRouter.patch('/:email', authMiddleware, sanitizeUsuario, update);
+usuarioRouter.delete('/:email', authMiddleware, remove);
 usuarioRouter.post('/upload-image', upload.single('imageFile'), uploadFiles, add);
 
 // 2FA

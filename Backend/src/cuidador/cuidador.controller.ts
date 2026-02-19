@@ -6,6 +6,8 @@ import { Cuidador } from './cuidador.entity.js';
 import sanitizeHTML from 'sanitize-html';
 import fs from 'fs';
 import path from 'path';
+import { SECRET_JWT_KEY } from '../config.js';
+import jwt from 'jsonwebtoken';
 
 const sanitizeCuidador = (req: Request, res: Response, next: NextFunction) => {
 
@@ -163,7 +165,7 @@ async function updateProfile(req: Request, res: Response): Promise<void> {
         }
 
         const dataToUpdate = req.body.sanitizeInput || req.body;
-        const camposPermitidos = ['nombre', 'email', 'telefono', 'descripcion', 'sexoCuidador'];
+      const camposPermitidos = ['nombre', 'email', 'telefono', 'descripcion', 'sexoCuidador', 'nroDocumento', 'tipoDocumento'];
         
         if (dataToUpdate.email && dataToUpdate.email !== cuidador.email) {
             const emailExists = await em.findOne(Usuario, { email: dataToUpdate.email });
@@ -332,6 +334,41 @@ async function remove(req: Request, res: Response) {
   } catch (error: any) {
     res.status(500).json({ message: "Error removing cuidador", error: error.message });
   }
+}
+
+async function authenticateUser(req: Request, res: Response, next: NextFunction) {
+  try {
+    console.log("🔒 Auth middleware - Cookies:", req.cookies);
+      
+      const token = req.cookies.access_token; 
+      
+      if (!token) {
+        res.status(401).json({ 
+          success: false,
+          error: 'No autenticado',
+          usuario: null   
+        });
+        return;
+      }
+    
+      try {
+        const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+        req.usuario = decoded;
+        next(); 
+      } catch (err) {
+        res.status(403).json({ 
+          success: false,
+          error: 'Token inválido',
+          usuario: null 
+        });
+        return;
+  }
+  }
+  catch (error: any) {
+    res.status(500).json({ message: "Error authenticating user", error: error.message });
+    return;
+  }
+  next();
 }
 
 export { sanitizeCuidador, findAll, findOne, add, update, remove, updateProfileImage, deleteProfileImage, updateProfile };

@@ -17,7 +17,7 @@ import PaymentCancel from './views/payment/PaymentCancel';
 const UnauthorizedPage = () => (
   <div style={{ textAlign: 'center', padding: '2rem' }}>
     <h2>No autorizado</h2>
-    <p>No tienes permisos para acceder a esta página</p>
+    <p>No teenes permisos para acceder a esta página</p>
     <a href="/">Volver al inicio</a>
   </div>
 );
@@ -37,22 +37,8 @@ function App() {
             <Route path="/unauthorized" element={<><Navbar /><UnauthorizedPage /></>} />
 
             {/* Rutas de pago */}
-            <Route
-              path="/payment/success"
-              element={
-                <ProtectedRoute requiredUserType="dueno">
-                  <PaymentSuccess />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payment/cancel"
-              element={
-                <ProtectedRoute requiredUserType="dueno">
-                  <PaymentCancel />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/payment/success" element={<PaymentSuccess />} />
+            <Route path="/payment/cancel" element={<PaymentCancel />} />
 
             {/* Rutas protegidas */}
             <Route
