@@ -24,9 +24,9 @@ En caso de que salga un error de que el usuario admin no tiene los privilegios s
 docker exec -it Petsbnb mysql -uroot
 
 ### 2. Una vez dentro de MySQL, ejecutar estos comandos SQL:
-GRANT ALL PRIVILEGES ON Petsbnb.* TO 'admin';
-FLUSH PRIVILEGES;
-EXIT;
+* GRANT ALL PRIVILEGES ON Petsbnb.* TO 'admin';
+* FLUSH PRIVILEGES;
+* EXIT;
 
 
 ## Stripe
