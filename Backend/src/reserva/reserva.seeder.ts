@@ -26,6 +26,7 @@ export const seedReservas = async (em: EntityManager): Promise<void> => {
       const publicacion = await em.findOne(Publicacion, { idPublicacion: data.idPublicacion });
       if(existe) {
         console.log('La reserva ya existe, saltando:', data.descripcion);
+        continue;
       }
       if (!dueno) {
         console.log('Dueño encontrado para id:', );

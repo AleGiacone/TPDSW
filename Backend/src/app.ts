@@ -18,7 +18,6 @@ import jwt from 'jsonwebtoken';
 import path from 'path';
 import cors from 'cors';
 import { reservaRouter, webHookRouter } from './reserva/reserva.routes.js';
-import { pagoRouter } from './reserva/pago.routers.js';
 import rateLimit from 'express-rate-limit';
 import { adminRouter } from './admin/admin.routes.js';
 
@@ -114,7 +113,6 @@ app.use("/api/usuario/upload-image", usuarioRouter);
 app.use("/api/publicacion", publicacionRouter);
 app.use("/api/imagenes", imagenRouter);
 app.use("/api/reservas", reservaRouter);
-app.use("/api/pagos", pagoRouter);
 
 
 app.get('/', (req, res) => {

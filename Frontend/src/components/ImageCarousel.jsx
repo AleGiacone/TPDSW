@@ -40,7 +40,8 @@ const ImageCarousel = ({ imagenes, titulo }) => {
                 alt={`Foto de ${titulo || 'publicación'} - ${currentImageIndex + 1}/${totalImages}`}
                 className="carousel-image"
                 onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/400x300?text=Imagen+no+disponible';
+                    e.target.onerror = null;
+                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23cccccc'/%3E%3Ctext x='50%25' y='50%25' fill='%23666666' dominant-baseline='middle' text-anchor='middle' font-size='20'%3EImagen no disponible%3C/text%3E%3C/svg%3E";
                 }}
             />
 

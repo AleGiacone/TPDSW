@@ -47,3 +47,25 @@ Este comando mostrará un link a una pagina de stripe loguearse. Luego de esto e
 Este nos devolverá otra key que es la que necesitaremos agregar en la otra variable de entorno.
 
 STRIPE_WEBHOOK_SECRET = *key proporcionada por la terminal*
+
+
+## GUÍA EJECUCIÓN DE TEST FRONTEND:
+Esta guía detalla los pasos necesarios para instalar, configurar y ejecutar la suite de pruebas del proyecto (Tests Unitarios con Vitest y Tests E2E con Playwright).
+
+Instalaciones previas (desde la carpeta Frontend):
+### Instalar dependencias del proyecto
+npm install
+### Instalar navegadores de Playwright (necesario solo la primera vez)
+npx playwright install
+
+Preparar entorno:
+## Backend: Iniciar Base de datos.
+## Frontend: Correr npm run dev
+
+Ejecución de tests (desde la carpeta Frontend) :
+- Test unitario: npx vitest run
+- Test E2E: npx playwright test --headed
+
+Vista de resultados:
+- Test unitario: npx vitest --ui
+- Test E2E: npx playwright show-report
