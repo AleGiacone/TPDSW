@@ -1,11 +1,8 @@
 import { Collection, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryKey, Property, Cascade, Rel, Type, Platform  } from "@mikro-orm/core";
 import { Publicacion } from "../publicacion/publicacion.entity.js";
-import { Cuidador } from "../cuidador/cuidador.entity.js";
 import { Dueno } from "../dueno/dueno.entity.js";
 import { Mascota } from "../mascota/mascota.entity.js";
-import { DateType } from "@mikro-orm/core/types/DateType.js";
 import { DiaReservado } from "./diaReservado.entity.js";
-import { TemporalDateType } from "./diaReservado.entity.js";
 
 // Testeo de propiedad Date
 

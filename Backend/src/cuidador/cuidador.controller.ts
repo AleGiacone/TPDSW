@@ -408,4 +408,4 @@ async function authenticateUser(req: Request, res: Response, next: NextFunction)
   next();
 }
 
-export { sanitizeCuidador, findAll, findOne, add, update, remove, updateProfileImage, deleteProfileImage, updateProfile };
+export { sanitizeCuidador, findAll, findOne, add, update, remove, updateProfileImage, deleteProfileImage, updateProfile, findByEmail };
