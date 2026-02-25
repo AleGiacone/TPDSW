@@ -15,6 +15,7 @@ const duenosData = [
     idUsuario: 3,
     tipoUsuario: 'dueno'
   },
+  
   {
     nombre: 'Katniss Everdeen',
     email: 'katniss.everdeen@district13.gov',
