@@ -1,4 +1,4 @@
-import { Collection, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryKey, Property, Cascade, Rel, Type, Platform  } from "@mikro-orm/core";
+import { Collection, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryKey, Property, Cascade, Rel, Type, Platform } from "@mikro-orm/core";
 import { Publicacion } from "../publicacion/publicacion.entity.js";
 import { Dueno } from "../dueno/dueno.entity.js";
 import { Mascota } from "../mascota/mascota.entity.js";
@@ -29,13 +29,13 @@ export class Reserva {
   @ManyToOne(() => Publicacion, { nullable: false })
   public publicacion!: Rel<Publicacion>;
 
-  @ManyToOne(() => Dueno, { nullable: false})
+  @ManyToOne(() => Dueno, { nullable: false })
   public dueno!: Rel<Dueno>;
 
-  @ManyToMany({entity: () => Mascota, cascade: [Cascade.ALL]})
+  @ManyToMany({ entity: () => Mascota, cascade: [Cascade.ALL] })
   mascotas = new Collection<Mascota>(this);
 
-  @OneToMany(() => DiaReservado, diasReservados => diasReservados.reserva, { nullable: true})
+  @OneToMany(() => DiaReservado, diasReservados => diasReservados.reserva, { nullable: true, cascade: [Cascade.ALL], orphanRemoval: true })
   diasReservados = new Collection<DiaReservado>(this);
 
 }

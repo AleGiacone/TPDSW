@@ -116,6 +116,7 @@ app.use("/api/reservas", reservaRouter);
 
 
 app.get('/', (req, res) => {
+  
   console.log('Session:', req.session);
   console.log(`Endpoint llamado: ${req.method} ${req.url}`);
   const { usuario } = req.session ?? { usuario: null };
