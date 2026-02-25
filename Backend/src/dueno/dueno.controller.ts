@@ -218,11 +218,11 @@ async function updateDueno(req: Request, res: Response): Promise<void> {
 }
 
 async function remove(req: Request, res: Response) {
+  console.log("🚀 Starting dueno removal process...",req.params.idUsuario);
   const emFork = orm.em.fork();
   try {
     const idUsuario = Number.parseInt(req.params.idUsuario as string);
-
-    const token = req.cookies.access_token;
+/*const token = req.cookies.access_token;
         const decoded = jwt.verify(token, SECRET_JWT_KEY!);
               req.usuario = decoded;
               if(req.body.idUsuario != req.usuario.idUsuario  && req.params.idUsuario != req.usuario.idUsuario && req.usuario.tipoUsuario !== 'admin') {
@@ -231,7 +231,7 @@ async function remove(req: Request, res: Response) {
                   message: 'Acceso denegado',
                   usuario: null});
                 return;
-              }
+              }*/
     const dueno = await emFork.findOneOrFail(Dueno, { idUsuario }, {
       populate: ['mascotas.imagen', 'reservas'] 
     });

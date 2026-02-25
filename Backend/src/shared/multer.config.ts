@@ -18,8 +18,7 @@ const storage = multer.diskStorage({
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-
-        // SIMPLIFICADO - formato: images-1234567890-987654321.jpg
+ 
         const name = `${file.fieldname}-${uniqueSuffix}${ext}`;
 
         console.log('💾 Guardando archivo:', name);

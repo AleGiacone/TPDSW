@@ -153,7 +153,7 @@ async function update(req: Request, res: Response) {
 
 async function updateProfile(req: Request, res: Response): Promise<void> {
     try {
-      const token = req.cookies.access_token; 
+   /*   const token = req.cookies.access_token; 
       const decoded = jwt.verify(token, SECRET_JWT_KEY!);
           req.usuario = decoded;
           if(req.body.idUsuario != req.usuario.idUsuario ) {
@@ -162,7 +162,7 @@ async function updateProfile(req: Request, res: Response): Promise<void> {
               message: 'Acceso denegado',
               usuario: null});
             return;
-          }
+          }*/
         const em = orm.em.fork();
         const { idUsuario } = req.params;
 
@@ -327,7 +327,7 @@ async function authenticateUpdate(req: Request, res: Response): Promise<boolean>
 
 async function remove(req: Request, res: Response) {
   try {
-    const token = req.cookies.access_token; 
+    /*const token = req.cookies.access_token; 
     const decoded = jwt.verify(token, SECRET_JWT_KEY!);
           req.usuario = decoded;
           if(req.body.idUsuario != req.usuario.idUsuario && req.usuario.tipoUsuario !== 'admin') {
@@ -336,7 +336,7 @@ async function remove(req: Request, res: Response) {
               message: 'Acceso denegado',
               usuario: null});
             return;
-          }
+          }*/
         
     console.log("Attempting to remove cuidador with idUsuario:", req.params.idUsuario);
     const em = orm.em.fork();
