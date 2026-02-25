@@ -6,5 +6,6 @@ Anotaciones.md
 Frontend/node_modules
 Frontend/dist
 node_modules
+Backend/coverage/
 Backend/.env
 Frontend/.env
