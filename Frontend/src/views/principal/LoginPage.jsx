@@ -45,6 +45,7 @@ function LoginPage() {
     setLoading(true);
     try {
       const result = await login(email, password, twoFACode);
+      
       if (!result?.success) {
         setErrorMsg(
           result?.error?.includes('2FA') || result?.error?.includes('Invalid')
