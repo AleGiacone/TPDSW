@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';//dom virtual, buscar elementos, simula eventos
 import { describe, it, expect, vi } from 'vitest';
 import ReservaCard from '../components/ReservaCard';
 
@@ -36,7 +36,7 @@ const reservaMock = {
   },
 };
 
-// ── Tests 
+//tests 
 describe('ReservaCard', () => {
 
   it('muestra el título de la publicación', () => {
