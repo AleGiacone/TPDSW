@@ -5,8 +5,10 @@ import { Request, Response, NextFunction } from 'express';
 
 const uploadDir = path.join(process.cwd(), 'public/img/publicacionImages');
 
+// Crear directorio si no existe
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
+    console.log('✅ Directorio creado:', uploadDir);
 }
 
 const storage = multer.diskStorage({
@@ -15,11 +17,11 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
-        const sanitizedOriginalName = path.basename(file.originalname, ext)
-            .replace(/[^a-zA-Z0-9]/g, '_')
-            .substring(0, 30);
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const name = `${file.fieldname}-${sanitizedOriginalName}-${uniqueSuffix}${ext}`;
+ 
+        const name = `${file.fieldname}-${uniqueSuffix}${ext}`;
+
+        console.log('💾 Guardando archivo:', name);
         cb(null, name);
     }
 });
@@ -27,7 +29,7 @@ const storage = multer.diskStorage({
 const uploadPublicacionImages = multer({
     storage: storage,
     limits: {
-        fileSize: 5 * 1024 * 1024,
+        fileSize: 5 * 1024 * 1024, // 5MB
         files: 5,
     },
     fileFilter: (req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
@@ -44,9 +46,8 @@ const baseUpload = uploadPublicacionImages.array('images', 5);
 export const publicacionImageUpload = (req: Request, res: Response, next: NextFunction) => {
     baseUpload(req, res, (err) => {
         if (err) {
-            return res.status(400).json({ 
-                message: 'Error al procesar archivos', 
-                error: err.message 
+            return res.status(400).json({
+                message: 'Error al procesar archivos'
             });
         }
         next();

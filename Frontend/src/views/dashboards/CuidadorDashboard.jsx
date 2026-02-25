@@ -1,26 +1,171 @@
-import React, { useState, useEffect, useCallback } from 'react'; 
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Calendar, X, AlertCircle, Upload, Trash2, Home, CalendarCheck, User, LogOut } from 'lucide-react';
+import PublicacionesGrid from '../../components/PublicacionesGrid';
 import { useAuth } from '../../hooks/useAuth';
-import { Navigate, useNavigate } from 'react-router-dom'; 
-import ImageCarousel from '../../components/ImageCarousel'; 
 import '../../styles/DashboardCuidador.css';
-import { Home, CalendarCheck, User, LogOut } from 'lucide-react';
+import { useReservas } from '../../hooks/useReservas';
+import ReservaCard from '../../components/ReservaCard';
 
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api`;
 
-// mi pequenio dashboard de cuidador
+// Componente de Calendario para selección múltiple de fechas
+const DisponibilidadCalendar = ({ onDateSelect, blockedDates = [], publicacionId }) => {
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [selectedDates, setSelectedDates] = useState([]);
 
+    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    const getDaysInMonth = (date) => {
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDayOfWeek = firstDay.getDay();
+        return { daysInMonth, startingDayOfWeek };
+    };
+
+    const isDateInPast = (date) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return date < today;
+    };
+
+    const isDateBlocked = (date) => {
+        const dateStr = date.toISOString().split('T')[0];
+        return blockedDates.includes(dateStr);
+    };
+
+    const isDateSelected = (date) => {
+        const dateStr = date.toISOString().split('T')[0];
+        return selectedDates.includes(dateStr);
+    };
+
+    const handleDateClick = (date) => {
+        if (isDateInPast(date)) return;
+
+        const dateStr = date.toISOString().split('T')[0];
+
+        setSelectedDates(prev => {
+            const newDates = prev.includes(dateStr)
+                ? prev.filter(d => d !== dateStr)
+                : [...prev, dateStr];
+            onDateSelect(newDates);
+            return newDates;
+        });
+    };
+
+    const renderCalendar = (monthOffset = 0) => {
+        const displayMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + monthOffset, 1);
+        const { daysInMonth, startingDayOfWeek } = getDaysInMonth(displayMonth);
+        const days = [];
+
+        for (let i = 0; i < startingDayOfWeek; i++) {
+            days.push(<div key={`empty-${i}`} className="calendar-day-empty"></div>);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(displayMonth.getFullYear(), displayMonth.getMonth(), day);
+            const inPast = isDateInPast(date);
+            const blocked = isDateBlocked(date);
+            const selected = isDateSelected(date);
+
+            const classNames = [
+                'calendar-day',
+                inPast && 'calendar-day-past',
+                blocked && 'calendar-day-blocked',
+                selected && 'calendar-day-selected'
+            ].filter(Boolean).join(' ');
+
+            days.push(
+                <div
+                    key={day}
+                    onClick={() => handleDateClick(date)}
+                    className={classNames}
+                    title={blocked ? 'Ya reservado' : selected ? 'Click para desbloquear' : 'Click para bloquear'}
+                >
+                    {day}
+                </div>
+            );
+        }
+
+        return days;
+    };
+
+    return (
+        <div className="disponibilidad-calendar">
+            <div className="calendar-header">
+                <button
+                    type="button"
+                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
+                    className="calendar-nav-btn"
+                >
+                    ←
+                </button>
+                <span className="calendar-month-title">
+                    {months[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+                </span>
+                <button
+                    type="button"
+                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
+                    className="calendar-nav-btn"
+                >
+                    →
+                </button>
+            </div>
+
+            <div className="calendar-grid-container">
+                {[0, 1].map(offset => (
+                    <div key={offset} className="calendar-month-grid">
+                        <div className="calendar-weekdays">
+                            {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(day => (
+                                <div key={day} className="calendar-weekday">{day}</div>
+                            ))}
+                        </div>
+                        <div className="calendar-days-grid">
+                            {renderCalendar(offset)}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="calendar-legend">
+                <div className="legend-item">
+                    <div className="legend-icon legend-icon-blocked"></div>
+                    <span>Ya reservado (no modificable)</span>
+                </div>
+                <div className="legend-item">
+                    <div className="legend-icon legend-icon-selected"></div>
+                    <span>Fecha bloqueada por vos</span>
+                </div>
+                <div className="legend-item">
+                    <div className="legend-icon legend-icon-available"></div>
+                    <span>Disponible</span>
+                </div>
+            </div>
+
+            {selectedDates.length > 0 && (
+                <div className="calendar-selection-summary">
+                    <strong>{selectedDates.length}</strong> fecha{selectedDates.length !== 1 ? 's' : ''} para bloquear
+                </div>
+            )}
+        </div>
+    );
+};
 
 const CuidadorDashboard = () => {
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     const [currentView, setCurrentView] = useState('publicaciones');
     const [publicaciones, setPublicaciones] = useState([]);
-    const [reservas, setReservas] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [existingImages, setExistingImages] = useState([]); 
+    const [existingImages, setExistingImages] = useState([]);
     const [imagesToDelete, setImagesToDelete] = useState([]);
     const [editingPublicacion, setEditingPublicacion] = useState(null);
     const [editingProfile, setEditingProfile] = useState(false);
-    const { user, logout, updateUser} = useAuth(); 
+    const { user, logout, updateUser } = useAuth();
     const [profileFormData, setProfileFormData] = useState({
         nombre: '',
         email: '',
@@ -31,130 +176,12 @@ const CuidadorDashboard = () => {
         descripcion: '',
     });
     const [profileImage, setProfileImage] = useState(null);
+    const [files, setFiles] = useState([]);
 
-
-const startEditProfile = () => {
-    if (user) {
-        setProfileFormData({
-            nombre: user.nombre || '',
-            email: user.email || '',
-            telefono: user.telefono || '',
-            tipoDocumento: user.tipoDocumento || 'DNI',
-            nroDocumento: user.nroDocumento || '',
-            sexoCuidador: user.sexoCuidador || '',
-            descripcion: user.descripcion || '',
-        });
-        setProfileImage(null);
-        setError('');
-        setEditingProfile(true);
-    }
-};
-
-const cancelEditProfile = () => {
-    setEditingProfile(false);
-    setProfileImage(null);
-    setError('');
-};
-
-const handleProfileChange = (e) => {
-    const { name, value } = e.target;
-    setProfileFormData(prev => ({
-        ...prev,
-        [name]: value
-    }));
-};
-
-const handleProfileImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-        setProfileImage(e.target.files[0]);
-    }
-};
-
-const handleUpdateProfile = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    
-    try {
-        let updatedImagePath = user?.perfilImage;
-        
-        if (profileImage) {
-            console.log('📸 Subiendo nueva imagen de perfil...');
-            const imageFormData = new FormData();
-            imageFormData.append('profileImage', profileImage);
-            
-            const imageResponse = await fetch(
-                `${API_BASE_URL}/cuidador/${user.idUsuario}/profile-image`, 
-                {
-                    method: 'POST',
-                    body: imageFormData,
-                    credentials: 'include'
-                }
-            );
-            
-            if (!imageResponse.ok) {
-                const imgError = await imageResponse.json();
-                throw new Error(imgError.message || 'Error al actualizar la imagen');
-            }
-            
-            const imageData = await imageResponse.json();
-            updatedImagePath = imageData.data.perfilImage;
-        }
-
-        const response = await fetch(
-            `${API_BASE_URL}/cuidador/${user.idUsuario}/profile`, 
-            {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    nombre: profileFormData.nombre,
-                    email: profileFormData.email,
-                    telefono: profileFormData.telefono,
-                    descripcion: profileFormData.descripcion,
-                    sexoCuidador: profileFormData.sexoCuidador
-                }),
-                credentials: 'include'
-            }
-        );
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al actualizar perfil');
-        }
-
-        const data = await response.json();
-        console.log(' Respuesta del servidor:', data);
-        
-        const updatedUserData = {
-            ...user,
-            nombre: profileFormData.nombre,
-            email: profileFormData.email,
-            telefono: profileFormData.telefono,
-            descripcion: profileFormData.descripcion,
-            sexoCuidador: profileFormData.sexoCuidador,
-            perfilImage: updatedImagePath
-        };
-        
-        
-        updateUser(updatedUserData);
-        
-        setEditingProfile(false);
-        setProfileImage(null);
-        setError('')
-
-    } catch (error) {
-        console.error(' Error al actualizar perfil:', error);
-        setError(error.message || 'Error al actualizar el perfil');
-        alert(' ' + error.message);
-    } finally {
-        setLoading(false);
-    }
-};
-    const [files, setFiles] = useState([]); 
-    
-    const API_BASE_URL = 'http://localhost:3000/api';
+    // Estados para disponibilidad
+    const [showCalendar, setShowCalendar] = useState(false);
+    const [diasReservados, setDiasReservados] = useState([]);
+    const [fechasABloquear, setFechasABloquear] = useState([]);
 
     const [formData, setFormData] = useState({
         titulo: '',
@@ -165,27 +192,164 @@ const handleUpdateProfile = async (e) => {
         cantAnimales: '',
         exotico: false
     });
-    
+
+    const {
+        reservas,
+        loading: reservasLoading,
+        error: reservasError,
+        getReservasByEstado,
+    } = useReservas(user?.idUsuario, 'cuidador');
+
+    const [filterStatus, setFilterStatus] = useState('todas');
+
+    // Estados para 2FA
+    const [show2FAModal, setShow2FAModal] = useState(false);
+    const [qrCode2FA, setQrCode2FA] = useState(null);
+    const [loading2FA, setLoading2FA] = useState(false);
+
+    const handleActivate2FA = async () => {
+        setLoading2FA(true);
+        setShow2FAModal(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/usuarios/2fa/generate`, {
+                method: 'POST',
+                credentials: 'include',
+                body: JSON.stringify({ email: user.email }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+            if (data.qrDataUrl) {
+                setQrCode2FA(data.qrDataUrl);
+            }
+        } catch (err) {
+            setError('Error al generar código QR para 2FA');
+        } finally {
+            setLoading2FA(false);
+        }
+    };
+
+    const close2FAModal = () => {
+        setShow2FAModal(false);
+        setQrCode2FA(null);
+    };
+
+    const startEditProfile = () => {
+        if (user) {
+            setProfileFormData({
+                nombre: user.nombre || '',
+                email: user.email || '',
+                telefono: user.telefono || '',
+                tipoDocumento: user.tipoDocumento || 'DNI',
+                nroDocumento: user.nroDocumento || '',
+                sexoCuidador: user.sexoCuidador || '',
+                descripcion: user.descripcion || '',
+            });
+            setProfileImage(null);
+            setError('');
+            setEditingProfile(true);
+        }
+    };
+
+    const cancelEditProfile = () => {
+        setEditingProfile(false);
+        setProfileImage(null);
+        setError('');
+    };
+
+    const handleProfileChange = (e) => {
+        const { name, value } = e.target;
+        setProfileFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleProfileImageChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setProfileImage(e.target.files[0]);
+        }
+    };
+
+    const handleUpdateProfile = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+
+        try {
+            let updatedImagePath = user?.perfilImage;
+
+            if (profileImage) {
+                const imageFormData = new FormData();
+                imageFormData.append('profileImage', profileImage);
+
+                const imageResponse = await fetch(
+                    `${API_BASE_URL}/cuidador/${user.idUsuario}/profile-image`,
+                    { method: 'POST', body: imageFormData, credentials: 'include' }
+                );
+
+                if (!imageResponse.ok) {
+                    const imgError = await imageResponse.json();
+                    throw new Error(imgError.message || 'Error al actualizar la imagen');
+                }
+
+                const imageData = await imageResponse.json();
+                updatedImagePath = imageData.data.perfilImage;
+            }
+
+            const response = await fetch(
+                `${API_BASE_URL}/cuidador/${user.idUsuario}/profile`,
+                {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nombre: profileFormData.nombre,
+                        email: profileFormData.email,
+                        telefono: profileFormData.telefono,
+                        descripcion: profileFormData.descripcion,
+                        sexoCuidador: profileFormData.sexoCuidador,
+                        nroDocumento: profileFormData.nroDocumento,
+                        tipoDocumento: profileFormData.tipoDocumento,
+                    }),
+                    credentials: 'include'
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al actualizar perfil');
+            }
+
+            const updatedUserData = {
+                ...user,
+                nombre: profileFormData.nombre,
+                email: profileFormData.email,
+                telefono: profileFormData.telefono,
+                descripcion: profileFormData.descripcion,
+                sexoCuidador: profileFormData.sexoCuidador,
+                perfilImage: updatedImagePath
+            };
+
+            updateUser(updatedUserData);
+            setEditingProfile(false);
+            setProfileImage(null);
+            setError('');
+
+        } catch (error) {
+            setError(error.message || 'Error al actualizar el perfil');
+            alert('❌ ' + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleFileChange = (e) => {
-       
         const newlySelectedFiles = Array.from(e.target.files);
+        const allFiles = [...files, ...newlySelectedFiles];
 
-       
-        const existingFiles = files; 
-        const allFiles = [...existingFiles, ...newlySelectedFiles];
-
-       
         const uniqueFilesMap = new Map();
         allFiles.forEach(file => {
             const key = `${file.name}-${file.size}-${file.lastModified}`;
-            if (!uniqueFilesMap.has(key)) {
-                uniqueFilesMap.set(key, file);
-            }
+            if (!uniqueFilesMap.has(key)) uniqueFilesMap.set(key, file);
         });
 
         const arrayUniqueFiles = Array.from(uniqueFilesMap.values());
-
-        
         const limitedFiles = arrayUniqueFiles.slice(0, 5);
 
         if (arrayUniqueFiles.length > 5) {
@@ -193,30 +357,22 @@ const handleUpdateProfile = async (e) => {
         }
 
         setFiles(limitedFiles);
-
-       o
-        e.target.value = null; 
+        e.target.value = null;
     };
 
-const removeFile = (indexToRemove) => {
-    console.log(`   Archivo a remover: ${files[indexToRemove]?.name}`);
-    
-    const newFiles = files.filter((_, index) => index !== indexToRemove);
-    
-    console.log(`   Archivos restantes: ${newFiles.length}`);
-    setFiles(newFiles);
-};
-   
+    const removeFile = (indexToRemove) => {
+        setFiles(files.filter((_, index) => index !== indexToRemove));
+    };
+
     const fetchPublicaciones = useCallback(async () => {
         if (!user?.idUsuario) return;
         setLoading(true);
         setError('');
-        
+
         try {
-            const userId = user.idUsuario;
-            const response = await fetch(`${API_BASE_URL}/publicacion/cuidador/${userId}`, {
+            const response = await fetch(`${API_BASE_URL}/publicacion/cuidador/${user.idUsuario}`, {
                 method: 'GET',
-                credentials: 'include', 
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' }
             });
 
@@ -225,216 +381,138 @@ const removeFile = (indexToRemove) => {
             }
 
             const data = await response.json();
-            console.log('DB Response:', data.publicaciones);
             setPublicaciones(Array.isArray(data.publicaciones) ? data.publicaciones : []);
         } catch (err) {
             setError('Error al cargar publicaciones: ' + err.message);
         } finally {
             setLoading(false);
         }
-    }, [user?.idUsuario]); 
+    }, [user?.idUsuario]);
 
-    const fetchReservas = useCallback(async () => {
-        if (!user?.id) return;
+    const fetchDiasReservados = async (publicacionId) => {
+        if (!publicacionId) return;
+
         try {
-            const response = await fetch(`${API_BASE_URL}/reserva/cuidador/${user.id}`, {
-                method: 'GET', 
-                credentials: 'include', 
-                headers: { 'Content-Type': 'application/json' }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setReservas(data.reservas || data || []);
-            }
+            const response = await fetch(
+                `${API_BASE_URL}/publicacion/dias-reservados`,
+                {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idPublicacion: publicacionId })
+                }
+            );
+
+            if (!response.ok) throw new Error(`Error ${response.status}`);
+
+            const data = await response.json();
+            setDiasReservados(data.data || []);
         } catch (err) {
-            console.error('Error al cargar reservas:', err);
+            setDiasReservados([]);
         }
-    }, [user?.id]); 
+    };
 
-
+    const handleDateSelect = useCallback((dates) => {
+        setFechasABloquear(dates);
+    }, []);
 
     useEffect(() => {
-        if (user?.idUsuario) {
-            fetchPublicaciones();
-        }
-    }, [user?.idUsuario, fetchPublicaciones]); 
-
+        if (user?.idUsuario) fetchPublicaciones();
+    }, [user?.idUsuario, fetchPublicaciones]);
 
     useEffect(() => {
-        if (user?.id) {
-            fetchReservas();
-        }
-    }, [user?.id, fetchReservas]); 
-
+        if (editingPublicacion?.id) fetchDiasReservados(editingPublicacion.id);
+    }, [editingPublicacion?.id]);
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+        e.preventDefault();
+        setLoading(true);
+        setError('');
 
-    const userId = user.id || user.idUsuario || user.userId;
-    
-    if (!userId) {
-        setError('Error: No se pudo obtener el ID del usuario');
-        setLoading(false);
-        return;
-    }
+        const userId = user.id || user.idUsuario || user.userId;
 
-    console.log("\n=== 🔍 VERIFICACIÓN PRE-ENVÍO ===");
-    console.log("📁 Total de archivos en state:", files.length);
-    
-
-    const fileSignatures = files.map(f => `${f.name}-${f.size}-${f.lastModified}`);
-    const uniqueSignatures = new Set(fileSignatures);
-    
-    if (fileSignatures.length !== uniqueSignatures.size) {
-        fileSignatures.forEach((sig, i) => {
-            const count = fileSignatures.filter(s => s === sig).length;
-            if (count > 1) {
-                console.error(`  Duplicado: ${files[i].name} (aparece ${count} veces)`);
-            }
-        });
-    } else {
-        console.log("✅ Todos los archivos en state son únicos");
-    }
-    
-    files.forEach((file, i) => {
-        console.log(`  ${i + 1}. ${file.name} (${(file.size / 1024).toFixed(2)} KB) [${file.lastModified}]`);
-    });
-
-    const formDataPayload = new FormData();
-    formDataPayload.append('idUsuario', userId);
-    formDataPayload.append('titulo', formData.titulo);
-    formDataPayload.append('descripcion', formData.descripcion);
-    formDataPayload.append('tarifaPorDia', formData.tarifaPorDia);
-    formDataPayload.append('ubicacion', formData.ubicacion);
-    formDataPayload.append('tipoAlojamiento', formData.tipoAlojamiento);
-    formDataPayload.append('cantAnimales', formData.cantAnimales);
-    formDataPayload.append('exotico', formData.exotico);
-
-    console.log("\n📎 Agregando archivos al FormData:");
-    files.forEach((file, index) => {
-        console.log(`  Agregando ${index + 1}/${files.length}: ${file.name} (${file.size} bytes)`);
-        formDataPayload.append('images', file, file.name);
-    });
-
-    let imageCount = 0;
-    const imagesInFormData = [];
-    for (let [key, value] of formDataPayload.entries()) {
-        if (key === 'images') {
-            imageCount++;
-            imagesInFormData.push({
-                index: imageCount,
-                name: value.name,
-                size: value.size,
-                type: value.type
-            });
-            console.log(`  images[${imageCount}]:`, {
-                name: value.name,
-                size: value.size,
-                type: value.type
-            });
-        }
-    }
-
-    const formDataNames = imagesInFormData.map(img => img.name);
-    const uniqueFormDataNames = new Set(formDataNames);
-    if (formDataNames.length !== uniqueFormDataNames.size) {
-        setError('Hay archivos duplicados en las imágenes seleccionadas');
-        setLoading(false);
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/publicacion`, {
-            method: 'POST',
-            credentials: 'include',
-            body: formDataPayload
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Error ${response.status}`);
-        }
-
-        await fetchPublicaciones();
-        setFiles([]);
-        setFormData({
-            titulo: '',
-            descripcion: '',
-            tarifaPorDia: '',
-            ubicacion: '',
-            tipoAlojamiento: '',
-            cantAnimales: '',
-            exotico: false
-        });
-        setCurrentView('publicaciones');
-        alert('Publicación creada exitosamente');
-    } catch (err) {
-        console.error('Error al crear publicación:', err);
-        setError('Error al crear publicación: ' + err.message);
-        alert('Error al crear publicación: ' + err.message);
-    } finally {
-        setLoading(false);
-    }
-};
-
-    const handleDeleteUser = async () => {
-        if (!window.confirm('🚨 ADVERTENCIA: Esta acción es irreversible. ¿Estás absolutamente seguro de que quieres ELIMINAR tu cuenta? Se eliminarán todas tus publicaciones y reservas.')) {
+        if (!userId) {
+            setError('Error: No se pudo obtener el ID del usuario');
+            setLoading(false);
             return;
         }
+
+        const formDataPayload = new FormData();
+        formDataPayload.append('idUsuario', userId);
+        formDataPayload.append('titulo', formData.titulo);
+        formDataPayload.append('descripcion', formData.descripcion);
+        formDataPayload.append('tarifaPorDia', formData.tarifaPorDia);
+        formDataPayload.append('ubicacion', formData.ubicacion);
+        formDataPayload.append('tipoAlojamiento', formData.tipoAlojamiento);
+        formDataPayload.append('cantAnimales', formData.cantAnimales);
+        formDataPayload.append('exotico', formData.exotico);
+
+        files.forEach((file) => {
+            formDataPayload.append('images', file, file.name);
+        });
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/publicacion`, {
+                method: 'POST',
+                credentials: 'include',
+                body: formDataPayload
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Error ${response.status}`);
+            }
+
+            await fetchPublicaciones();
+            setFiles([]);
+            setFormData({ titulo: '', descripcion: '', tarifaPorDia: '', ubicacion: '', tipoAlojamiento: '', cantAnimales: '', exotico: false });
+            setCurrentView('publicaciones');
+            alert('✅ Publicación creada exitosamente');
+        } catch (err) {
+            setError('Error al crear publicación: ' + err.message);
+            alert('❌ Error al crear publicación: ' + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteUser = async () => {
+        if (!window.confirm('🚨 ADVERTENCIA: Esta acción es irreversible. ¿Estás absolutamente seguro de que quieres ELIMINAR tu cuenta? Se eliminarán todas tus publicaciones y reservas.')) return;
 
         setLoading(true);
         setError('');
 
         try {
             const userId = user.idUsuario;
-            if (!userId) {
-                throw new Error('ID de usuario no encontrado.');
-            }
+            if (!userId) throw new Error('ID de usuario no encontrado.');
 
-            const response = await fetch(
-                `${API_BASE_URL}/cuidador/${userId}`,
-                {
-                    method: 'DELETE',
-                    credentials: 'include'
-                }
-            );
+            const response = await fetch(`${API_BASE_URL}/cuidador/${userId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.message || `Error ${response.status} al eliminar la cuenta.`);
             }
 
-            
             await logout();
             alert('✅ Cuenta eliminada exitosamente. Serás redirigido.');
-            navigate('/'); 
+            navigate('/');
 
         } catch (error) {
-            console.error('❌ Error al eliminar la cuenta:', error);
             setError(error.message || 'Error al eliminar la cuenta. Inténtalo de nuevo.');
-            alert('Error: ' + (error.message || 'No se pudo eliminar la cuenta.'));
+            alert('❌ Error: ' + (error.message || 'No se pudo eliminar la cuenta.'));
         } finally {
             setLoading(false);
         }
     };
 
-useEffect(() => {
-    files.forEach((file, i) => {
-        console.log(`  ${i + 1}. ${file.name}`);
-    });
-}, [files]);
-
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
+        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
-   
     const handleLogout = async () => {
         try {
             await logout();
@@ -444,41 +522,41 @@ useEffect(() => {
         }
     };
 
-
-
     const deletePublicacion = async (id) => {
-        if (!window.confirm('¿Estás seguro de eliminar esta publicación? Esta acción es irreversible y eliminará todas las imágenes asociadas.')) { 
-            return; 
+        if (!id) {
+            alert('❌ Error: No se puede eliminar - ID inválido');
+            return;
         }
-        
+
+        if (!window.confirm(`⚠️ ¿Estás seguro de eliminar esta publicación?\n\nEsta acción es irreversible.`)) return;
+
         setLoading(true);
         setError('');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/publicacion/${id}`, { 
-                method: 'DELETE', 
-                credentials: 'include', 
-                headers: { 'Content-Type': 'application/json' } 
+            const response = await fetch(`${API_BASE_URL}/publicacion/${id}`, {
+                method: 'DELETE',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' }
             });
 
-            if (!response.ok) { 
+            if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `Error ${response.status}: No se pudo eliminar la publicación.`); 
+                throw new Error(errorData.message || `Error ${response.status}: No se pudo eliminar la publicación.`);
             }
-           
-            await fetchPublicaciones();
 
-        } catch (err) { 
-            console.error('Error al eliminar:', err);
+            await fetchPublicaciones();
+            alert('✅ Publicación eliminada exitosamente');
+
+        } catch (err) {
             setError('Error al eliminar publicación: ' + err.message);
-            alert(' Error al eliminar publicación: ' + err.message); 
+            alert('❌ Error al eliminar publicación: ' + err.message);
         } finally {
             setLoading(false);
         }
     };
+
     const startEditPublicacion = (pub) => {
-        console.log('Editando publicación:', pub);
-        
         setEditingPublicacion(pub);
         setFormData({
             titulo: pub.titulo,
@@ -492,6 +570,8 @@ useEffect(() => {
         setExistingImages(pub.imagenes || []);
         setFiles([]);
         setImagesToDelete([]);
+        setShowCalendar(false);
+        setFechasABloquear([]);
         setCurrentView('editar-publicacion');
     };
 
@@ -500,24 +580,60 @@ useEffect(() => {
         setExistingImages(prev => prev.filter(img => img.id !== imageId));
     };
 
-
     const cancelEdit = () => {
         setEditingPublicacion(null);
-        setFormData({
-            titulo: '',
-            descripcion: '',
-            tarifaPorDia: '',
-            ubicacion: '',
-            tipoAlojamiento: '',
-            cantAnimales: '',
-            exotico: false
-        });
+        setFormData({ titulo: '', descripcion: '', tarifaPorDia: '', ubicacion: '', tipoAlojamiento: '', cantAnimales: '', exotico: false });
         setExistingImages([]);
         setFiles([]);
         setImagesToDelete([]);
+        setShowCalendar(false);
+        setFechasABloquear([]);
+        setDiasReservados([]);
         setCurrentView('publicaciones');
     };
 
+    const handleBloquearFechas = async () => {
+        if (fechasABloquear.length === 0) {
+            alert('⚠️ Selecciona al menos una fecha para bloquear');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const bloqueoData = {
+                idPublicacion: editingPublicacion.id,
+                dias: fechasABloquear,
+                titulo: editingPublicacion.titulo,
+                descripcion: editingPublicacion.descripcion,
+                tarifaPorDia: editingPublicacion.tarifaPorDia,
+                ubicacion: editingPublicacion.ubicacion,
+                tipoAlojamiento: editingPublicacion.tipoAlojamiento,
+                cantAnimales: editingPublicacion.cantAnimales,
+                exotico: editingPublicacion.exotico
+            };
+
+            const response = await fetch(`${API_BASE_URL}/publicacion/reserva-cuidador`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bloqueoData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Error ${response.status}`);
+            }
+
+            alert(`✅ ${fechasABloquear.length} fecha(s) bloqueada(s)`);
+            setFechasABloquear([]);
+            await fetchDiasReservados(editingPublicacion.id);
+
+        } catch (err) {
+            alert('❌ Error: ' + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -526,7 +642,6 @@ useEffect(() => {
 
         try {
             const formDataPayload = new FormData();
-            
             formDataPayload.append('titulo', formData.titulo);
             formDataPayload.append('descripcion', formData.descripcion);
             formDataPayload.append('tarifaPorDia', formData.tarifaPorDia);
@@ -534,21 +649,19 @@ useEffect(() => {
             formDataPayload.append('tipoAlojamiento', formData.tipoAlojamiento);
             formDataPayload.append('cantAnimales', formData.cantAnimales);
             formDataPayload.append('exotico', formData.exotico);
-        
+
             if (imagesToDelete.length > 0) {
                 formDataPayload.append('imagesToDelete', JSON.stringify(imagesToDelete));
             }
-            
-            files.forEach((file) => {
-                formDataPayload.append('images', file);
-            });
+
+            files.forEach((file) => formDataPayload.append('images', file));
 
             const response = await fetch(`${API_BASE_URL}/publicacion/${editingPublicacion.id}`, {
                 method: 'PUT',
                 credentials: 'include',
                 body: formDataPayload
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.message || `Error ${response.status}`);
@@ -556,245 +669,109 @@ useEffect(() => {
 
             await fetchPublicaciones();
             cancelEdit();
-            alert('Publicación actualizada exitosamente!');
+            alert('✅ Publicación actualizada exitosamente!');
 
         } catch (err) {
-            console.error('Error al actualizar:', err);
             setError('Error al actualizar publicación: ' + err.message);
         } finally {
             setLoading(false);
         }
     };
 
-
-    const updateReservaEstado = async (reservaId, nuevoEstado) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/reserva/${reservaId}/estado`, { 
-                method: 'PUT', 
-                credentials: 'include', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ estado: nuevoEstado })
-            });
-            if (!response.ok) { 
-                throw new Error(`Error ${response.status}`); 
-            }
-            setReservas(prev => prev.map(reserva => 
-                reserva.id === reservaId ? { ...reserva, estado: nuevoEstado } : reserva
-            ));
-            alert(`Reserva ${nuevoEstado === 'confirmada' ? 'aceptada' : 'rechazada'} exitosamente`);
-        } catch (err) { 
-            alert('Error al actualizar reserva: ' + err.message); 
-        }
-    };
-
-    const renderPublicaciones = () => (
-        <div className="dashboard-main">
-            <div className="publicaciones-header">
-                <h2 className="section-title">Mis Publicaciones</h2>
-                <button
-                    onClick={() => setCurrentView('nueva-publicacion')}
-                    className="btn-primary"
-                >
-                    + Nueva Publicación
+    const renderPublicaciones = () => {
+        const renderDashboardActions = (pub) => (
+            <>
+                <button onClick={() => startEditPublicacion(pub)} className="btn-edit">
+                    ✏️ Editar
                 </button>
-            </div>
+                <button onClick={() => deletePublicacion(pub.id)} className="btn-delete">
+                    🗑️ Eliminar
+                </button>
+            </>
+        );
 
-            {loading && <div className="loading-message">Cargando publicaciones...</div>}
-            
-            {error && <div className="error-message">{error}</div>}
-
-            {publicaciones.length === 0 && !loading ? (
-                <div className="empty-state">
-                    <p>Aún no tienes publicaciones</p>
+        return (
+            <>
+                <div className="publicaciones-header">
+                    <h2 className="section-title">Mis Publicaciones</h2>
+                    <button onClick={() => setCurrentView('nueva-publicacion')} className="btn-primary">
+                        + Nueva Publicación
+                    </button>
                 </div>
-            ) : (
-                <div className="publicaciones-grid">
-                    {publicaciones.map((pub) => (
-                        <div key={pub.id} className="publicacion-card">
-                            <div className="card-image-wrapper">
-                                <ImageCarousel 
-                                    imagenes={pub.imagenes || []} 
-                                    titulo={pub.titulo}
-                                />
-                            </div>
-                            
-                            <h3 className="card-title">{pub.titulo}</h3>
-                            <p className="card-description">{pub.descripcion}</p>
-                            
-                            <div className="card-info">
-                                <div className="price-location">
-                                    <span className="price">
-                                        ${pub.tarifaPorDia}/día
-                                    </span>
-                                    <span className="location">📍 {pub.ubicacion}</span>
-                                </div>
-                                <div className="card-details">
-                                    <span>Tipo: {pub.tipoAlojamiento} | Max animales: {pub.cantAnimales}</span>
-                                    {pub.exotico && <span className="exotic-badge"> | Acepta exóticos</span>}
-                                </div>
-                            </div>
-
-                            <div className="card-buttons">
-                                <button onClick={() => startEditPublicacion(pub)} className="btn-edit">
-                                    Editar
-                                </button>
-                                <button 
-                                    onClick={() => deletePublicacion(pub.id)}
-                                    className="btn-delete"
-                                >
-                                    Eliminar
-                                </button>
-                                <button className="btn-reservas">
-                                    Ver Reservas
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                <div className="publicaciones-grid-wrapper">
+                    <PublicacionesGrid
+                        publicaciones={publicaciones}
+                        loading={loading}
+                        error={error}
+                        onRetry={fetchPublicaciones}
+                        renderCardActions={renderDashboardActions}
+                        emptyMessage="Aún no tienes publicaciones"
+                        showCuidadorInfo={false}
+                        isDashboard={false}
+                    />
                 </div>
-            )}
-        </div>
-    );
+            </>
+        );
+    };
 
     const renderNuevaPublicacion = () => (
         <div className="dashboard-main">
             <div className="form-container">
                 <h2 className="section-title">Nueva Publicación</h2>
-                
                 <form onSubmit={handleSubmit} className="form-card" encType="multipart/form-data">
                     <div className="form-group">
                         <label className="form-label">Título:</label>
-                        <input 
-                            type="text" 
-                            name="titulo" 
-                            value={formData.titulo} 
-                            onChange={handleChange} 
-                            required 
-                            className="form-input" 
-                        />
+                        <input type="text" name="titulo" value={formData.titulo} onChange={handleChange} required className="form-input" placeholder="Ej: Cuidado de mascotas en casa amplia con jardín" />
                     </div>
-                    
                     <div className="form-group">
                         <label className="form-label">Descripción:</label>
-                        <textarea 
-                            name="descripcion" 
-                            value={formData.descripcion} 
-                            onChange={handleChange} 
-                            rows={4} 
-                            required 
-                            className="form-textarea" 
-                        />
+                        <textarea name="descripcion" value={formData.descripcion} onChange={handleChange} rows={4} required className="form-textarea" placeholder="Describe tu espacio, experiencia y lo que ofreces..." />
                     </div>
-
                     <div className="form-grid">
                         <div className="form-group">
                             <label className="form-label">Tarifa por día ($):</label>
-                            <input 
-                                type="number" 
-                                name="tarifaPorDia" 
-                                value={formData.tarifaPorDia} 
-                                onChange={handleChange} 
-                                min="0" 
-                                step="0.01" 
-                                required 
-                                className="form-input" 
-                            />
+                            <input type="number" name="tarifaPorDia" value={formData.tarifaPorDia} onChange={handleChange} min="0" step="0.01" required className="form-input" placeholder="0.00" />
                         </div>
                         <div className="form-group">
                             <label className="form-label">Cantidad de animales:</label>
-                            <input 
-                                type="number" 
-                                name="cantAnimales" 
-                                value={formData.cantAnimales} 
-                                onChange={handleChange} 
-                                min="1" 
-                                required 
-                                className="form-input" 
-                            />
+                            <input type="number" name="cantAnimales" value={formData.cantAnimales} onChange={handleChange} min="1" required className="form-input" placeholder="¿Cuántos podés cuidar?" />
                         </div>
                     </div>
-
                     <div className="form-group">
                         <label className="form-label">Ubicación:</label>
-                        <input 
-                            type="text" 
-                            name="ubicacion" 
-                            value={formData.ubicacion} 
-                            onChange={handleChange} 
-                            required 
-                            className="form-input" 
-                        />
+                        <input type="text" name="ubicacion" value={formData.ubicacion} onChange={handleChange} required className="form-input" placeholder="Ej: Rosario, Barrio Alberdi" />
                     </div>
-
                     <div className="form-group">
                         <label className="form-label">Tipo de alojamiento:</label>
-                        <select 
-                            name="tipoAlojamiento" 
-                            value={formData.tipoAlojamiento} 
-                            onChange={handleChange} 
-                            required 
-                            className="form-select"
-                        >
+                        <select name="tipoAlojamiento" value={formData.tipoAlojamiento} onChange={handleChange} required className="form-select">
                             <option value="">Seleccionar...</option>
-                            <option value="casa">En mi casa</option>
-                            <option value="domicilio">En casa del dueño</option>
-                            <option value="ambos">Ambos</option>
+                            <option value="casa">🏠 En mi casa</option>
+                            <option value="domicilio">🚪 En casa del dueño</option>
+                            <option value="ambos">✅ Ambos</option>
                         </select>
                     </div>
-
                     <div className="form-group">
                         <label className="checkbox-group">
-                            <input 
-                                type="checkbox" 
-                                name="exotico" 
-                                checked={formData.exotico} 
-                                onChange={handleChange} 
-                                className="checkbox-input" 
-                            />
-                            <span>Acepto mascotas exóticas</span>
+                            <input type="checkbox" name="exotico" checked={formData.exotico} onChange={handleChange} className="checkbox-input" />
+                            <span>🦜 Acepto mascotas exóticas</span>
                         </label>
                     </div>
-
                     <div className="form-group file-upload-group">
-                        <label className="form-label">
-                            Fotos de la Publicación (Máx. 5):
-                        </label>
-                        
+                        <label className="form-label">📸 Fotos de la Publicación (Máx. 5):</label>
                         <div className="file-input-wrapper">
-                            <input
-                                type="file"
-                                name="images" 
-                                onChange={handleFileChange}
-                                multiple 
-                                accept="image/*" 
-                                className="form-input file-input"
-                                id="file-input"
-                            />
+                            <input type="file" name="images" onChange={handleFileChange} multiple accept="image/*" className="form-input file-input" id="file-input" />
                             <label htmlFor="file-input" className="file-input-label">
-                                📁 Seleccionar imágenes (mantenga Ctrl/Cmd para seleccionar varias)
+                                <Upload size={18} /> Seleccionar imágenes
                             </label>
                         </div>
-
                         {files.length > 0 && (
                             <div className="image-preview-container">
-                                <p className="file-count">
-                                    {files.length} imagen{files.length !== 1 ? 'es' : ''} seleccionada{files.length !== 1 ? 's' : ''} ({5 - files.length} restante{5 - files.length !== 1 ? 's' : ''})
-                                </p>
+                                <p className="file-count">{files.length} imagen{files.length !== 1 ? 'es' : ''} seleccionada{files.length !== 1 ? 's' : ''} ({5 - files.length} restante{5 - files.length !== 1 ? 's' : ''})</p>
                                 <div className="image-preview-grid">
                                     {files.map((file, index) => (
                                         <div key={index} className="image-preview-item">
-                                            <img 
-                                                src={URL.createObjectURL(file)} 
-                                                alt={`Preview ${index + 1}`}
-                                                className="preview-thumbnail"
-                                            />
-                                            <button 
-                                                type="button"
-                                                onClick={() => removeFile(index)}
-                                                className="remove-image-btn"
-                                                title="Eliminar imagen"
-                                            >
-                                                ✕
-                                            </button>
+                                            <img src={URL.createObjectURL(file)} alt={`Preview ${index + 1}`} className="preview-thumbnail" />
+                                            <button type="button" onClick={() => removeFile(index)} className="remove-image-btn" title="Eliminar imagen">✕</button>
                                             <span className="image-name">{file.name}</span>
                                         </div>
                                     ))}
@@ -802,577 +779,267 @@ useEffect(() => {
                             </div>
                         )}
                     </div>
-
-                    {error && (<div className="error-message">{error}</div>)}
-
+                    {error && <div className="error-message">{error}</div>}
                     <div className="form-buttons">
-                        <button 
-                            type="button" 
-                            onClick={() => {
-                                setCurrentView('publicaciones');
-                                setFiles([]); 
-                            }}
-                            className="btn-secondary"
-                        >
-                            Cancelar
-                        </button>
-                        <button 
-                            type="submit" 
-                            disabled={loading}
-                            className="btn-primary"
-                        >
-                            {loading ? 'Creando...' : 'Crear Publicación'}
-                        </button>
+                        <button type="button" onClick={() => { setCurrentView('publicaciones'); setFiles([]); }} className="btn-secondary">Cancelar</button>
+                        <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Creando...' : '✨ Crear Publicación'}</button>
                     </div>
                 </form>
             </div>
         </div>
     );
-    const renderEditarPublicacion = () => (
-        <div className="dashboard-main">
-            <div className="form-container">
-                <h2 className="section-title">Editar Publicación</h2>
-                
-                <form onSubmit={handleUpdate} className="form-card" encType="multipart/form-data">
-                    <div className="form-group">
-                        <label className="form-label">Título:</label>
-                        <input 
-                            type="text" 
-                            name="titulo" 
-                            value={formData.titulo} 
-                            onChange={handleChange} 
-                            required 
-                            className="form-input" 
-                        />
-                    </div>
-                    
-                    <div className="form-group">
-                        <label className="form-label">Descripción:</label>
-                        <textarea 
-                            name="descripcion" 
-                            value={formData.descripcion} 
-                            onChange={handleChange} 
-                            rows={4} 
-                            required 
-                            className="form-textarea" 
-                        />
-                    </div>
 
-                    <div className="form-grid">
+    const renderEditarPublicacion = () => {
+        const totalImages = existingImages.length + files.length;
+        return (
+            <div className="dashboard-main">
+                <div className="form-container">
+                    <h2 className="section-title">Editar Publicación</h2>
+                    <form onSubmit={handleUpdate} className="form-card" encType="multipart/form-data">
                         <div className="form-group">
-                            <label className="form-label">Tarifa por día ($):</label>
-                            <input 
-                                type="number" 
-                                name="tarifaPorDia" 
-                                value={formData.tarifaPorDia} 
-                                onChange={handleChange} 
-                                min="0" 
-                                step="0.01" 
-                                required 
-                                className="form-input" 
-                            />
+                            <label className="form-label">Título:</label>
+                            <input type="text" name="titulo" value={formData.titulo} onChange={handleChange} required className="form-input" />
                         </div>
                         <div className="form-group">
-                            <label className="form-label">Cantidad de animales:</label>
-                            <input 
-                                type="number" 
-                                name="cantAnimales" 
-                                value={formData.cantAnimales} 
-                                onChange={handleChange} 
-                                min="1" 
-                                required 
-                                className="form-input" 
-                            />
+                            <label className="form-label">Descripción:</label>
+                            <textarea name="descripcion" value={formData.descripcion} onChange={handleChange} rows={4} required className="form-textarea" />
                         </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Ubicación:</label>
-                        <input 
-                            type="text" 
-                            name="ubicacion" 
-                            value={formData.ubicacion} 
-                            onChange={handleChange} 
-                            required 
-                            className="form-input" 
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Tipo de alojamiento:</label>
-                        <select 
-                            name="tipoAlojamiento" 
-                            value={formData.tipoAlojamiento} 
-                            onChange={handleChange} 
-                            required 
-                            className="form-select"
-                        >
-                            <option value="">Seleccionar...</option>
-                            <option value="casa">En mi casa</option>
-                            <option value="domicilio">En casa del dueño</option>
-                            <option value="ambos">Ambos</option>
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="checkbox-group">
-                            <input 
-                                type="checkbox" 
-                                name="exotico" 
-                                checked={formData.exotico} 
-                                onChange={handleChange} 
-                                className="checkbox-input" 
-                            />
-                            <span>Acepto mascotas exóticas</span>
-                        </label>
-                    </div>
-
-                    {existingImages.length > 0 && (
-                        <div className="form-group">
-                            <label className="form-label">Imágenes actuales:</label>
-                            <div className="existing-images-container">
-                                <div className="image-preview-grid">
-                                    {existingImages.map((img) => (
-                                        <div key={img.id} className="image-preview-item existing-image">
-                                            <img 
-                                                src={img.url || `http://localhost:3000${img.path}`}
-                                                alt="Imagen existente"
-                                                className="preview-thumbnail"
-                                            />
-                                            <button 
-                                                type="button"
-                                                onClick={() => markImageForDeletion(img.id)}
-                                                className="remove-image-btn"
-                                                title="Eliminar imagen"
-                                            >
-                                                ✕
-                                            </button>
-                                            <span className="image-label">Existente</span>
-                                        </div>
-                                    ))}
-                                </div>
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label className="form-label">Tarifa por día ($):</label>
+                                <input type="number" name="tarifaPorDia" value={formData.tarifaPorDia} onChange={handleChange} min="0" step="0.01" required className="form-input" />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Cantidad de animales:</label>
+                                <input type="number" name="cantAnimales" value={formData.cantAnimales} onChange={handleChange} min="1" required className="form-input" />
                             </div>
                         </div>
-                    )}
-
-                    <div className="form-group file-upload-group">
-                        <label className="form-label">
-                            Agregar nuevas fotos (Máx. 5 en total):
-                        </label>
-                        
-                        <div className="file-input-wrapper">
-                            <input
-                                type="file"
-                                name="images" 
-                                onChange={handleFileChange}
-                                multiple 
-                                accept="image/*" 
-                                className="form-input file-input"
-                                id="file-input-edit"
-                                disabled={existingImages.length + files.length >= 5}
-                            />
-                            <label 
-                                htmlFor="file-input-edit" 
-                                className={`file-input-label ${existingImages.length + files.length >= 5 ? 'disabled' : ''}`}
-                            >
-                                {existingImages.length + files.length >= 5 
-                                    ? '🚫 Máximo de imágenes alcanzado' 
-                                    : '📁 Agregar más imágenes'
-                                }
+                        <div className="form-group">
+                            <label className="form-label">Ubicación:</label>
+                            <input type="text" name="ubicacion" value={formData.ubicacion} onChange={handleChange} required className="form-input" />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Tipo de alojamiento:</label>
+                            <select name="tipoAlojamiento" value={formData.tipoAlojamiento} onChange={handleChange} required className="form-select">
+                                <option value="">Seleccionar...</option>
+                                <option value="casa">En mi casa</option>
+                                <option value="domicilio">En casa del dueño</option>
+                                <option value="ambos">Ambos</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="checkbox-group">
+                                <input type="checkbox" name="exotico" checked={formData.exotico} onChange={handleChange} className="checkbox-input" />
+                                <span>Acepto mascotas exóticas</span>
                             </label>
                         </div>
-
-                        <p className="file-count">
-                            Total: {existingImages.length + files.length} imagen(es) 
-                            ({5 - (existingImages.length + files.length)} restante(s))
-                        </p>
-
-                        {files.length > 0 && (
-                            <div className="image-preview-container">
-                                <p className="file-count-label">Nuevas imágenes a subir:</p>
-                                <div className="image-preview-grid">
-                                    {files.map((file, index) => (
-                                        <div key={index} className="image-preview-item new-image">
-                                            <img 
-                                                src={URL.createObjectURL(file)} 
-                                                alt={`Preview ${index + 1}`}
-                                                className="preview-thumbnail"
-                                            />
-                                            <button 
-                                                type="button"
-                                                onClick={() => removeFile(index)}
-                                                className="remove-image-btn"
-                                                title="Eliminar imagen"
-                                            >
-                                                ✕
-                                            </button>
-                                            <span className="image-label new-label">Nueva</span>
-                                        </div>
-                                    ))}
+                        {existingImages.length > 0 && (
+                            <div className="form-group">
+                                <label className="form-label">Imágenes actuales:</label>
+                                <div className="existing-images-container">
+                                    <div className="image-preview-grid">
+                                        {existingImages.map((img) => (
+                                            <div key={img.id} className="image-preview-item existing-image">
+                                                <img src={img.url || `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${img.path}`} alt="Imagen existente" className="preview-thumbnail" />
+                                                <button type="button" onClick={() => markImageForDeletion(img.id)} className="remove-image-btn" title="Eliminar imagen"><Trash2 size={16} /></button>
+                                                <span className="image-label">Existente</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         )}
-                    </div>
-
-                    {error && (<div className="error-message">{error}</div>)}
-
-                    <div className="form-buttons">
-                        <button 
-                            type="button" 
-                            onClick={cancelEdit}
-                            className="btn-secondary"
-                        >
-                            Cancelar
-                        </button>
-                        <button 
-                            type="submit" 
-                            disabled={loading}
-                            className="btn-primary"
-                        >
-                            {loading ? 'Actualizando...' : 'Actualizar Publicación'}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-    
-    const renderReservas = () => (
-        <div className="dashboard-main">
-            <h2 className="section-title">Mis Reservas</h2>
-            {reservas.length === 0 ? (
-                <p className="loading-message">No tienes reservas aún</p>
-            ) : (
-                <div className="reservas-grid">
-                    {reservas.map((reserva) => (
-                        <div key={reserva.id} className="reserva-card">
-                            <div className="reserva-info">
-                                <h3>{reserva.publicacion}</h3>
-                                <p><strong>Dueño:</strong> {reserva.dueno}</p>
-                                <p><strong>Mascota:</strong> {reserva.mascota}</p>
-                                <p>
-                                    <strong>Fechas:</strong> {reserva.fechaInicio} - {reserva.fechaFin}
-                                </p>
-                                <p><strong>Total:</strong> ${reserva.total}</p>
+                        <div className="form-group file-upload-group">
+                            <label className="form-label">Agregar nuevas fotos (Máx. 5 en total):</label>
+                            <div className="file-input-wrapper">
+                                <input type="file" name="images" onChange={handleFileChange} multiple accept="image/*" className="form-input file-input" id="file-input-edit" disabled={totalImages >= 5} />
+                                <label htmlFor="file-input-edit" className={`file-input-label ${totalImages >= 5 ? 'disabled' : ''}`}>
+                                    {totalImages >= 5 ? '🚫 Máximo alcanzado' : '📁 Agregar más imágenes'}
+                                </label>
                             </div>
-                            <div className="reserva-status">
-                                <span className={`status-badge status-${reserva.estado}`}>
-                                    {reserva.estado.toUpperCase()}
-                                </span>
-                                {reserva.estado === 'pendiente' && (
-                                    <div className="reserva-actions">
-                                        <button 
-                                            onClick={() => updateReservaEstado(reserva.id, 'confirmada')}
-                                            className="btn-accept"
-                                        >
-                                            Aceptar
-                                        </button>
-                                        <button 
-                                            onClick={() => updateReservaEstado(reserva.id, 'rechazada')}
-                                            className="btn-reject"
-                                        >
-                                            Rechazar
-                                        </button>
+                            <p className="file-count">Total: {totalImages} imagen(es) ({5 - totalImages} restante(s))</p>
+                            {files.length > 0 && (
+                                <div className="image-preview-container">
+                                    <p className="file-count-label">Nuevas imágenes a subir:</p>
+                                    <div className="image-preview-grid">
+                                        {files.map((file, index) => (
+                                            <div key={index} className="image-preview-item new-image">
+                                                <img src={URL.createObjectURL(file)} alt={`Preview ${index + 1}`} className="preview-thumbnail" />
+                                                <button type="button" onClick={() => removeFile(index)} className="remove-image-btn" title="Eliminar imagen"><X size={16} /></button>
+                                                <span className="image-label new-label">Nueva</span>
+                                            </div>
+                                        ))}
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
-                    ))}
+                        <div className="disponibilidad-section">
+                            <div className="disponibilidad-header">
+                                <h3><Calendar size={20} className="icon-calendar" /> Gestionar Disponibilidad</h3>
+                            </div>
+                            <p className="disponibilidad-description">Bloquea fechas en las que no puedas recibir mascotas</p>
+                            <button type="button" onClick={() => setShowCalendar(!showCalendar)} className="btn-toggle-calendar">
+                                {showCalendar ? '🙈 Ocultar' : '📅 Mostrar'} Calendario
+                            </button>
+                            {diasReservados.length > 0 && (
+                                <div className="reservas-alert">
+                                    <AlertCircle size={16} />
+                                    <span>Hay <strong>{diasReservados.length}</strong> fechas reservadas</span>
+                                </div>
+                            )}
+                        </div>
+                        {showCalendar && (
+                            <div className="calendar-section">
+                                <DisponibilidadCalendar onDateSelect={handleDateSelect} blockedDates={diasReservados} publicacionId={editingPublicacion.id} />
+                                <button type="button" onClick={handleBloquearFechas} disabled={fechasABloquear.length === 0 || loading} className="btn-bloquear-fechas">
+                                    {loading ? '⏳ Bloqueando...' : `🔒 Bloquear ${fechasABloquear.length || 0} fecha${fechasABloquear.length !== 1 ? 's' : ''}`}
+                                </button>
+                            </div>
+                        )}
+                        {error && <div className="error-message">{error}</div>}
+                        <div className="form-buttons">
+                            <button type="button" onClick={cancelEdit} className="btn-secondary">Cancelar</button>
+                            <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Actualizando...' : '💾 Actualizar Publicación'}</button>
+                        </div>
+                    </form>
                 </div>
-            )}
-        </div>
-    );
+            </div>
+        );
+    };
+
+    const renderReservas = () => {
+        const reservasFiltradas = getReservasByEstado(filterStatus);
+        return (
+            <>
+                <div className="reservas-header">
+                    <h2 className="section-title">Reservas recibidas</h2>
+                    <div className="reservas-filters">
+                        <button onClick={() => setFilterStatus('todas')} className={`filter-btn ${filterStatus === 'todas' ? 'active' : ''}`}>Todas ({reservas.length})</button>
+                        <button onClick={() => setFilterStatus('pendiente')} className={`filter-btn ${filterStatus === 'pendiente' ? 'active' : ''}`}>Pendientes ({getReservasByEstado('pendiente').length})</button>
+                        <button onClick={() => setFilterStatus('en_curso')} className={`filter-btn ${filterStatus === 'en_curso' ? 'active' : ''}`}>En curso ({getReservasByEstado('en_curso').length})</button>
+                    </div>
+                </div>
+                {reservasLoading && <div className="loading-message">Cargando reservas...</div>}
+                {reservasError && <div className="error-message">{reservasError}</div>}
+                {reservasFiltradas.length === 0 && !reservasLoading ? (
+                    <div className="empty-state" style={{ background: 'var(--lighter-peach)', margin: '0 3rem 4rem' }}>
+                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
+                        <h3>
+                            {filterStatus === 'todas' && 'No has recibido reservas aún'}
+                            {filterStatus === 'pendiente' && 'No hay reservas pendientes'}
+                            {filterStatus === 'en_curso' && 'No hay reservas en curso'}
+                        </h3>
+                        <p>Tus publicaciones aparecerán en la búsqueda de los dueños</p>
+                    </div>
+                ) : (
+                    <div className="reservas-grid">
+                        {reservasFiltradas.map((reserva) => (
+                            <ReservaCard key={reserva.idReserva || reserva.id} reserva={reserva} userType="cuidador" />
+                        ))}
+                    </div>
+                )}
+            </>
+        );
+    };
+
     const renderPerfil = () => (
         <div className="dashboard-main">
             <div className="perfil-container">
                 <h2 className="section-title">Mi Perfil</h2>
-                
                 {!editingProfile ? (
                     <div className="perfil-card">
-                        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                        <div className="perfil-image-container">
                             {user?.perfilImage ? (
-                                <img 
-                                    src={`http://localhost:3000${user.perfilImage}`}
-                                    alt="Foto de perfil"
-                                    style={{
-                                        width: '150px',
-                                        height: '150px',
-                                        borderRadius: '50%',
-                                        objectFit: 'cover',
-                                        border: '3px solid #f97840'
-                                    }}
-                                />
+                                <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${user.perfilImage}`} alt="Foto de perfil" className="perfil-image" />
                             ) : (
-                                <div style={{
-                                    width: '150px',
-                                    height: '150px',
-                                    borderRadius: '50%',
-                                    backgroundColor: '#e5e7eb',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    margin: '0 auto',
-                                    fontSize: '48px'
-                                }}>
-                                    👤
-                                </div>
+                                <div className="perfil-placeholder">👤</div>
                             )}
                         </div>
-
-                        <div className="perfil-field">
-                            <label className="field-label">Nombre:</label>
-                            <p className="field-value">{user?.nombre}</p>
+                        <div className="perfil-fields">
+                            <div className="perfil-field"><span className="field-label">Nombre</span><p className="field-value">{user?.nombre}</p></div>
+                            <div className="perfil-field"><span className="field-label">Email</span><p className="field-value">{user?.email}</p></div>
+                            <div className="perfil-field"><span className="field-label">Teléfono</span><p className="field-value">{user?.telefono || 'No especificado'}</p></div>
+                            <div className="perfil-field"><span className="field-label">Documento</span><p className="field-value">{user?.tipoDocumento || 'DNI'} {user?.nroDocumento || 'No especificado'}</p></div>
+                            <div className="perfil-field"><span className="field-label">Sexo</span><p className="field-value">{user?.sexoCuidador || 'No especificado'}</p></div>
+                            <div className="perfil-field"><span className="field-label">Descripción</span><p className="field-value field-description">{user?.descripcion || 'Sin descripción personalizada'}</p></div>
                         </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Email:</label>
-                            <p className="field-value">{user?.email}</p>
+                        <div className="perfil-2fa">
+                            <span className="perfil-2fa-label">🔐 Verificación en dos pasos</span>
+                            <button type="button" onClick={handleActivate2FA} disabled={loading2FA} className="btn-2fa">
+                                {loading2FA ? 'Generando...' : 'Activar 2FA'}
+                            </button>
                         </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Teléfono:</label>
-                            <p className="field-value">{user?.telefono || 'No especificado'}</p>
+                        <div className="perfil-actions">
+                            <button onClick={startEditProfile} className="btn-primary">✏️ Editar Perfil</button>
+                            <button onClick={handleDeleteUser} className="btn-danger" disabled={loading}>{loading ? 'Eliminando...' : '🗑️ Eliminar Cuenta'}</button>
                         </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Documento:</label>
-                            <p className="field-value">
-                                {user?.tipoDocumento || 'DNI'} {user?.nroDocumento || 'No especificado'}
-                            </p>
-                        </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Sexo:</label>
-                            <p className="field-value">{user?.sexoCuidador || 'No especificado'}</p>
-                        </div>
-                        <div className="perfil-field">
-                            <label className="field-label">Descripción:</label>
-                            <p className="field-value field-description">
-                                {user?.descripcion || 'Sin descripción personalizada'}
-                            </p>
-                        </div>
-                        <button 
-                            onClick={startEditProfile}
-                            className="btn-primary"
-                        >
-                            ✏️ Editar Perfil
-                        </button>
-                        \<button
-                            onClick={handleDeleteUser}
-                            className="btn-delete"
-                            disabled={loading} // Deshabilitar si está cargando
-                            style={{ width: '100%', padding: '10px', marginTop: '10px' }} // Estilo para destacarlo
-                        >
-                            {loading ? 'Eliminando...' : '🗑️ Eliminar Cuenta'}
-                        </button>
                     </div>
                 ) : (
-                    <form onSubmit={handleUpdateProfile} className="form-card">
-                        <div className="form-group" style={{ textAlign: 'center' }}>
+                    <form onSubmit={handleUpdateProfile} className="perfil-form-card">
+                        <div className="perfil-image-upload">
                             <label className="form-label">Foto de perfil:</label>
-                            <div style={{ margin: '15px 0' }}>
+                            <div className="profile-image-preview">
                                 {profileImage ? (
-                                    <img 
-                                        src={URL.createObjectURL(profileImage)}
-                                        alt="Preview"
-                                        style={{
-                                            width: '150px',
-                                            height: '150px',
-                                            borderRadius: '50%',
-                                            objectFit: 'cover',
-                                            border: '3px solid #3b82f6'
-                                        }}
-                                    />
+                                    <img src={URL.createObjectURL(profileImage)} alt="Preview" className="perfil-image" />
                                 ) : user?.perfilImage ? (
-                                    <img 
-                                        src={`http://localhost:3000${user.perfilImage}`}
-                                        alt="Foto actual"
-                                        style={{
-                                            width: '150px',
-                                            height: '150px',
-                                            borderRadius: '50%',
-                                            objectFit: 'cover',
-                                            border: '3px solid #3b82f6'
-                                        }}
-                                    />
+                                    <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${user.perfilImage}`} alt="Foto actual" className="perfil-image" />
                                 ) : (
-                                    <div style={{
-                                        width: '150px',
-                                        height: '150px',
-                                        borderRadius: '50%',
-                                        backgroundColor: '#e5e7eb',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        margin: '0 auto',
-                                        fontSize: '48px'
-                                    }}>
-                                        👤
-                                    </div>
+                                    <div className="perfil-placeholder">👤</div>
                                 )}
                             </div>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleProfileImageChange}
-                                className="form-input"
-                                style={{ marginTop: '10px' }}
-                            />
+                            <input type="file" accept="image/*" onChange={handleProfileImageChange} />
                         </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Nombre:</label>
-                            <input
-                                type="text"
-                                name="nombre"
-                                value={profileFormData.nombre}
-                                onChange={handleProfileChange}
-                                className="form-input"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Email:</label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={profileFormData.email}
-                                onChange={handleProfileChange}
-                                className="form-input"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Teléfono:</label>
-                            <input
-                                type="tel"
-                                name="telefono"
-                                value={profileFormData.telefono}
-                                onChange={handleProfileChange}
-                                className="form-input"
-                            />
-                        </div>
-
+                        <div className="form-group"><label className="form-label">Nombre:</label><input type="text" name="nombre" value={profileFormData.nombre} onChange={handleProfileChange} className="form-input" /></div>
+                        <div className="form-group"><label className="form-label">Email:</label><input type="email" name="email" value={profileFormData.email} onChange={handleProfileChange} className="form-input" /></div>
+                        <div className="form-group"><label className="form-label">Teléfono:</label><input type="tel" name="telefono" value={profileFormData.telefono} onChange={handleProfileChange} className="form-input" /></div>
                         <div className="form-grid">
                             <div className="form-group">
                                 <label className="form-label">Tipo de documento:</label>
-                                <select
-                                    name="tipoDocumento"
-                                    value={profileFormData.tipoDocumento}
-                                    onChange={handleProfileChange}
-                                    className="form-select"
-                                >
+                                <select name="tipoDocumento" value={profileFormData.tipoDocumento} onChange={handleProfileChange} className="form-select">
                                     <option value="DNI">DNI</option>
                                     <option value="Pasaporte">Pasaporte</option>
                                     <option value="Otro">Otro</option>
                                 </select>
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Número de documento:</label>
-                                <input
-                                    type="text"
-                                    name="nroDocumento"
-                                    value={profileFormData.nroDocumento}
-                                    onChange={handleProfileChange}
-                                    className="form-input"
-                                />
-                            </div>
+                            <div className="form-group"><label className="form-label">Nro. documento:</label><input type="text" name="nroDocumento" value={profileFormData.nroDocumento} onChange={handleProfileChange} className="form-input" /></div>
                         </div>
-
                         <div className="form-group">
                             <label className="form-label">Sexo:</label>
-                            <select
-                                name="sexoCuidador"
-                                value={profileFormData.sexoCuidador}
-                                onChange={handleProfileChange}
-                                className="form-select"
-                            >
+                            <select name="sexoCuidador" value={profileFormData.sexoCuidador} onChange={handleProfileChange} className="form-select">
                                 <option value="">Seleccionar...</option>
                                 <option value="Masculino">Masculino</option>
                                 <option value="Femenino">Femenino</option>
                                 <option value="Otro">Otro</option>
                             </select>
                         </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Descripción personal:</label>
-                            <textarea
-                                name="descripcion"
-                                value={profileFormData.descripcion}
-                                onChange={handleProfileChange}
-                                rows={4}
-                                className="form-textarea"
-                                placeholder="Cuéntanos sobre ti, tu experiencia con mascotas, etc."
-                            />
-                        </div>
-
+                        <div className="form-group"><label className="form-label">Descripción personal:</label><textarea name="descripcion" value={profileFormData.descripcion} onChange={handleProfileChange} rows={4} className="form-textarea" placeholder="Cuéntanos sobre ti, tu experiencia con mascotas, etc." /></div>
                         {error && <div className="error-message">{error}</div>}
-
                         <div className="form-buttons">
-                            <button
-                                type="button"
-                                onClick={cancelEditProfile}
-                                className="btn-secondary"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="btn-primary"
-                            >
-                                {loading ? 'Guardando...' : 'Guardar Cambios'}
-                            </button>
+                            <button type="button" onClick={cancelEditProfile} className="btn-secondary">Cancelar</button>
+                            <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Guardando...' : 'Guardar Cambios'}</button>
                         </div>
                     </form>
                 )}
             </div>
         </div>
-    );     
-    
+    );
 
     return (
         <div className="dashboard-container">
             <nav className="dashboard-navbar">
                 <div className="navbar-brand">
-                    <h1 className="navbar-title">PetsBnB - Cuidador</h1>
-                    <span className="navbar-welcome">Bienvenido, {user?.nombre}</span>
+                    <h1 className="navbar-title">🐕 PetsBnB Cuidador</h1>
                 </div>
-                
-                <div className="navbar-buttons">
-                    <div className="up-buttons">
-                    <button
-                        onClick={() => navigate('/')} 
-                        className="nav-button btn-publicaciones-extra"
-                    >
-                        <Home size={18} style={{marginRight: '5px'}}/>
-                        Demás Publicaciones
-                    </button>
-                    <button
-                        onClick={() => setCurrentView('publicaciones')}
-                        className={`nav-button ${currentView === 'publicaciones' ? 'active' : ''}`}
-                    >
-                        Mis Publicaciones
-                    </button>
-                    <button
-                        onClick={() => setCurrentView('reservas')}
-                        className={`nav-button ${currentView === 'reservas' ? 'active' : ''}`}
-                    >  <CalendarCheck size={18} style={{marginRight: '5px'}}/>
-                        Reservas
-                    </button>
-                    </div>
-                    <div className="down-buttons">
-                    <button
-                        onClick={() => setCurrentView('perfil')}
-                        className={`nav-button ${currentView === 'perfil' ? 'active' : ''}`}
-                    >
-                        <User size={18} style={{marginRight: '5px'}}/>
-                    </button>
-                    <button 
-                        onClick={handleLogout}
-                        className="logout-button"
-                    >   <LogOut size={18} style={{marginRight: '5px'}}/>
-                    </button>
-                    </div>
+                <div className="up-buttons">
+                    <button onClick={() => navigate('/')} className="nav-button btn-publicaciones-extra"><Home size={18} /> Ver Publicaciones</button>
+                    <button onClick={() => setCurrentView('publicaciones')} className={`nav-button ${currentView === 'publicaciones' ? 'active' : ''}`}>Mis Publicaciones</button>
+                    <button onClick={() => setCurrentView('reservas')} className={`nav-button ${currentView === 'reservas' ? 'active' : ''}`}><CalendarCheck size={18} /> Reservas</button>
+                </div>
+                <div className="down-buttons">
+                    <button onClick={() => setCurrentView('perfil')} className={`nav-button ${currentView === 'perfil' ? 'active' : ''}`}><User size={18} /> Perfil</button>
+                    <button onClick={handleLogout} className="logout-button"><LogOut size={18} /></button>
                 </div>
             </nav>
-
             <main>
                 {currentView === 'publicaciones' && renderPublicaciones()}
                 {currentView === 'reservas' && renderReservas()}
@@ -1380,6 +1047,28 @@ useEffect(() => {
                 {currentView === 'nueva-publicacion' && renderNuevaPublicacion()}
                 {currentView === 'editar-publicacion' && renderEditarPublicacion()}
             </main>
+            {show2FAModal && (
+                <div className="twofa-modal-overlay" onClick={close2FAModal}>
+                    <div className="twofa-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="twofa-modal-header">
+                            <span className="twofa-modal-icon">🔐</span>
+                            <h3>Verificación en dos pasos</h3>
+                            <button className="twofa-modal-close" onClick={close2FAModal}>✕</button>
+                        </div>
+                        <p className="twofa-modal-desc">Escaneá este código QR con Google Authenticator o cualquier app TOTP. Una vez configurado, se te pedirá el código al iniciar sesión.</p>
+                        <div className="twofa-modal-qr">
+                            {loading2FA ? (
+                                <div className="twofa-loading">Generando código QR...</div>
+                            ) : qrCode2FA ? (
+                                <img src={qrCode2FA} alt="Código QR 2FA" />
+                            ) : (
+                                <div className="twofa-loading" style={{ color: 'var(--error-red)' }}>Error al cargar el código QR</div>
+                            )}
+                        </div>
+                        <button className="twofa-modal-btn-close" onClick={close2FAModal}>Listo, cerrar</button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

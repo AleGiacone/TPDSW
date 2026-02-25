@@ -3,6 +3,7 @@ import { sanitizeDueno, findAll, findOne, add, updateDueno, remove, findPets, au
 } from './dueno.controller.js';
 import multer from 'multer'; 
 import path from 'path';
+import { adminAuthenticate } from '../admin/admin.controller.js';
 
 export const duenoRouter = Router();
 const storage = multer.diskStorage({
@@ -36,6 +37,6 @@ duenoRouter.get("/:idUsuario/MisMascotas", findPets);
 duenoRouter.get("/", findAll);
 duenoRouter.get("/:idUsuario", findOne);
 duenoRouter.post("/", sanitizeDueno, authenticateDueno, add);
-duenoRouter.delete("/:idUsuario", remove);
+duenoRouter.delete("/:idUsuario",  remove);
 duenoRouter.put("/:idUsuario", sanitizeDueno, authenticateUpdate, updateDueno);
 duenoRouter.patch("/:idUsuario", sanitizeDueno, updateDueno);

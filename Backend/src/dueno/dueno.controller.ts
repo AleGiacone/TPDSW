@@ -6,8 +6,8 @@ import bcrypt from 'bcrypt';
 import sanitizeHTML from 'sanitize-html';
 import fs from 'fs'; 
 import path from 'path'; 
-
-const em = orm.em;
+import jwt from 'jsonwebtoken';
+import { SECRET_JWT_KEY } from '../config.js';
 
 function sanitizeDueno(req: Request, res: Response, next: NextFunction) {
     
@@ -35,7 +35,9 @@ function sanitizeDueno(req: Request, res: Response, next: NextFunction) {
 }
 
 async function authenticateDueno(req: Request, res: Response, next: NextFunction) {
+  
   try {
+    const em = orm.em.fork();
     const existingUser = await em.findOne(Usuario, { email: req.body.sanitizeInput.email });
     if (existingUser) {
       res.status(400).json({ message: 'El email ya está en uso' });
@@ -65,12 +67,13 @@ async function authenticateDueno(req: Request, res: Response, next: NextFunction
     
     next();
   } catch (error: any) {
-    res.status(500).json({ message: "Error authenticating dueno", error: error.message });
+    res.status(500).json({ message: "Error authenticating dueno" });
   }
 }
 
 async function authenticateUpdate(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    const em = orm.em.fork();
     const idUsuario = Number(req.params.idUsuario);
     const existingUser = await em.findOne(Dueno, { idUsuario });
     
@@ -113,32 +116,37 @@ async function authenticateUpdate(req: Request, res: Response, next: NextFunctio
     
     next();
   } catch (error: any) {
-    res.status(500).json({ message: "Error authenticating update", error: error.message });
+    res.status(500).json({ message: "Error authenticating update" });
   }
 }
 
 async function findAll(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
+
     const duenos = await em.find(Dueno, {});
     await em.populate(duenos, ['mascotas']);
     res.status(200).json({ message: 'Found all duenos', data: duenos });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving duenos", error: error.message });
+    res.status(500).json({ message: "Error retrieving duenos" });
   }
 }
 
 async function findOne(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
+
     const idUsuario = Number(req.params.idUsuario);
     const dueno = await em.findOneOrFail(Dueno, { idUsuario }, { populate: ['mascotas'] });
     res.status(200).json({ message: 'Dueno found', data: dueno});
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving dueno", error: error.message });
+    res.status(500).json({ message: "Error retrieving dueno" });
   }
 }
 
 async function add(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const email = await em.findOne(Usuario, { email: req.body.sanitizeInput.email });
     if (email) {
       res.status(400).json({ message: 'Email already exists' });
@@ -150,23 +158,45 @@ async function add(req: Request, res: Response) {
     await em.flush();
     res.status(200).json({ message: 'Dueno created', data: dueno });
   } catch (error: any) {
-    res.status(500).json({ message: "Error creating dueno", error: error.message });
+    res.status(500).json({ message: "Error creating dueno" });
   }
 }
 
 async function findPets(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
+    const token = req.cookies.access_token;
+        const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+              req.usuario = decoded;
+              if(req.body.idUsuario != req.usuario.idUsuario && req.params.idUsuario != req.usuario.idUsuario && req.usuario.tipoUsuario !== 'admin') {
+                res.status(403).json({ 
+                  success: false,
+                  message: 'Acceso denegado',
+                  usuario: null});
+                return;
+              }
     const idUsuario = Number(req.params.idUsuario);
     const dueno = await em.findOneOrFail(Dueno, { idUsuario }, { populate: ['mascotas'] });
     res.status(200).json({ message: 'Mascotas found', data: dueno.mascotas });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving mascotas", error: error.message });
+    res.status(500).json({ message: "Error retrieving mascotas" });
   }
 }
 
 async function updateDueno(req: Request, res: Response): Promise<void> {
   try {
-    const idUsuario = Number.parseInt(req.params.idUsuario);
+    const token = req.cookies.access_token;
+        const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+              req.usuario = decoded;
+              if(req.body.idUsuario != req.usuario.idUsuario && req.params.idUsuario != req.usuario.idUsuario && req.usuario.tipoUsuario !== 'admin') {
+                res.status(403).json({ 
+                  success: false,
+                  message: 'Acceso denegado',
+                  usuario: null});
+                return;
+              }
+    const em = orm.em.fork();
+    const idUsuario = Number.parseInt(req.params.idUsuario as string);
     const dueno = await em.findOneOrFail(Dueno, { idUsuario });
 
     if (!dueno) {
@@ -183,16 +213,25 @@ async function updateDueno(req: Request, res: Response): Promise<void> {
 
     res.status(200).json({ message: 'Dueno updated', data: dueno });
   } catch (error: any) {
-    res.status(500).json({ message: "Error updating dueno", error: error.message });
+    res.status(500).json({ message: "Error updating dueno" });
   }
 }
 
 async function remove(req: Request, res: Response) {
-  const emFork = em.fork();
+  console.log("🚀 Starting dueno removal process...",req.params.idUsuario);
+  const emFork = orm.em.fork();
   try {
-    const idUsuario = Number.parseInt(req.params.idUsuario);
-
-    
+    const idUsuario = Number.parseInt(req.params.idUsuario as string);
+/*const token = req.cookies.access_token;
+        const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+              req.usuario = decoded;
+              if(req.body.idUsuario != req.usuario.idUsuario  && req.params.idUsuario != req.usuario.idUsuario && req.usuario.tipoUsuario !== 'admin') {
+                res.status(403).json({ 
+                  success: false,
+                  message: 'Acceso denegado',
+                  usuario: null});
+                return;
+              }*/
     const dueno = await emFork.findOneOrFail(Dueno, { idUsuario }, {
       populate: ['mascotas.imagen', 'reservas'] 
     });
@@ -229,12 +268,12 @@ async function remove(req: Request, res: Response) {
     res.status(200).json({ message: 'Dueno eliminado (Cascada limpia exitosa)', data: dueno });
   } catch (error: any) {
     console.error("🚨 CRITICAL DB ERROR during Dueno removal:", error);
-    res.status(500).json({ message: "Error removing dueno (Fallo en cascada forzada)", error: error.message });
+    res.status(500).json({ message: "Error removing dueno (Fallo en cascada forzada)" });
   }
 }
 
 async function updateProfileImageDueno(req: Request, res: Response): Promise<void> {
-  const emFork = em.fork(); 
+  const emFork = orm.em.fork(); 
   try {
     const idUsuario = Number(req.params.idUsuario);
 
@@ -278,14 +317,24 @@ async function updateProfileImageDueno(req: Request, res: Response): Promise<voi
 
    
     res.status(500).json({
-      message: "Error al actualizar la imagen de perfil del dueño",
-      error: error.message || String(error)
+      message: "Error al actualizar la imagen de perfil del dueño"
     });
   }
 }
 
 async function deleteProfileImageDueno(req: Request, res: Response): Promise<void> {
   try {
+    const em = orm.em.fork();
+    const token = req.cookies.access_token;
+    const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+          req.usuario = decoded;
+          if(req.params.idUsuario != req.usuario.idUsuario ) {
+            res.status(403).json({ 
+              success: false,
+              message: 'Acceso denegado',
+              usuario: null});
+            return;
+          }
     const idUsuario = Number(req.params.idUsuario);
     const dueno = await em.findOneOrFail(Dueno, { idUsuario });
     
@@ -304,7 +353,7 @@ async function deleteProfileImageDueno(req: Request, res: Response): Promise<voi
 
     res.status(200).json({ message: 'Profile image deleted successfully' });
   } catch (error: any) {
-    res.status(500).json({ message: "Error deleting dueno profile image", error: error.message });
+    res.status(500).json({ message: "Error deleting dueno profile image" });
   }
 }
 

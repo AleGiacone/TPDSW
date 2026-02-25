@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import ImageCarousel from '../../components/ImageCarousel'; 
+import PublicacionesGrid from '../../components/PublicacionesGrid';
 import '../../styles/PrivateHomePage.css';
+import { Calendar, X, AlertCircle, Upload, Trash2, Home, CalendarCheck, User, LogOut, Cat, Dog, DollarSign, MapPin } from 'lucide-react';
 
 
 const PublicacionesView = () => {
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
-    
+
     const [error, setError] = useState('');
-    
+
 
     const [formValues, setFormValues] = useState({
         ubicacion: '',
@@ -20,7 +21,7 @@ const PublicacionesView = () => {
         cantAnimales: ''
     });
     const [filterParams, setFilterParams] = useState(formValues);
-    const API_BASE_URL = 'http://localhost:3000/api';
+    const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api`;
     const [publicaciones, setPublicaciones] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isFilterBarOpen, setIsFilterBarOpen] = useState(false);
@@ -29,21 +30,22 @@ const PublicacionesView = () => {
         setLoading(true);
         setError('');
         try {
-            
+
             const params = new URLSearchParams();
             if (filterParams.ubicacion) params.append('ubicacion', filterParams.ubicacion);
             if (filterParams.tipoAlojamiento) params.append('tipoAlojamiento', filterParams.tipoAlojamiento);
             if (filterParams.tarifaMax && !isNaN(parseFloat(filterParams.tarifaMax))) params.append('tarifaMax', filterParams.tarifaMax);
             if (filterParams.exotico === true) params.append('exotico', 'true');
             if (filterParams.cantAnimales && !isNaN(parseInt(filterParams.cantAnimales))) {
-                
-                params.append('cantAnimales', filterParams.cantAnimales);}
+
+                params.append('cantAnimales', filterParams.cantAnimales);
+            }
 
             const url = `${API_BASE_URL}/publicacion${params.toString() ? `?${params.toString()}` : ''}`;
-            
+
             const response = await fetch(url, {
                 method: 'GET',
-                credentials: 'include', 
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' }
             });
 
@@ -56,20 +58,21 @@ const PublicacionesView = () => {
             setPublicaciones(Array.isArray(data.data) ? data.data : []);
         } catch (err) {
             setError('Error al cargar publicaciones: ' + err.message);
-            setPublicaciones([]); 
+            setPublicaciones([]);
         } finally {
             setLoading(false);
         }
-    }, [filterParams]); 
+    }, [filterParams]);
 
 
     useEffect(() => {
         fetchPublicaciones();
-    }, [fetchPublicaciones]); 
+    }, [fetchPublicaciones]);
 
     const handleFilterChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFiltros(prev => ({
+      
+        setFormValues(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
@@ -82,11 +85,51 @@ const PublicacionesView = () => {
             return;
         }
 
-        if (user?.tipoUsuario?.toLowerCase() === 'cuidador') { 
+        if (user?.tipoUsuario?.toLowerCase() === 'cuidador') {
             alert('Los cuidadores no pueden hacer reservas');
             return;
         }
+      
         navigate(`/reservar/${publicacionId}`);
+    };
+
+
+    const renderActionButtons = (pub) => {
+        
+        const pubId = pub.idPublicacion || pub.id;
+
+        if (!isAuthenticated) {
+            return (
+                <button
+                    onClick={() => navigate('/login')}
+                    className="reserve-btn"
+                >
+                    Iniciar sesión para reservar
+                </button>
+            );
+        }
+
+        if (user?.tipoUsuario?.toLowerCase() === 'cuidador') {
+            return (
+                <button
+                    className="reserve-btn disabled"
+                    title="Los cuidadores no pueden hacer reservas"
+                    disabled
+                >
+                    Solo para dueños
+                </button>
+            );
+        }
+
+        return (
+            <button
+              
+                onClick={() => handleReservar(pubId)}
+                className="reserve-btn"
+            >
+                🎯 Reservar
+            </button>
+        );
     };
 
 
@@ -98,35 +141,7 @@ const PublicacionesView = () => {
         }));
     };
 
-    const fetchData = useCallback(async () => {
-        setLoading(true);
-      
-        const queryParams = new URLSearchParams();
-
-        if (filterParams.ubicacion) queryParams.append('ubicacion', filterParams.ubicacion);
-        if (filterParams.tipoAlojamiento) queryParams.append('tipoAlojamiento', filterParams.tipoAlojamiento);
-        if (filterParams.tarifaMax) queryParams.append('tarifaMax', filterParams.tarifaMax);
-        if (filterParams.exotico === true) queryParams.append('exotico', 'true');
-
-        try {
-            const response = await fetch(`/api/publicacion?${queryParams.toString()}`);
-            if (!response.ok) throw new Error('Network response was not ok');
-            const data = await response.json();
-            setPublicaciones(data.data || []);
-        } catch (error) {
-            console.error(error);
-          
-        } finally {
-            setLoading(false);
-        }
-    }, [filterParams]); 
-   
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
-
     const handleSearch = () => {
-        
         setFilterParams(formValues);
     };
 
@@ -134,10 +149,10 @@ const PublicacionesView = () => {
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="search-container">
-            
+
                 <div className="search-filters ">
                     <div className="filter-group">
-                        <label className="filter-label">Lugar</label>
+                        <label className="filter-label"><MapPin size={18} /> Lugar</label>
                         <input
                             type="text"
                             placeholder="Explorar destinos"
@@ -147,9 +162,9 @@ const PublicacionesView = () => {
                             onChange={handleInputChange}
                         />
                     </div>
-                    
+
                     <div className="filter-group">
-                        <label className="filter-label">Tipo de alojamiento</label>
+                        <label className="filter-label"> <Home size={18} /> Tipo de alojamiento</label>
                         <select
                             name="tipoAlojamiento"
                             value={formValues.tipoAlojamiento}
@@ -164,7 +179,7 @@ const PublicacionesView = () => {
                     </div>
 
                     <div className="filter-group">
-                        <label className="filter-label">💰 Tarifa máxima</label>
+                        <label className="filter-label"><DollarSign size={18} /> Tarifa máxima</label>
                         <input
                             type="number"
                             placeholder="Precio máximo"
@@ -176,7 +191,7 @@ const PublicacionesView = () => {
                     </div>
 
                     <div className="filter-group">
-                        <label className="filter-label">🐕 Cantidad animales</label>
+                        <label className="filter-label"><Dog size={18} /> Cantidad animales</label>
                         <input
                             type="number"
                             placeholder="¿Cuántos?"
@@ -197,123 +212,32 @@ const PublicacionesView = () => {
                                 onChange={handleInputChange}
                                 className="checkbox-input"
                             />
-                            <span className="checkbox-text">🦎 Exóticos</span>
+                            <span className="checkbox-text">Exóticos</span>
                         </label>
                     </div>
-                   
- 
-        <button className="search-btn" onClick={handleSearch}>
-            🔍
-        </button>
+
+
+                    <button className="search-btn" onClick={handleSearch}>
+                        🔍
+                    </button>
                 </div>
             </div>
-            
+
             <main className="homepage-main">
                 <div className="hero-section">
                     <h2 className="hero-title hide-on-mobile">
                         Encontrá el cuidador perfecto para tu mascota
                     </h2>
                 </div>
-                
-                {loading && (
-                    <div className="loading-section">
-                        <div className="loading-spinner">🔄</div>
-                        <p>Cargando publicaciones...</p>
-                    </div>
-                )}
-                
-                {error && (
-                    <div className="error-section">
-                        <p>⚠️ {error}</p>
-                        <button onClick={fetchPublicaciones} className="retry-btn">
-                            Reintentar
-                        </button>
-                    </div>
-                )}
-                
-                {!loading && publicaciones.length === 0 ? (
-                    <div className="empty-state">
-                        <h3>No se encontraron publicaciones</h3>
-                        <p>Intenta ajustar los filtros de búsqueda</p>
-                    </div>
-                ) : (
-                    <div className="publicaciones-grid">
-                        { Array.isArray(publicaciones) && publicaciones.map((pub) => (
-                            <div key={pub.idPublicacion} className="publicacion-card">
-                                
-                                <div className="card-image-wrapper">
-                                    <ImageCarousel 
-                                        imagenes={pub.imagenes || []} 
-                                        titulo={pub.titulo}
-                                    />
-                                </div>
-                                <div className="card-content">
-                                <div className="card-header">
-                                    <h3 className="card-title">{pub.titulo}</h3>
-                                    <div className="cuidador-info">
-                                        <span className="cuidador-name">
-                                            Por: {pub.idCuidador?.nombre || 'Cuidador'}
-                                        </span>
-                                    </div>
-                                </div>
-                                
-                                <p className="card-description">{pub.descripcion}</p>
-                                
-                                <div className="card-details">
-                                    <div className="detail-item">
-                                        <span className="detail-label">📍 Ubicación:</span>
-                                        <span>{pub.ubicacion}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <span className="detail-label">🏠 Tipo:</span>
-                                        <span>{pub.tipoAlojamiento}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <span className="detail-label">🐕 Max animales:</span>
-                                        <span>{pub.cantAnimales}</span>
-                                    </div>
-                                    {pub.exotico && (
-                                        <div className="exotic-badge">
-                                            🦎 Acepta mascotas exóticas
-                                        </div>
-                                    )}
-                                </div>
-                                </div>
-                                <div className="card-footer">
-                                    <div className="price-section">
-                                        <span className="price">${pub.tarifaPorDia}</span>
-                                        <span className="price-period">/ día</span>
-                                    </div>
-                                    <div className="card-actions">
-                                        {!isAuthenticated ? (
-                                            <button 
-                                                onClick={() => navigate('/login')}
-                                                className="reserve-btn"
-                                            >
-                                                Iniciar sesión para reservar
-                                            </button>
-                                        ) : user?.tipoUsuario?.toLowerCase() === 'cuidador' ? (
-                                            <button 
-                                                className="reserve-btn disabled"
-                                                title="Los cuidadores no pueden hacer reservas"
-                                                disabled
-                                            >
-                                                Solo para dueños
-                                            </button>
-                                        ) : (
-                                            <button 
-                                                onClick={() => handleReservar(pub.idPublicacion)}
-                                                className="reserve-btn"
-                                            >
-                                                🎯 Reservar
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                <PublicacionesGrid
+                    publicaciones={publicaciones}
+                    loading={loading}
+                    error={error}
+                    onRetry={fetchPublicaciones}
+                    renderCardActions={renderActionButtons}
+                    emptyMessage="No se encontraron publicaciones"
+                    showCuidadorInfo={true}
+                />
             </main>
         </div>
     );

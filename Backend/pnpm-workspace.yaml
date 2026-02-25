@@ -1,6 +1,0 @@
-ignoredBuiltDependencies:
-  - node
-
-onlyBuiltDependencies:
-  - bcrypt
-  - unrs-resolver

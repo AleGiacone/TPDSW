@@ -6,10 +6,10 @@ import { Cuidador } from './cuidador.entity.js';
 import sanitizeHTML from 'sanitize-html';
 import fs from 'fs';
 import path from 'path';
+import { SECRET_JWT_KEY } from '../config.js';
+import jwt from 'jsonwebtoken';
 
 const sanitizeCuidador = (req: Request, res: Response, next: NextFunction) => {
-
- 
 
   req.body.sanitizeInput = {
     idUsuario: sanitizeHTML(req.body.idUsuario),
@@ -21,7 +21,8 @@ const sanitizeCuidador = (req: Request, res: Response, next: NextFunction) => {
     telefono: sanitizeHTML(req.body.telefono),
     sexoCuidador: sanitizeHTML(req.body.sexoCuidador),
     descripcion: sanitizeHTML(req.body.descripcion),
-    tipoUsuario: 'cuidador'
+    tipoUsuario: 'cuidador',
+  
   };
 
   Object.keys(req.body.sanitizeInput).forEach((key) => {
@@ -30,7 +31,6 @@ const sanitizeCuidador = (req: Request, res: Response, next: NextFunction) => {
     }
   });
 
-  console.log("Sanitized input:", req.body.sanitizeInput);
 
   next();
 };
@@ -61,7 +61,7 @@ async function authenticateCuidador(req: Request, res: Response): Promise<boolea
     }
     return true;
   } catch (error: any) {
-    res.status(500).json({ message: "Error authenticating cuidador", error: error.message });
+    res.status(500).json({ message: "Error authenticating cuidador" });
     return false;
   }
 }
@@ -69,10 +69,11 @@ async function authenticateCuidador(req: Request, res: Response): Promise<boolea
 async function findAll(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
+    
     const cuidadores = await em.find(Cuidador, {});
     res.status(200).json({ message: 'Found all cuidadores', data: cuidadores });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving cuidadores", error: error.message });
+    res.status(500).json({ message: "Error retrieving cuidadores" });
   }
 }
 
@@ -83,7 +84,7 @@ async function findOne(req: Request, res: Response) {
     const cuidador = await em.findOneOrFail(Cuidador, { idUsuario });
     res.status(200).json({ message: 'Cuidador found', data: cuidador });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving cuidador", error: error.message });
+    res.status(500).json({ message: "Error retrieving cuidador" });
   }
 }
 
@@ -100,23 +101,24 @@ async function add(req: Request, res: Response) {
       req.body.sanitizeInput.password = await bcrypt.hash(req.body.sanitizeInput.password, 10);
       const cuidador = em.create(Cuidador, req.body.sanitizeInput);
       await em.persistAndFlush(cuidador);
-      res.status(200).json({ message: 'cuidador created', data: cuidador });
+      res.status(200).json({ message: 'cuidador created'});
       return;
     }
   } catch (error: any) {
-    res.status(500).json({ message: "Error creating cuidador", error: error.message });
+    res.status(500).json({ message: "Error creating cuidador"});
     return;
   }
 }
 
 async function update(req: Request, res: Response) {
   try {
+    
     const em = orm.em.fork();
-    const idUsuario = Number.parseInt(req.params.idUsuario);
+    const idUsuario = Number.parseInt(req.params.idUsuario as string);
     const cuidador = await em.findOneOrFail(Cuidador, { idUsuario: idUsuario });
     
     if (!cuidador) {
-      res.status(404).json({ message: 'Cuidador not found', data: idUsuario });
+      res.status(404).json({ message: 'Cuidador not found'});
       return;
     }
     
@@ -145,12 +147,22 @@ async function update(req: Request, res: Response) {
     
     res.status(200).json(cuidador);
   } catch (error: any) {
-    res.status(500).json({ message: "Error updating cuidador", error: error.message });
+    res.status(500).json({ message: "Error updating cuidador"});
   }
 }
 
 async function updateProfile(req: Request, res: Response): Promise<void> {
     try {
+   /*   const token = req.cookies.access_token; 
+      const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+          req.usuario = decoded;
+          if(req.body.idUsuario != req.usuario.idUsuario ) {
+            res.status(403).json({ 
+              success: false,
+              message: 'Acceso denegado',
+              usuario: null});
+            return;
+          }*/
         const em = orm.em.fork();
         const { idUsuario } = req.params;
 
@@ -162,7 +174,7 @@ async function updateProfile(req: Request, res: Response): Promise<void> {
         }
 
         const dataToUpdate = req.body.sanitizeInput || req.body;
-        const camposPermitidos = ['nombre', 'email', 'telefono', 'descripcion', 'sexoCuidador'];
+      const camposPermitidos = ['nombre', 'email', 'telefono', 'descripcion', 'sexoCuidador', 'nroDocumento', 'tipoDocumento'];
         
         if (dataToUpdate.email && dataToUpdate.email !== cuidador.email) {
             const emailExists = await em.findOne(Usuario, { email: dataToUpdate.email });
@@ -194,8 +206,8 @@ async function updateProfile(req: Request, res: Response): Promise<void> {
 
     } catch (error: any) {
         res.status(500).json({
-            message: 'Error al actualizar perfil',
-            error: error?.message ?? String(error)
+            message: 'Error al actualizar perfil'
+           
         });
     }
 }
@@ -231,10 +243,10 @@ async function updateProfileImage(req: Request, res: Response): Promise<void> {
   } catch (error: any) {
     if (req.file) {
       fs.unlink(req.file.path, (err) => {
-        if (err) console.error("Error deleting uploaded file:", err);
+        if (err) console.error("Error deleting uploaded file:");
       });
     }
-    res.status(500).json({ message: "Error updating profile image", error: error.message });
+    res.status(500).json({ message: "Error updating profile image"});
   }
 }
 
@@ -273,7 +285,7 @@ async function deleteProfileImage(req: Request, res: Response): Promise<void> {
 
     res.status(200).json({ message: 'Profile image deleted successfully' });
   } catch (error: any) {
-    res.status(500).json({ message: "Error deleting profile image", error: error.message });
+    res.status(500).json({ message: "Error deleting profile image"});
   }
 }
 
@@ -284,7 +296,7 @@ async function authenticateUpdate(req: Request, res: Response): Promise<boolean>
     const existingUser = await em.findOne(Cuidador, { idUsuario });
     
     if (!existingUser) {
-      res.status(404).json({ message: 'Usuario not found', data: idUsuario });
+      res.status(404).json({ message: 'Usuario not found'});
       return false;
     }
     
@@ -322,17 +334,31 @@ async function authenticateUpdate(req: Request, res: Response): Promise<boolean>
     
     return true;
   } catch (error: any) {
-    res.status(500).json({ message: "Error authenticating update", error: error.message });
+    res.status(500).json({ message: "Error al actualizar el cuidador"});
     return false;
   }
 }
 
 async function remove(req: Request, res: Response) {
   try {
+    /*const token = req.cookies.access_token; 
+    const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+          req.usuario = decoded;
+          if(req.body.idUsuario != req.usuario.idUsuario && req.usuario.tipoUsuario !== 'admin') {
+            res.status(403).json({ 
+              success: false,
+              message: 'Acceso denegado',
+              usuario: null});
+            return;
+          }*/
+        
+    console.log("Attempting to remove cuidador with idUsuario:", req.params.idUsuario);
     const em = orm.em.fork();
-    const idUsuario = Number.parseInt(req.params.idUsuario);
+    const idUsuario = Number.parseInt(req.params.idUsuario as string);
     const cuidador = await em.findOneOrFail(Cuidador, { idUsuario: idUsuario });
-  
+    
+
+
     if (cuidador.perfilImage) {
       const imagePath = path.join('public', cuidador.perfilImage);
       if (fs.existsSync(imagePath)) {
@@ -343,8 +369,43 @@ async function remove(req: Request, res: Response) {
     await em.removeAndFlush(cuidador);
     res.status(200).json({ message: 'Cuidador removed', data: cuidador });
   } catch (error: any) {
-    res.status(500).json({ message: "Error removing cuidador", error: error.message });
+    res.status(500).json({ message: "Error removing cuidador"});
   }
 }
 
-export { sanitizeCuidador, findAll, findOne, add, update, remove, updateProfileImage, deleteProfileImage, updateProfile, findByEmail };
+async function authenticateUser(req: Request, res: Response, next: NextFunction) {
+  try {
+    console.log("🔒 Auth middleware - Cookies:", req.cookies);
+      
+      const token = req.cookies.access_token; 
+      
+      if (!token) {
+        res.status(401).json({ 
+          success: false,
+          message: 'No autenticado',
+          usuario: null   
+        });
+        return;
+      }
+    
+      try {
+        const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+        req.usuario = decoded;
+        next(); 
+      } catch (err) {
+        res.status(403).json({ 
+          success: false,
+          message: 'Token inválido',
+          usuario: null 
+        });
+        return;
+  }
+  }
+  catch (error: any) {
+    res.status(500).json({ message: "Error authenticating user" });
+    return;
+  }
+  next();
+}
+
+export { sanitizeCuidador, findAll, findOne, add, update, remove, updateProfileImage, deleteProfileImage, updateProfile };

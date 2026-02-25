@@ -26,10 +26,10 @@ function sanitizeRaza(req: Request, res: Response, next: NextFunction) {
   next()
 }
 
-const em = orm.em
 
 async function findAll(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const razas = await em.find(Raza, {}, { populate: ['especie'] });
     const razasFormateadas = razas.map(raza => ({
       id: raza.idRaza,
@@ -46,14 +46,14 @@ async function findAll(req: Request, res: Response) {
     });
   } catch (error: any) {
     res.status(500).json({ 
-      message: "Error retrieving razas", 
-      error: error.message 
+      message: "Error retrieving razas"
     });
   }
 }
 
 async function add(req: Request, res: Response): Promise<void> {
   try {
+    const em = orm.em.fork();
     console.log("IdEspecie recibido:", req.body.sanitizeInput.idEspecie);
     const especie = await em.findOne(Especie, { idEspecie: req.body.sanitizeInput.idEspecie });
     
@@ -70,29 +70,30 @@ async function add(req: Request, res: Response): Promise<void> {
     await em.populate(raza, ['especie']);
     res.status(201).json({ message: 'Raza created', data: raza });
   } catch (error: any) {
-    res.status(500).json({ message: "Error creating raza", error: error.message });
+    res.status(500).json({ message: "Error creating raza" });
   }
 }
 
 async function findOne(req: Request, res: Response) {
   try{
-    const idRaza = Number.parseInt (req.params.idRaza)
+    const em = orm.em.fork();
+    const idRaza = Number.parseInt (req.params.idRaza as string)
     const raza = await em.findOneOrFail (Raza , {idRaza}, {populate : ['especie']});
     res.status(200).json({ message: 'Raza found', data: raza });
   } catch (error:any){
-    res.status(500).json({ message: "Error retrieving raza", error: error.message });
+    res.status(500).json({ message: "Error retrieving raza" });
   } 
 }
   
 async function update(req: Request, res: Response) {
   console.log("Updating raza with data:", req.body.sanitizeInput);
   try{
+    const em = orm.em.fork();
     if (req.body.sanitizeInput.nomRaza === '' || req.body.sanitizeInput.nomRaza === undefined || req.body.sanitizeInput.nomRaza.length <= 3) {
       res.status(400).json({ message: "Nombre de raza invalido" });
       return;
     }
-    const em = RequestContext.getEntityManager()!;
-    const idRaza = Number.parseInt(req.params.idRaza);
+    const idRaza = Number.parseInt(req.params.idRaza as string);
     console.log("idRaza", idRaza)
     const raza = await em.findOneOrFail(Raza, {idRaza} );
     em.assign( raza, req.body)
@@ -101,19 +102,20 @@ async function update(req: Request, res: Response) {
   } catch (error:any){
     console.error(error.stack);
 
-    res.status(500).json({ message: "Error updating raza", error: error.message });
+    res.status(500).json({ message: "Error updating raza" });
   }
 }
 
 async function remove (req: Request, res: Response) {
   try {
-    const idRaza = Number.parseInt (req.params.idRaza)
+    const em = orm.em.fork();
+    const idRaza = Number.parseInt (req.params.idRaza as string)
     const raza = await em.findOneOrFail (Raza, {idRaza})
     await em.removeAndFlush (raza)
     res.status(200).send ({message:"se fue"})
     //em.nativeDelete(raza , {idRaza})
   } catch (error:any){
-  res.status(500).json ({message: error.message})
+    res.status(500).json ({message: "Error removing raza"})
   }
  }
  

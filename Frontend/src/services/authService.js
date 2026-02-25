@@ -1,6 +1,7 @@
 
 
-const API_URL = 'http://localhost:3000/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = `${BASE_URL}/api`;
 
 export async function loginCtrl(email, password) {
   return fetch(`${API_URL}/usuarios`, { 
@@ -29,7 +30,7 @@ export async function registerCtrl(formData) {
 }
 
 export async function logoutCtrl() {
-  return fetch(`http://localhost:3000/logout`, {
+  return fetch(`${BASE_URL}/logout`, {
     method: 'POST',
     credentials: 'include',
   });

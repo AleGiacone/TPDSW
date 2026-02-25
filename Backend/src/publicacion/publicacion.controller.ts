@@ -6,14 +6,22 @@ import { Imagen }  from '../imagen/imagenes.entity.js';
 import sanitizeHTML from 'sanitize-html'
 import { authToken } from '../auth.js';
 import fs from 'fs';
+import { Reserva } from '../reserva/reserva.entity.js';
+import { Temporal } from 'temporal-polyfill'
+import { DiaReservado } from '../reserva/diaReservado.entity.js';
+import jwt from 'jsonwebtoken';
+import { SECRET_JWT_KEY } from '../config.js';
 
 
 function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
+  console.log("Sanitizing publicacion input", req.body);
+  console.log("Request path:", req.path); // Para debugging
+
   const precioValue = req.body.tarifaPorDia || req.body.precio;
   const precioNumerico = Number(precioValue);
 
   req.body.sanitizeInput = {
-    idUsuario: sanitizeHTML(req.body.idUsuario),
+    idUsuario: req.body.idUsuario ? sanitizeHTML(req.body.idUsuario) : undefined,
     titulo: sanitizeHTML(req.body.titulo),
     descripcion: sanitizeHTML(req.body.descripcion),
     tarifaPorDia: !isNaN(precioNumerico) ? precioNumerico : undefined,
@@ -21,19 +29,124 @@ function sanitizePublicacion(req: Request, res: Response, next: NextFunction) {
     ubicacion: req.body.ubicacion ? sanitizeHTML(req.body.ubicacion) : undefined,
     tipoAlojamiento: req.body.tipoAlojamiento ? sanitizeHTML(req.body.tipoAlojamiento) : undefined,
     cantAnimales: req.body.cantAnimales ? parseInt(req.body.cantAnimales) : 1,
-    exotico: req.body.exotico === true || req.body.exotico === 'true'
+    exotico: req.body.exotico === true || req.body.exotico === 'true',
+    idPublicacion: req.body.idPublicacion
   };
 
-  Object.keys(req.body.sanitizeInput).forEach((key) => {
-    if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
-      delete req.body.sanitizeInput[key];
+  const esEndpointConDias = req.path.includes('reserva-cuidador') ||
+    req.path.includes('dias-reservados');
+
+  if (esEndpointConDias && req.body.dias) {
+    console.log("Endpoint con días detectado, incluyendo dias en sanitizeInput");
+    req.body.sanitizeInput.dias = req.body.dias;
+
+    // Validar formato de fechas solo si hay días
+    if (req.body.sanitizeInput.dias != null && req.body.sanitizeInput.dias != undefined) {
+      try {
+        for (let dia of req.body.sanitizeInput.dias) {
+          console.log("Sanitizing date:", dia);
+          Temporal.PlainDate.from(dia);
+        }
+      } catch (error) {
+        res.status(400).json({ message: "Error parsing dates" });
+        return;
+      }
     }
-  });
+  } else {
+    console.log("Endpoint sin días (UPDATE normal), NO incluyendo dias");
+  }
+  //Ver object keys borra campos
+  // Object.keys(req.body.sanitizeInput).forEach((key) => {
+  //   if (req.body.sanitizeInput[key] === undefined || req.body.sanitizeInput[key] === '') {
+  //     console.log("Removing undefined field:", key);
+  //     delete req.body.sanitizeInput[key];
+  //   }
+  // });
+  console.log("Sanitized input:", req.body.sanitizeInput);
+
+  if (req.method === 'PUT' || req.method === 'PATCH') {
+    delete req.body.sanitizeInput.idPublicacion;
+    delete req.body.sanitizeInput.fechaPublicacion;
+    delete req.body.sanitizeInput.idUsuario;
+  }
   
   next();
 }
 
+async function diasReservados(req: Request, res: Response) {
+  try {
+    console.log("Obteniendo días reservados para la publicación:", req.body.sanitizeInput.idPublicacion);
+    const em = orm.em.fork();
+    const idPublicacion = Number(req.body.sanitizeInput.idPublicacion);
+    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas', 'diasOcupados'] });
+      
+    const reservasDeLaPublicacion = await em.find(Reserva, { publicacion:  publicacion }, { populate: ['diasReservados'] });
+          
+    const diasReservados = reservasDeLaPublicacion.map(r => r.diasReservados.getItems().map(d => d.fechaReservada)).flat();
+    
+    const diasOcupados = publicacion.diasOcupados.getItems().map(d => d.fechaReservada);
+    const todosLosDiasReservados = Array.from(new Set([...diasReservados, ...diasOcupados]));
+
+    res.status(200).json({ message: "Días reservados obtenidos", data: todosLosDiasReservados });
+    }
+    catch (error: any) {
+    res.status(500).json({ message: "Error retrieving reserved days" });
+    return;
+  }
+}
+
+
+
+async function reservaCuidador(req: Request, res: Response, next: NextFunction) {
+  try {
+    console.log("Verificando reserva cuidador con data:", req.body.sanitizeInput);
+    const em = orm.em.fork();
+    const publicacion = await em.findOneOrFail(
+      Publicacion,
+      { idPublicacion: req.body.sanitizeInput.idPublicacion },
+      { populate: ['reservas', 'diasOcupados'] } // ✅ Agregado diasOcupados
+    );
+    console.log("Publicacion encontrada:", publicacion);
+    const reservasDeLaPublicacion = await em.find(Reserva, { publicacion: publicacion }, { populate: ['diasReservados'] });
+    //Todos los dias ya reservados en esa publicacion
+    const diasReservados = reservasDeLaPublicacion.map(r => r.diasReservados.getItems().map(d => d.fechaReservada)).flat();
+    for (let dia of req.body.sanitizeInput.dias) {
+      if(diasReservados.includes(Temporal.PlainDate.from(dia).toString())){
+        res.status(400).json({ message: `La fecha ${Temporal.PlainDate.from(dia).toString()} ya está reservada.` });
+        return;
+      }
+    }
+    const diasOcupados = publicacion.diasOcupados.getItems().map(d => d.fechaReservada);
+    for (let dia of req.body.sanitizeInput.dias) {
+      if(diasOcupados.includes(Temporal.PlainDate.from(dia).toString())){
+        res.status(400).json({ message: `La fecha ${Temporal.PlainDate.from(dia).toString()} ya está ocupada.` });
+        return;
+      }
+    }
+
+
+    for (const dia of req.body.sanitizeInput.dias) {
+      
+      const diaReservado = em.create(DiaReservado, { fechaReservada: dia, publicacion: publicacion });
+      publicacion.diasOcupados.add(diaReservado);
+    }
+    await em.flush();
+
+    res.status(200).json({ message: "Reserva cuidador verificada", data: diasReservados });
+  }catch (error: any) {  
+    res.status(400).json({ message: "Error verifying reserva cuidador" });
+    return;
+  }
+
+}
+
+
+
+
+// Función para validar los datos de la publicación
+
 async function authenticatePublicacion(req: Request, res: Response): Promise<boolean> {
+  const em = orm.em.fork();
   const { titulo, descripcion, tarifaPorDia, ubicacion, tipoAlojamiento, cantAnimales } = req.body.sanitizeInput;
 
   if (!titulo || titulo.length <= 3) {
@@ -69,10 +182,11 @@ async function authenticatePublicacion(req: Request, res: Response): Promise<boo
   return true;
 }
 
+// Función para validar los datos de la publicación
+
 async function findAll(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
-
     // 1. Extraer los parámetros de la URL
     const {
       ubicacion,
@@ -126,7 +240,7 @@ async function findAll(req: Request, res: Response) {
     await em.populate(publicaciones, ['idCuidador']);
     res.status(200).json({ message: 'Found all publicaciones', data: publicaciones });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving publicaciones", error: error.message });
+    res.status(500).json({ message: "Error retrieving publicaciones" });
   }
 }
 
@@ -137,9 +251,34 @@ async function findOne(req: Request, res: Response) {
     const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion }, { populate: ['reservas', 'imagenes','idCuidador'] });
     res.status(200).json({ message: 'Publicacion found', data: publicacion });
   } catch (error: any) {
-    res.status(500).json({ message: "Error retrieving publicacion", error: error.message });
+    res.status(500).json({ message: "Error retrieving publicacion" });
   }
 }
+
+// Funcion para devolver los días reservados en una publicación
+
+async function getDiasReservados(req: Request, res: Response) {
+  try {
+    const em = orm.em.fork();
+    console.log("Obteniendo días reservados para la publicación:", req.params.idPublicacion);
+    const publicacion = await em.findOneOrFail(Publicacion, { idPublicacion: parseInt(req.params.idPublicacion as string) }, { populate: ['reservas'] });
+      
+    const reservasDeLaPublicacion = await em.find(Reserva, { publicacion:  publicacion }, { populate: ['diasReservados'] });
+          
+    const diasReservados = reservasDeLaPublicacion.map(r => r.diasReservados.getItems().map(d => d.fechaReservada)).flat();
+      
+    res.status(200).json({ message: "Días reservados obtenidos", data: diasReservados });
+  } catch (error: any) {
+    res.status(500).json({ message: "Error retrieving reserved days" });
+    return;
+  }
+
+
+}
+
+
+
+// Función para obtener publicaciones por cuidador
 
 async function findByCuidador(req: Request, res: Response): Promise<void> {
   try {
@@ -189,17 +328,16 @@ async function findByCuidador(req: Request, res: Response): Promise<void> {
     });
   } catch (error: any) {
     res.status(500).json({ 
-      message: "Error retrieving publicaciones del cuidador", 
-      error: error.message 
+      message: "Error retrieving publicaciones del cuidador"
     });
   }
 }
 
 async function add(req: Request, res: Response): Promise<void> {
     const files = req.files as Express.Multer.File[] || [];
-    const em = orm.em.fork();
 
     try {
+      const em = orm.em.fork();
         if (!req.body.sanitizeInput) {
             res.status(400).json({ message: "Datos no procesados correctamente" });
             return;
@@ -293,8 +431,7 @@ async function add(req: Request, res: Response): Promise<void> {
         }
         
         res.status(500).json({ 
-            message: "Error creating publicacion", 
-            error: error.message
+          message: "Error creating publicacion"
         });
     }
 }
@@ -302,21 +439,38 @@ async function add(req: Request, res: Response): Promise<void> {
 async function update(req: Request, res: Response): Promise<void> {
   const files = req.files as Express.Multer.File[] || [];
   const em = orm.em.fork();
-  
   try {
-    const idPublicacion = Number.parseInt(req.params.idPublicacion);
+    const idPublicacion = Number.parseInt(req.params.idPublicacion as string);
     const publicacion = await em.findOneOrFail(
-      Publicacion, 
-      { idPublicacion }, 
-      { populate: ['imagenes'] }
+      Publicacion,
+      { idPublicacion },
+      { populate: ['imagenes', 'idCuidador'] }
     );
+    const token = req.cookies.access_token;
+    const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+    req.usuario = decoded;
+    if(req.usuario.tipoUsuario !== 'admin' && req.usuario.idUsuario !== publicacion.idCuidador.idUsuario) {
+      res.status(403).json({ 
+      success: false,
+      message: 'Acceso denegado',
+      usuario: null});
+      return;
+    }
+    const { titulo, descripcion, tarifaPorDia, ubicacion, tipoAlojamiento, cantAnimales, exotico } = req.body.sanitizeInput;
 
-    em.assign(publicacion, req.body.sanitizeInput);
+    if (titulo !== undefined) publicacion.titulo = titulo;
+    if (descripcion !== undefined) publicacion.descripcion = descripcion;
+    if (tarifaPorDia !== undefined) publicacion.tarifaPorDia = Number(tarifaPorDia);
+    if (ubicacion !== undefined) publicacion.ubicacion = ubicacion;
+    if (tipoAlojamiento !== undefined) publicacion.tipoAlojamiento = tipoAlojamiento;
+    if (cantAnimales !== undefined) publicacion.cantAnimales = Number(cantAnimales);
+    if (exotico !== undefined) publicacion.exotico = Boolean(exotico);
+    // fechaPublicacion NO se toca en un update
 
     if (req.body.imagesToDelete) {
       const imagesToDelete = JSON.parse(req.body.imagesToDelete);
-      const imagenesAEliminar = await em.find(Imagen, { 
-        idImagen: { $in: imagesToDelete } 
+      const imagenesAEliminar = await em.find(Imagen, {
+        idImagen: { $in: imagesToDelete }
       });
 
       for (const img of imagenesAEliminar) {
@@ -335,21 +489,20 @@ async function update(req: Request, res: Response): Promise<void> {
         imagen.publicacion = publicacion;
         return imagen;
       });
-
       em.persist(nuevasImagenes);
     }
 
     await em.flush();
     await em.refresh(publicacion, { populate: ['imagenes'] });
-    
+
     const imagenesFormateadas = publicacion.imagenes.getItems().map(img => ({
       id: img.idImagen,
       path: img.path,
       url: `http://localhost:3000${img.path}`
     }));
 
-    res.status(200).json({ 
-      message: 'Publicacion updated', 
+    res.status(200).json({
+      message: 'Publicacion updated',
       data: {
         ...publicacion,
         imagenes: imagenesFormateadas
@@ -363,37 +516,43 @@ async function update(req: Request, res: Response): Promise<void> {
         });
       });
     }
-    
-    res.status(500).json({ 
-      message: "Error updating publicacion", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error updating publicacion"
     });
   }
 }
 
-async function remove(req: Request, res: Response) { 
+async function remove(req: Request, res: Response) {
   try {
-    const em = orm.em.fork();
-    const idPublicacion = Number.parseInt(req.params.idPublicacion);
-    const publicacion = await em.findOneOrFail(
-      Publicacion, 
-      { idPublicacion }, 
-      { populate: ['imagenes'] }
-    );
+//      const token = req.cookies.access_token;
+     const em = orm.em.fork();
+      const idPublicacion = Number.parseInt(req.params.idPublicacion as string);
+      const publicacion = await em.findOneOrFail(
+        Publicacion, 
+        { idPublicacion }, 
+        { populate: ['imagenes', 'idCuidador'] }
+      );
 
-    const imagenes = publicacion.imagenes.getItems();
-    for (const img of imagenes) {
-      const filePath = `public${img.path}`;
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+      const imagenes = publicacion.imagenes.getItems();
+      for (const img of imagenes) {
+        const filePath = `public${img.path}`;
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
       }
-    }
-
-    await em.removeAndFlush(publicacion);
-    res.status(200).json({ message: 'Publicacion removed', data: publicacion });
+//      const decoded = jwt.verify(token, SECRET_JWT_KEY!);
+ //                   req.usuario = decoded;
+ //                   if(req.usuario.tipoUsuario !== 'admin' && req.usuario.idUsuario !== publicacion.idCuidador.idUsuario) {
+   //                   res.status(403).json({ 
+     //                   success: false,
+       //                 message: 'Acceso denegado',
+         //               usuario: null});
+           //           return;
+             //       }
+      await em.removeAndFlush(publicacion);
+      res.status(200).json({ message: 'Publicacion removed', data: publicacion });
   } catch (error: any) {
-    res.status(500).json({ message: "Error removing publicacion", error: error.message });
+    res.status(500).json({ message: "Error removing publicacion" });
   }
 }
-
-export { sanitizePublicacion, findAll, findOne, findByCuidador, add, update, remove };
+export { sanitizePublicacion, findAll, findOne, findByCuidador, add, update, remove, getDiasReservados, reservaCuidador, diasReservados};
